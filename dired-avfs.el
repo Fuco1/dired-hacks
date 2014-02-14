@@ -32,11 +32,27 @@
 
 (require 'dash)
 
-(defvar dired-avfs-root "~/.avfs")
-(defvar dired-avfs-archives '("zip" "rar" "tar"))
-(defvar dired-avfs-hide-root t)
+(defgroup dired-avfs ()
+  "Dired-avfs"
+  :group 'dired-hacks
+  :prefix "dired-avfs-")
 
-(defun dired-avfs-archive-filename (filename)
+(defcustom dired-avfs-root "~/.avfs"
+  "Root where the avfs virtual filesystem is mounted."
+  :type 'directory
+  :group 'dired-avfs)
+
+(defcustom dired-avfs-archives '("zip" "rar" "tar")
+  "Archives that are automagically opened via avfs."
+  :type '(repeat string)
+  :group 'dired-avfs)
+
+(defcustom dired-avfs-hide-root t
+  "If non-nil, hide the avfs root in dired listing."
+  :type 'boolean
+  :group 'dired-avfs)
+
+(defun dired-avfs--archive-filename (filename)
   (concat dired-avfs-root (file-truename filename) "#"))
 
 (defun dired-avfs-archive-p (filename)
