@@ -55,12 +55,12 @@
 (defun dired-avfs--archive-filename (filename)
   (concat dired-avfs-root (file-truename filename) "#"))
 
-(defun dired-avfs-archive-p (filename)
+(defun dired-avfs--archive-p (filename)
   (let ((extensions (concat "\\." (regexp-opt dired-avfs-archives) "\\'")))
     (string-match-p extensions filename)))
 
 (defun dired-avfs--open (filename)
-  (find-file (dired-avfs-archive-filename filename)))
+  (find-file (dired-avfs--archive-filename filename)))
 
 (defun dired-avfs--hide-root ()
   (save-excursion
@@ -92,7 +92,7 @@ directory under point."
                 (error "Unable to visit this file")))
         (find-file-run-dired t))
     (cond
-     ((dired-avfs-archive-p file)
+     ((dired-avfs--archive-p file)
       (dired-avfs--open file))
      ((dired-get-subdir) ;; this should not be here!!!
       (-when-let (end (save-excursion (re-search-forward "[/:]" (line-end-position) t)))
@@ -109,8 +109,8 @@ directory under point."
   "If the target is archive that can be handled via avfs,
 automagically change the filename to the location of virtual
 directory representing this archive."
-  (when (dired-avfs-archive-p (ad-get-arg 0))
-    (ad-set-arg 0 (dired-avfs-archive-filename (ad-get-arg 0)))))
+  (when (dired-avfs--archive-p (ad-get-arg 0))
+    (ad-set-arg 0 (dired-avfs--archive-filename (ad-get-arg 0)))))
 
 (provide 'dired-avfs)
 
