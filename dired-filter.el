@@ -1,0 +1,253 @@
+;;; dired-filter.el --- Ibuffer-like filtering for dired.
+
+;; Copyright (C) 2014 Matus Goljer
+
+;; Author: Matus Goljer <matus.goljer@gmail.com>
+;; Maintainer: Matus Goljer <matus.goljer@gmail.com>
+;; Keywords: lisp
+;; Version: 0.0.1
+;; Created: 14th February 2014
+;; Package-requires: ((dash "2.5.0") (dired-hacks-utils "0.0.1"))
+
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;; Adds much-lacking filtering facilities to dired.
+
+;; See https://github.com/Fuco1/dired-hacks for the entire collection
+
+;;; Code:
+
+(require 'dired-x)
+(require 'dired-aux)
+(require 'dash)
+(require 'dired-hacks-utils)
+
+(defvar dired-filter-marker-char ?\x3FF
+  "Temporary marker used by Dired-Filter.")
+
+(defvar dired-filter-stack nil
+  "Filter stack.")
+(make-variable-buffer-local 'dired-filter-stack)
+
+(defvar dired-filter-alist nil
+  "Definitions of filters.
+
+Entries are of type (name desc body) ")
+
+(defgroup dired-filter ()
+  "Dired-filter"
+  :group 'dired-hacks
+  :prefix "dired-filter-")
+
+(defcustom dired-filter-verbose t
+  "If non-nil, print debug messages."
+  :type 'boolean
+  :group 'dired-filter)
+
+(defun dired-filter--push (filter)
+  "Push FILTER onto the active filter stack."
+  (push filter dired-filter-stack))
+
+(defun dired-filter--make-filter-1 (stack)
+  (cond
+   ((eq (car stack) 'or)
+    `(or ,@(mapcar 'dired-filter--make-filter-1 (cdr stack))))
+   ((eq (car stack) 'not)
+    `(not ,@(mapcar 'dired-filter--make-filter-1 (cdr stack))))
+   (t (let* ((def (assoc (car stack) dired-filter-alist))
+             (remove (caddr def))
+             (qualifier (cdr stack)))
+        (if qualifier
+            `(let ((qualifier ,qualifier))
+               ,(if remove
+                    `(not ,(cadddr def))
+                  (cadddr def)))
+          (if remove
+              `(not ,(cadddr def))
+            (cadddr def)))))))
+
+(defun dired-filter--make-filter ()
+  `(and ,@(mapcar 'dired-filter--make-filter-1 dired-filter-stack)))
+
+(defun dired-filter--update ()
+  "Re-run the filters."
+  (let ((file-name (ignore-errors (dired-get-filename))))
+    (dired-revert)
+    (dired-filter-expunge)
+    (when file-name
+      (dired-utils-goto-line file-name))))
+
+(defun dired-filter--expunge ()
+  (interactive)
+  (when (and dired-filter-mode
+             dired-filter-stack)
+    (let ((filter (dired-filter--make-filter))
+          (dired-marker-char dired-filter-marker-char)
+          (old-modified-p (buffer-modified-p))
+          count)
+      (when dired-filter-verbose (message "Filtering..."))
+      (if (eval (dired-filter-mark-unmarked filter))
+          (setq count (dired-do-kill-lines nil (if dired-filter-verbose "Filtered %d line%s." "")))
+        (when dired-filter-verbose (message "Nothing to filter")))
+      (set-buffer-modified-p (and old-modified-p
+                                  (save-excursion
+                                    (goto-char (point-min))
+                                    (re-search-forward dired-re-mark nil t))))
+      count)))
+
+(defun dired-filter-mark-unmarked (filter)
+  `(dired-mark-if
+    (let ((file-name (ignore-errors (dired-get-filename 'no-dir t))))
+      (and
+       file-name
+       (looking-at " ")
+       (not ,filter)))
+    nil))
+
+(cl-defmacro dired-filter-define (name documentation
+                                       (&key
+                                        description
+                                        reader
+                                        remove)
+                                       &rest body)
+  "Create a filter.
+
+Files matched by the predicate are kept in the listing.
+
+For filters where the reverse behaviour makes more sense as
+default, you can set the `:remove' argument to `t' to flip the
+truth value by default.  Do not flip the value in the predicate
+itself!"
+  (declare (indent 2) (doc-string 2))
+  (let ((fn-name (intern (concat "dired-filter-by-" (symbol-name name)))))
+    `(progn
+       (defun ,fn-name (qualifier)
+         ,(or documentation "This filter is not documented.")
+         (interactive (list ,reader))
+         (dired-filter--push (cons ',name qualifier))
+         (message "%s" (format ,(concat (format "Filter by %s added: " description) " %s") qualifier))
+         (dired-filter--update))
+       (push (list ',name ,description ,remove ',(if (= (length body) 1)
+                                                     `,(car body)
+                                                   `(progn ,@body)))
+             dired-filter-alist))))
+
+(dired-filter-define dot-files
+    "Remove dot-files from current listing."
+  (:description "dot-files"
+   :reader nil
+   :remove t)
+  (string-match "^\\." file-name))
+
+(dired-filter-define name
+    "Toggle current view to files matching QUALIFIER."
+  (:description "name"
+   :reader (regexp-quote (read-from-minibuffer "Pattern: " )))
+  (string-match qualifier file-name))
+
+(dired-filter-define omit
+    "Remove lines matched by `dired-omit-regexp' from current listing."
+  (:description "omit"
+   :reader (dired-omit-regexp)
+   :remove t)
+  (string-match qualifier file-name))
+
+(defun dired-filter-transpose ()
+  "Transpose the two top filters."
+  (interactive)
+  (let ((top (car dired-filter-stack))
+        (top2 (cadr dired-filter-stack)))
+    (when (not top2)
+      (error "To transpose you need at least two filters on stack"))
+    (pop dired-filter-stack)
+    (pop dired-filter-stack)
+    (dired-filter--push top)
+    (dired-filter--push top2)))
+
+(defun dired-filter-or ()
+  "Or the top two filters."
+  (interactive)
+  (let ((top (car dired-filter-stack))
+        (top2 (cadr dired-filter-stack)))
+    (when (not top2)
+      (error "To \"or\" you need at least two filters on stack"))
+    (pop dired-filter-stack)
+    (pop dired-filter-stack)
+    (cond
+     ((and (eq (car top) 'or)
+           (eq (car top2) 'or))
+      (dired-filter--push (append '(or) (cdr top) (cdr top2))))
+     ((eq (car top) 'or)
+      (dired-filter--push (append '(or) (cdr top) `(,top2))))
+     ((eq (car top2) 'or)
+      (dired-filter--push (append `(or ,top) (cdr top2))))
+     (t (dired-filter--push `(or ,top ,top2))))
+    (dired-filter--update)))
+
+(defun dired-filter-negate ()
+  "Logically negate the top filter."
+  (interactive)
+  (let ((top (car dired-filter-stack)))
+    (when (not top)
+      (error "You need at least one filter on the stack"))
+    (pop dired-filter-stack)
+    (dired-filter--push `(not ,top))
+    (dired-filter--update)))
+
+(defun dired-filter-decompose ()
+  "Decompose the composite filter on top of the stack.
+
+This means, if the filter is an `or' or `not' filter, pop it and
+push all its constituents back on the stack."
+  (interactive)
+  (let ((top (car dired-filter-stack)))
+    (if (not (or (eq (car top) 'or)
+                 (eq (car top) 'not)))
+        (error "You can only decompose `or' or `not' filters.")
+      (pop dired-filter-stack)
+      (--each (nreverse (cdr top))
+        (dired-filter--push it))
+      (dired-filter--update))))
+
+(defun dired-filter-pop ()
+  "Remove the top filter in this buffer."
+  (interactive)
+  (let ((top (pop dired-filter-stack)))
+    (when dired-filter-verbose
+      (if top
+          (message "Popped filter %s: %s" (car top) (cdr top))
+        (message "Filter stack was empty."))))
+  (dired-filter--update))
+
+(defun dired-filter-pop-all ()
+  "Remove all the filters in this buffer."
+  (interactive)
+  (setq dired-filter-stack nil)
+  (dired-filter--update))
+
+(define-minor-mode dired-filter-mode
+  "Toggle filtering of files in Dired."
+  :group 'dired-filter
+  :lighter " Filter"
+  (if dired-filter-mode
+      (dired-filter--expunge)
+    (revert-buffer)))
+
+(add-hook 'dired-after-readin-hook 'dired-filter--expunge)
+
+(provide 'dired-filter)
+
+;;; dired-filter.el ends here
