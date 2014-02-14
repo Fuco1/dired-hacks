@@ -52,6 +52,14 @@
   :type 'boolean
   :group 'dired-avfs)
 
+(defcustom dired-avfs-ignore-commands nil
+  "Do not open a file via avfs if it was opened using this command.
+
+For example, this allows the user to open files via avfs from
+dired, but not from `find-file'."
+  :type '(repeat symbol)
+  :group 'dired-avfs)
+
 (defun dired-avfs--archive-filename (filename)
   (concat dired-avfs-root (file-truename filename) "#"))
 
@@ -109,7 +117,8 @@ directory under point."
   "If the target is archive that can be handled via avfs,
 automagically change the filename to the location of virtual
 directory representing this archive."
-  (when (dired-avfs--archive-p (ad-get-arg 0))
+  (when (and (not (memq this-command dired-avfs-ignore-commands))
+             (dired-avfs--archive-p (ad-get-arg 0)))
     (ad-set-arg 0 (dired-avfs--archive-filename (ad-get-arg 0)))))
 
 (provide 'dired-avfs)
