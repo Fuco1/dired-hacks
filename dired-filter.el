@@ -57,6 +57,23 @@ Entries are of type (name desc body) ")
   :type 'boolean
   :group 'dired-filter)
 
+(defcustom dired-filter-show-filters t
+  "If non-nil, if `dired-filter-stack' is non-nil, show a
+description of active filters in header line.
+
+This modifies `header-line-format' by appending
+`dired-filter-header-line-format' to it."
+  :type 'boolean
+  :group 'dired-filter)
+
+(defcustom dired-filter-header-line-format '((:eval (format "Active filters: %s" (dired-filter--describe-filters))))
+  "A format expression for dired-filter's header line.
+
+Has the same format as `mode-line-format'."
+  :type 'sexp
+  :group 'dired-filter)
+(put 'dired-filter-header-line-format 'risky-local-variable t)
+
 (defcustom dired-filter-prefix "/"
   "Prefix key for `dired-filter-mode-map'."
   :type 'string
@@ -99,6 +116,24 @@ When this expression evals to non-nil, file is kept in the
 listing."
   `(and ,@(mapcar 'dired-filter--make-filter-1 dired-filter-stack)))
 
+(defun dired-filter--describe-filters-1 (stack)
+  "Return a string describing `dired-filter-stack'."
+  (cond
+   ((eq (car stack) 'or)
+    (concat "[OR " (mapconcat 'dired-filter--describe-filters-1 (cdr stack) " ") "]"))
+   ((eq (car stack) 'not)
+    (concat "[NOT " (mapconcat 'dired-filter--describe-filters-1 (cdr stack) " ") "]"))
+   (t (let* ((def (assoc (car stack) dired-filter-alist))
+             (desc (cadr def))
+             (remove (caddr def))
+             (qualifier (cdr stack)))
+        (if qualifier
+            (format "[%s: %s]" desc qualifier)
+          (format "[%s]" desc))))))
+
+(defun dired-filter--describe-filters ()
+  (mapconcat 'dired-filter--describe-filters-1 dired-filter-stack " "))
+
 (defun dired-filter--update ()
   "Re-run the filters."
   (let ((file-name (ignore-errors (dired-get-filename))))
@@ -110,6 +145,12 @@ listing."
   "Remove the files specified by current `dired-filter-stack'
 from the listing."
   (interactive)
+  ;; this should probably be moved elsewhere
+  (if (and dired-filter-mode
+           dired-filter-show-filters
+           dired-filter-stack)
+      (add-to-list 'header-line-format '("" dired-filter-header-line-format) t)
+    (setq header-line-format (--remove (equal it '("" dired-filter-header-line-format)) header-line-format)))
   (when (and dired-filter-mode
              dired-filter-stack)
     (let ((filter (dired-filter--make-filter))
