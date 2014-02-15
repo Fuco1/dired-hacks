@@ -60,7 +60,7 @@ opened in browser and you want to edit the file instead of view it.
 Note also that this package can handle calls when point is not on a
 line representing a file---an example hook is provided to open a
 subdirectory under point if point is on the subdir line, see
-`dired-open-file-open-subdir`.
+`dired-open-subdir`.
 
 If you write your own handler, make sure they do *not* throw errors
 but instead return nil if they can't proceed.
