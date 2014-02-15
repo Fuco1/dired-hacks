@@ -216,7 +216,7 @@ argument from user.
   (declare (indent 2) (doc-string 2))
   (let ((fn-name (intern (concat "dired-filter-by-" (symbol-name name)))))
     `(progn
-       (defun ,fn-name (qualifier)
+       (defun ,fn-name (&optional qualifier)
          ,(or (and documentation
                    (if remove
                        (concat documentation "\n\nBy default, files matched by this filter are /removed/.")
