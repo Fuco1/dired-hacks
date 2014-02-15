@@ -86,7 +86,6 @@ Entries are of type (name desc body) ")
   "Re-run the filters."
   (let ((file-name (ignore-errors (dired-get-filename))))
     (dired-revert)
-    (dired-filter-expunge)
     (when file-name
       (dired-utils-goto-line file-name))))
 
