@@ -38,10 +38,6 @@
 (defvar dired-filter-marker-char ?\x3FF
   "Temporary marker used by Dired-Filter.")
 
-(defvar dired-filter-stack nil
-  "Filter stack.")
-(make-variable-buffer-local 'dired-filter-stack)
-
 (defvar dired-filter-alist nil
   "Definitions of filters.
 
@@ -51,6 +47,24 @@ Entries are of type (name desc body) ")
   "Dired-filter"
   :group 'dired-hacks
   :prefix "dired-filter-")
+
+(defcustom dired-filter-stack '((omit))
+  "Filter stack.
+
+You can customize this variable to change what filters are active
+when new dired buffer is created.
+
+The stack is a list of conses where car is the symbol
+representing the fitler (it's the part of `dired-filter-by-...')
+and cdr is current value of its argument, or nil if filter
+doesn't take argument.
+
+By default, `dired-filter-by-omit' is active."
+  :type '(repeat (cons
+                  (symbol :tag "Fitler")
+                  (sexp :tag "Qualifier")))
+  :group 'dired-filter)
+(make-variable-buffer-local 'dired-filter-stack)
 
 (defcustom dired-filter-verbose t
   "If non-nil, print debug messages."
@@ -99,7 +113,12 @@ Has the same format as `mode-line-format'."
     `(not ,@(mapcar 'dired-filter--make-filter-1 (cdr stack))))
    (t (let* ((def (assoc (car stack) dired-filter-alist))
              (remove (cadddr def))
-             (qualifier (cdr stack)))
+             (qualifier (cond
+                         ;; special hack for omit filter, to
+                         ;; recompute the filter regexp
+                         ((eq (car stack) 'omit)
+                          (dired-omit-regexp))
+                         (t (cdr stack)))))
         (if qualifier
             `(let ((qualifier ,qualifier))
                ,(if remove
@@ -262,7 +281,6 @@ argument from user.
     "Toggle current view to files matched by `dired-omit-regexp'."
   (:description "omit"
    :qualifier-description nil
-   :reader (dired-omit-regexp)
    :remove t)
   (string-match qualifier file-name))
 
