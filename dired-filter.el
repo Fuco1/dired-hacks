@@ -57,6 +57,8 @@ Entries are of type (name desc body) ")
   :type 'boolean
   :group 'dired-filter)
 
+
+;; internals
 (defun dired-filter--push (filter)
   "Push FILTER onto the active filter stack."
   (push filter dired-filter-stack))
@@ -80,6 +82,10 @@ Entries are of type (name desc body) ")
             (cadddr def)))))))
 
 (defun dired-filter--make-filter ()
+  "Build the expression that filters the files.
+
+When this expression evals to non-nil, file is kept in the
+listing."
   `(and ,@(mapcar 'dired-filter--make-filter-1 dired-filter-stack)))
 
 (defun dired-filter--update ()
@@ -90,6 +96,8 @@ Entries are of type (name desc body) ")
       (dired-utils-goto-line file-name))))
 
 (defun dired-filter--expunge ()
+  "Remove the files specified by current `dired-filter-stack'
+from the listing."
   (interactive)
   (when (and dired-filter-mode
              dired-filter-stack)
@@ -116,25 +124,48 @@ Entries are of type (name desc body) ")
        (not ,filter)))
     nil))
 
+
+;; ui
+;;;###autoload
 (cl-defmacro dired-filter-define (name documentation
                                        (&key
                                         description
                                         reader
                                         remove)
                                        &rest body)
-  "Create a filter.
+  "Create a filter NAME.
 
 Files matched by the predicate are kept in the listing.
 
 For filters where the reverse behaviour makes more sense as
 default, you can set the `:remove' argument to `t' to flip the
 truth value by default.  Do not flip the value in the predicate
-itself!"
+itself!
+
+DOCUMENTATION is the documentation of the created filter.
+
+BODY should contain forms which will be evaluated to test whether or
+not a particular file should be displayed or not.  The forms in BODY
+will be evaluated with FILE-NAME bound to the file name, and QUALIFIER
+bound to the current argument of the filter.
+
+:description is a short description of this filter (usually one
+or two words).
+
+:reader is a form that is used by `interactive' to read optional
+argument.  If not specified or nil, the filter does not accept
+argument from user.
+
+:remove reverses the default matching strategy of the filter."
   (declare (indent 2) (doc-string 2))
   (let ((fn-name (intern (concat "dired-filter-by-" (symbol-name name)))))
     `(progn
        (defun ,fn-name (qualifier)
-         ,(or documentation "This filter is not documented.")
+         ,(or (and documentation
+                   (if remove
+                       (concat documentation "\n\nBy default, files matched by this filter are /removed/.")
+                     documentation))
+              "This filter is not documented.")
          (interactive (list ,reader))
          (dired-filter--push (cons ',name qualifier))
          (message "%s" (format ,(concat (format "Filter by %s added: " description) " %s") qualifier))
@@ -145,7 +176,7 @@ itself!"
              dired-filter-alist))))
 
 (dired-filter-define dot-files
-    "Remove dot-files from current listing."
+    "Toggle current view to dot-files."
   (:description "dot-files"
    :reader nil
    :remove t)
