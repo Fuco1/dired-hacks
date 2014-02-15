@@ -1,0 +1,170 @@
+;;; dired-open.el --- Open files from dired using using custom actions.
+
+;; Copyright (C) 2014 Matus Goljer
+
+;; Author: Matus Goljer <matus.goljer@gmail.com>
+;; Maintainer: Matus Goljer <matus.goljer@gmail.com>
+;; Keywords: lisp
+;; Version: 0.0.1
+;; Created: 14th February 2014
+;; Package-requires: ((dash "2.5.0"))
+
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;; While emacs already has the `auto-mode-alist', this is often
+;; insufficient.  Many times, you want to open media files, pdfs or
+;; other documents with an external application.  There's remedy for
+;; that too, namely `dired-guess-shell-alist-user', but that is still
+;; not as convenient as just hitting enter.
+
+;; This package adds a mechanism to add "hooks" to `dired-find-file'
+;; that will run before emacs tries its own mechanisms to open the
+;; file, thus enabling you to launch other application and suspend the
+;; default behaviour.
+
+;; By default, two additional methods are enabled,
+;; `dired-open-by-extension' and `dired-open-subdir'.
+
+;; This package also provide two other convenience hooks: first tries
+;; to open the file using `xdg-open', the other by launching
+;; applications from `dired-guess-shell-alist-user'.  These are not
+;; used by default.
+
+;; You can customize the list of functions to try by customizing
+;; `dired-open-functions'.
+
+;; To fall back to the default `dired-find-file', you can provide the
+;; prefix argument (usually C-u) to the `dired-open-file' function.
+;; This is useful for example when you configure html files to be
+;; opened in browser and you want to edit the file instead of view it.
+
+;; Note also that this package can handle calls when point is not on a
+;; line representing a file---an example hook is provided to open a
+;; subdirectory under point if point is on the subdir line, see
+;; `dired-open-file-open-subdir'.
+
+;; If you write your own handler, make sure they do *not* throw errors
+;; but instead return nil if they can't proceed.
+
+;; See https://github.com/Fuco1/dired-hacks for the entire collection.
+
+;;; Code:
+
+(require 'dired-x)
+(require 'dash)
+
+(defgroup dired-open ()
+  "Dired-open"
+  :group 'dired-hacks
+  :prefix "dired-open-")
+
+(defcustom dired-open-functions '(dired-open-by-extension dired-open-subdir)
+  "List of functions to try to open a file.
+
+Each function should accept no argument and should retrieve the
+filename and/or other context by itself.  Each function should
+return non-nil value if it succeeded in opening the file."
+  :type 'hook
+  :group 'dired-open)
+
+(defcustom dired-open-extensions nil
+  "Alist of extensions mapping to a programs to run them in.
+
+The filename is appended after the program."
+  :type '(alist
+          :key-type (string :tag "Extension")
+          :value-type (string :tag "Program"))
+  :group 'dired-open)
+
+
+;; file opening procedures
+(defun dired-open-xdg ()
+  "Try to run `xdg-open' to open the file under point."
+  (interactive)
+  (if (executable-find "xdg-open")
+      (let ((file (ignore-errors (dired-get-file-for-visit))))
+        (start-process "dired-open" nil
+                       "xdg-open" (file-truename file)))
+    nil))
+
+(defun dired-open-by-extension ()
+  "Open a file according to its extension."
+  (interactive)
+  (let ((file (ignore-errors (dired-get-file-for-visit)))
+        done)
+    (when file
+      (--each-while dired-open-extensions (not done)
+        (when (string-match (concat "\\." (regexp-quote (car it)) "\\'") file)
+          (setq done t)
+          (apply 'start-process "dired-open" nil
+                 (-snoc (split-string (cdr it) " ") (file-truename file)))))
+      done)))
+
+(defun dired-open-guess-shell-alist ()
+  "Open the file under point in an application suggested by
+`dired-guess-shell-alist-user'."
+  (interactive)
+  (let ((file (ignore-errors (dired-get-file-for-visit)))
+        done)
+    (when file
+      (--each-while dired-guess-shell-alist-user (not done)
+        (when (string-match (car it) file)
+          (setq done t)
+          (apply 'start-process "dired-open" nil
+                 (-snoc (split-string (eval (cadr it)) " ") (file-truename file)))))
+      done)))
+
+
+;; non-file opening procedures
+(defun dired-open-subdir ()
+  "If point is on a subdir line, open the directory under point
+in a new buffer.
+
+For example, if the point is on line
+
+  /home/us|er/downloads
+
+the directory /home/user is opened in new buffer."
+  (interactive)
+  (when (dired-get-subdir)
+    (-when-let (end (save-excursion (re-search-forward "[/:]" (line-end-position) t)))
+      (let ((path (buffer-substring-no-properties
+                   (+ 2 (line-beginning-position))
+                   (1- end))))
+        (find-file path)))))
+
+
+;; main
+
+;;;###autoload
+(defun dired-open-file (&optional arg)
+  "Try `dired-open-functions' to open the thing under point.
+
+That can be either file or any other line of dired listing.
+
+If no function succeeded, run `dired-find-file' normally.
+
+With \\[universal-argument], run `dired-find-file' normally."
+  (interactive "P")
+  (when (or arg
+            (not (run-hook-with-args-until-success 'dired-open-functions)))
+    (dired-find-file)))
+
+(define-key dired-mode-map [remap dired-find-file] 'dired-open-file)
+
+(provide 'dired-open)
+
+;;; dired-open.el ends here

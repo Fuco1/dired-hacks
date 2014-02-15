@@ -84,35 +84,6 @@ dired, but not from `find-file'."
   (interactive)
   (dired-avfs--open (dired-file-name-at-point)))
 
-;; make this somehow work with other custom redefinitions of
-;; `dired-find-file'
-(defun dired-avfs-find-file ()
-  "In Dired, visit the file or directory named on this line.
-
-If point is on a file, behaves like `dired-file-file' but handles
-archives via avfs.
-
-If point is on a directory header, open a new dired for the
-directory under point."
-  (interactive)
-  (let ((file (condition-case nil
-                  (dired-get-file-for-visit)
-                (error "Unable to visit this file")))
-        (find-file-run-dired t))
-    (cond
-     ((dired-avfs--archive-p file)
-      (dired-avfs--open file))
-     ((dired-get-subdir) ;; this should not be here!!!
-      (-when-let (end (save-excursion (re-search-forward "[/:]" (line-end-position) t)))
-        (let ((path (buffer-substring-no-properties
-                     (+ 2 (line-beginning-position))
-                     (1- end))))
-          (find-file path))))
-     (t
-      (find-file file)))))
-
-(define-key dired-mode-map [remap dired-find-file] 'dired-avfs-find-file)
-
 (defadvice find-file-noselect (before fix-avfs-arguments activate)
   "If the target is archive that can be handled via avfs,
 automagically change the filename to the location of virtual
