@@ -98,16 +98,16 @@ Has the same format as `mode-line-format'."
    ((eq (car stack) 'not)
     `(not ,@(mapcar 'dired-filter--make-filter-1 (cdr stack))))
    (t (let* ((def (assoc (car stack) dired-filter-alist))
-             (remove (caddr def))
+             (remove (cadddr def))
              (qualifier (cdr stack)))
         (if qualifier
             `(let ((qualifier ,qualifier))
                ,(if remove
-                    `(not ,(cadddr def))
-                  (cadddr def)))
+                    `(not ,(car (cddddr def)))
+                  (car (cddddr def))))
           (if remove
-              `(not ,(cadddr def))
-            (cadddr def)))))))
+              `(not ,(car (cddddr def)))
+            (car (cddddr def))))))))
 
 (defun dired-filter--make-filter ()
   "Build the expression that filters the files.
@@ -125,10 +125,11 @@ listing."
     (concat "[NOT " (mapconcat 'dired-filter--describe-filters-1 (cdr stack) " ") "]"))
    (t (let* ((def (assoc (car stack) dired-filter-alist))
              (desc (cadr def))
-             (remove (caddr def))
-             (qualifier (cdr stack)))
-        (if qualifier
-            (format "[%s: %s]" desc qualifier)
+             (desc-qual (caddr def))
+             (qualifier (cdr stack))
+             (qual-formatted (eval desc-qual)))
+        (if qual-formatted
+            (format "[%s: %s]" desc qual-formatted)
           (format "[%s]" desc))))))
 
 (defun dired-filter--describe-filters ()
@@ -182,6 +183,7 @@ from the listing."
 (cl-defmacro dired-filter-define (name documentation
                                        (&key
                                         description
+                                        (qualifier-description '(identity qualifier))
                                         reader
                                         remove)
                                        &rest body)
@@ -208,6 +210,8 @@ or two words).
 argument.  If not specified or nil, the filter does not accept
 argument from user.
 
+:qualifier-description is a form to format qualifier for display.
+
 :remove reverses the default matching strategy of the filter."
   (declare (indent 2) (doc-string 2))
   (let ((fn-name (intern (concat "dired-filter-by-" (symbol-name name)))))
@@ -222,9 +226,10 @@ argument from user.
          (dired-filter--push (cons ',name qualifier))
          (message "%s" (format ,(concat (format "Filter by %s added: " description) " %s") qualifier))
          (dired-filter--update))
-       (push (list ',name ,description ,remove ',(if (= (length body) 1)
-                                                     `,(car body)
-                                                   `(progn ,@body)))
+       (push (list ',name ,description ',qualifier-description
+                   ,remove ',(if (= (length body) 1)
+                                 `,(car body)
+                               `(progn ,@body)))
              dired-filter-alist))))
 
 (dired-filter-define dot-files
@@ -242,19 +247,21 @@ argument from user.
 
 (dired-filter-define regexp
     "Toggle current view to files matching QUALIFIER as a regular expression."
-  (:description "name"
+  (:description "regexp"
    :reader (read-from-minibuffer "Regexp: " ))
   (string-match qualifier file-name))
 
 (dired-filter-define extension
     "Toggle current view to files with extension matching QUALIFIER."
-  (:description "name"
+  (:description "extension"
+   :qualifier-description (substring qualifier 2 (- (length qualifier) 2))
    :reader (concat "\\." (regexp-quote (read-from-minibuffer "Extension: " )) "\\'"))
   (string-match qualifier file-name))
 
 (dired-filter-define omit
     "Toggle current view to files matched by `dired-omit-regexp'."
   (:description "omit"
+   :qualifier-description nil
    :reader (dired-omit-regexp)
    :remove t)
   (string-match qualifier file-name))
