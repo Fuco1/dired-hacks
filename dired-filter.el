@@ -188,12 +188,30 @@ argument from user.
    :reader (regexp-quote (read-from-minibuffer "Pattern: " )))
   (string-match qualifier file-name))
 
+(dired-filter-define regexp
+    "Toggle current view to files matching QUALIFIER as a regular expression."
+  (:description "name"
+   :reader (read-from-minibuffer "Regexp: " ))
+  (string-match qualifier file-name))
+
+(dired-filter-define extension
+    "Toggle current view to files with extension matching QUALIFIER."
+  (:description "name"
+   :reader (concat "\\." (regexp-quote (read-from-minibuffer "Extension: " )) "\\'"))
+  (string-match qualifier file-name))
+
 (dired-filter-define omit
-    "Remove lines matched by `dired-omit-regexp' from current listing."
+    "Toggle current view to files matched by `dired-omit-regexp'."
   (:description "omit"
    :reader (dired-omit-regexp)
    :remove t)
   (string-match qualifier file-name))
+
+(dired-filter-define predicate
+    "Toggle current view to files for which QUALIFIER returns non-nil."
+  (:description "predicate"
+   :reader (read-minibuffer "Filter by predicate (form): "))
+  (eval qualifier))
 
 (defun dired-filter-transpose ()
   "Transpose the two top filters."
