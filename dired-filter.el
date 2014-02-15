@@ -106,7 +106,7 @@ from the listing."
           (old-modified-p (buffer-modified-p))
           count)
       (when dired-filter-verbose (message "Filtering..."))
-      (if (eval (dired-filter-mark-unmarked filter))
+      (if (eval (dired-filter--mark-unmarked filter))
           (setq count (dired-do-kill-lines nil (if dired-filter-verbose "Filtered %d line%s." "")))
         (when dired-filter-verbose (message "Nothing to filter")))
       (set-buffer-modified-p (and old-modified-p
@@ -115,7 +115,7 @@ from the listing."
                                     (re-search-forward dired-re-mark nil t))))
       count)))
 
-(defun dired-filter-mark-unmarked (filter)
+(defun dired-filter--mark-unmarked (filter)
   `(dired-mark-if
     (let ((file-name (ignore-errors (dired-get-filename 'no-dir t))))
       (and
