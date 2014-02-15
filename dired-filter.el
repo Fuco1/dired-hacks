@@ -335,7 +335,10 @@ push all its constituents back on the stack."
   (let ((top (pop dired-filter-stack)))
     (when dired-filter-verbose
       (if top
-          (message "Popped filter %s: %s" (car top) (cdr top))
+          (--if-let (let ((qualifier (cdr top)))
+                      (eval (caddr (assoc (car top) dired-filter-alist))))
+              (message "Popped filter %s: %s" (car top) it)
+            (message "Popped filter %s" (car top)))
         (message "Filter stack was empty."))))
   (dired-filter--update))
 
