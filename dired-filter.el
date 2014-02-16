@@ -88,16 +88,34 @@ Has the same format as `mode-line-format'."
   :group 'dired-filter)
 (put 'dired-filter-header-line-format 'risky-local-variable t)
 
-(defcustom dired-filter-prefix "/"
-  "Prefix key for `dired-filter-mode-map'."
-  :type 'string
-  :group 'dired-filter
-  :set 'dired-filter--set-prefix-key)
+(defvar dired-filter-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map "n" 'dired-filter-by-name)
+    (define-key map "r" 'dired-filter-by-regexp)
+    (define-key map "x" 'dired-filter-by-extension)
+    (define-key map "." 'dired-filter-by-dot-files)
+    (define-key map "i" 'dired-filter-by-omit)
+    (define-key map "e" 'dired-filter-by-predicate)
+
+    (define-key map "o" 'dired-filter-or)
+    (define-key map "!" 'dired-filter-negate)
+    (define-key map "d" 'dired-filter-decompose)
+    (define-key map (kbd "TAB") 'dired-filter-transpose)
+    (define-key map "p" 'dired-filter-pop)
+    (define-key map "/" 'dired-filter-pop-all)
+    map)
+  "Keymap used for `dired-filter-mode'.")
 
 (defun dired-filter--set-prefix-key (varname value)
   (when varname
     (set-default varname value))
   (define-key dired-mode-map (kbd value) dired-filter-map))
+
+(defcustom dired-filter-prefix "/"
+  "Prefix key for `dired-filter-mode-map'."
+  :type 'string
+  :group 'dired-filter
+  :set 'dired-filter--set-prefix-key)
 
 
 ;; internals
@@ -368,24 +386,6 @@ push all its constituents back on the stack."
 
 
 ;; mode stuff
-(defvar dired-filter-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map "n" 'dired-filter-by-name)
-    (define-key map "r" 'dired-filter-by-regexp)
-    (define-key map "x" 'dired-filter-by-extension)
-    (define-key map "." 'dired-filter-by-dot-files)
-    (define-key map "i" 'dired-filter-by-omit)
-    (define-key map "e" 'dired-filter-by-predicate)
-
-    (define-key map "o" 'dired-filter-or)
-    (define-key map "!" 'dired-filter-negate)
-    (define-key map "d" 'dired-filter-decompose)
-    (define-key map (kbd "TAB") 'dired-filter-transpose)
-    (define-key map "p" 'dired-filter-pop)
-    (define-key map "/" 'dired-filter-pop-all)
-    map)
-  "Keymap used for `dired-filter-mode'.")
-
 (define-minor-mode dired-filter-mode
   "Toggle filtering of files in Dired."
   :group 'dired-filter
