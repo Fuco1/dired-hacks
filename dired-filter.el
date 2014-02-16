@@ -94,10 +94,12 @@ Has the same format as `mode-line-format'."
     (define-key map "r" 'dired-filter-by-regexp)
     (define-key map "x" 'dired-filter-by-extension)
     (define-key map "." 'dired-filter-by-dot-files)
-    (define-key map "i" 'dired-filter-by-omit)
+    (define-key map "o" 'dired-filter-by-omit)
     (define-key map "e" 'dired-filter-by-predicate)
+    (define-key map "f" 'dired-filter-by-file)
+    (define-key map "i" 'dired-filter-by-directory)
 
-    (define-key map "o" 'dired-filter-or)
+    (define-key map "v" 'dired-filter-or) ; 'v' is sort of like logical or symbol
     (define-key map "!" 'dired-filter-negate)
     (define-key map "d" 'dired-filter-decompose)
     (define-key map (kbd "TAB") 'dired-filter-transpose)
@@ -235,10 +237,11 @@ itself!
 
 DOCUMENTATION is the documentation of the created filter.
 
-BODY should contain forms which will be evaluated to test whether or
-not a particular file should be displayed or not.  The forms in BODY
-will be evaluated with FILE-NAME bound to the file name, and QUALIFIER
-bound to the current argument of the filter.
+BODY should contain forms which will be evaluated to test whether
+or not a particular file should be displayed or not.  The forms
+in BODY will be evaluated with FILE-NAME bound to the file name,
+and QUALIFIER bound to the current argument of the filter.
+During the evaluation point is at the beginning of line.
 
 :description is a short description of this filter (usually one
 or two words).
@@ -307,6 +310,16 @@ argument from user.
   (:description "predicate"
    :reader (read-minibuffer "Filter by predicate (form): "))
   (eval qualifier))
+
+(dired-filter-define directory
+    "Toggle current view to show only directories."
+  (:description "directory")
+  (looking-at "^  d"))
+
+(dired-filter-define file
+    "Toggle current view to show only files."
+  (:description "file")
+  (looking-at "^  -"))
 
 (defun dired-filter-transpose ()
   "Transpose the two top filters."
