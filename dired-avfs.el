@@ -40,10 +40,11 @@
 
 ;;; Code:
 
+(require 'dired-hacks-utils)
 (require 'dash)
 
 (defgroup dired-avfs ()
-  "Dired-avfs"
+  "AVFS support for dired."
   :group 'dired-hacks
   :prefix "dired-avfs-")
 

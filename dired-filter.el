@@ -32,8 +32,8 @@
 
 (require 'dired-x)
 (require 'dired-aux)
-(require 'dash)
 (require 'dired-hacks-utils)
+(require 'dash)
 
 (defvar dired-filter-marker-char ?\x3FF
   "Temporary marker used by Dired-Filter.")
@@ -44,7 +44,7 @@
 Entries are of type (name desc body) ")
 
 (defgroup dired-filter ()
-  "Dired-filter"
+  "Ibuffer-like filtering for dired."
   :group 'dired-hacks
   :prefix "dired-filter-")
 

@@ -31,6 +31,13 @@
 
 ;;; Code:
 
+(require 'dash)
+
+(defgroup dired-hacks ()
+  "Collection of useful dired additions."
+  :group 'dired
+  :prefix "dired-hacks-")
+
 (defun dired-utils-goto-line (filename)
   "Go to line describing FILENAME in listing.
 

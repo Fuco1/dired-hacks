@@ -64,10 +64,11 @@
 ;;; Code:
 
 (require 'dired-x)
+(require 'dired-hacks-utils)
 (require 'dash)
 
 (defgroup dired-open ()
-  "Dired-open"
+  "Open files from dired using using custom actions."
   :group 'dired-hacks
   :prefix "dired-open-")
 
