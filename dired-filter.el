@@ -272,6 +272,7 @@ argument from user.
                                `(progn ,@body)))
              dired-filter-alist))))
 
+;;;###autoload (autoload 'dired-filter-by-dot-files "dired-filter")
 (dired-filter-define dot-files
     "Toggle current view to dot-files."
   (:description "dot-files"
@@ -279,18 +280,21 @@ argument from user.
    :remove t)
   (string-match "^\\." file-name))
 
+;;;###autoload (autoload 'dired-filter-by-name "dired-filter")
 (dired-filter-define name
     "Toggle current view to files matching QUALIFIER."
   (:description "name"
    :reader (regexp-quote (read-from-minibuffer "Pattern: " )))
   (string-match qualifier file-name))
 
+;;;###autoload (autoload 'dired-filter-by-regexp "dired-filter")
 (dired-filter-define regexp
     "Toggle current view to files matching QUALIFIER as a regular expression."
   (:description "regexp"
    :reader (read-from-minibuffer "Regexp: " ))
   (string-match qualifier file-name))
 
+;;;###autoload (autoload 'dired-filter-by-extension "dired-filter")
 (dired-filter-define extension
     "Toggle current view to files with extension matching QUALIFIER."
   (:description "extension"
@@ -298,6 +302,7 @@ argument from user.
    :reader (concat "\\." (regexp-quote (read-from-minibuffer "Extension: " )) "\\'"))
   (string-match qualifier file-name))
 
+;;;###autoload (autoload 'dired-filter-by-omit "dired-filter")
 (dired-filter-define omit
     "Toggle current view to files matched by `dired-omit-regexp'."
   (:description "omit"
@@ -305,22 +310,26 @@ argument from user.
    :remove t)
   (string-match qualifier file-name))
 
+;;;###autoload (autoload 'dired-filter-by-predicate "dired-filter")
 (dired-filter-define predicate
     "Toggle current view to files for which QUALIFIER returns non-nil."
   (:description "predicate"
    :reader (read-minibuffer "Filter by predicate (form): "))
   (eval qualifier))
 
+;;;###autoload (autoload 'dired-filter-by-directory "dired-filter")
 (dired-filter-define directory
     "Toggle current view to show only directories."
   (:description "directory")
   (looking-at "^  d"))
 
+;;;###autoload (autoload 'dired-filter-by-file "dired-filter")
 (dired-filter-define file
     "Toggle current view to show only files."
   (:description "file")
   (looking-at "^  -"))
 
+;;;###autoload
 (defun dired-filter-transpose ()
   "Transpose the two top filters."
   (interactive)
@@ -333,6 +342,7 @@ argument from user.
     (dired-filter--push top)
     (dired-filter--push top2)))
 
+;;;###autoload
 (defun dired-filter-or ()
   "Or the top two filters."
   (interactive)
@@ -353,6 +363,7 @@ argument from user.
      (t (dired-filter--push `(or ,top ,top2))))
     (dired-filter--update)))
 
+;;;###autoload
 (defun dired-filter-negate ()
   "Logically negate the top filter."
   (interactive)
@@ -363,6 +374,7 @@ argument from user.
     (dired-filter--push `(not ,top))
     (dired-filter--update)))
 
+;;;###autoload
 (defun dired-filter-decompose ()
   "Decompose the composite filter on top of the stack.
 
@@ -378,6 +390,7 @@ push all its constituents back on the stack."
         (dired-filter--push it))
       (dired-filter--update))))
 
+;;;###autoload
 (defun dired-filter-pop ()
   "Remove the top filter in this buffer."
   (interactive)
@@ -391,6 +404,7 @@ push all its constituents back on the stack."
         (message "Filter stack was empty."))))
   (dired-filter--update))
 
+;;;###autoload
 (defun dired-filter-pop-all ()
   "Remove all the filters in this buffer."
   (interactive)
@@ -399,6 +413,7 @@ push all its constituents back on the stack."
 
 
 ;; mode stuff
+;;;###autoload
 (define-minor-mode dired-filter-mode
   "Toggle filtering of files in Dired."
   :group 'dired-filter
