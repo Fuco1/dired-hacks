@@ -4,7 +4,7 @@
 
 ;; Author: Matus Goljer <matus.goljer@gmail.com>
 ;; Maintainer: Matus Goljer <matus.goljer@gmail.com>
-;; Keywords: lisp
+;; Keywords: files
 ;; Version: 0.0.1
 ;; Created: 14th February 2014
 ;; Package-requires: ((dash "2.5.0") (dired-hacks-utils "0.0.1"))
