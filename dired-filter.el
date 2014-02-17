@@ -94,13 +94,13 @@ Has the same format as `mode-line-format'."
     (define-key map "r" 'dired-filter-by-regexp)
     (define-key map "x" 'dired-filter-by-extension)
     (define-key map "." 'dired-filter-by-dot-files)
-    (define-key map "o" 'dired-filter-by-omit)
+    (define-key map "O" 'dired-filter-by-omit)
     (define-key map "e" 'dired-filter-by-predicate)
     (define-key map "f" 'dired-filter-by-file)
     (define-key map "i" 'dired-filter-by-directory)
     (define-key map "m" 'dired-filter-by-mode)
 
-    (define-key map "v" 'dired-filter-or) ; 'v' is sort of like logical or symbol
+    (define-key map "o" 'dired-filter-or)
     (define-key map "!" 'dired-filter-negate)
     (define-key map "d" 'dired-filter-decompose)
     (define-key map (kbd "TAB") 'dired-filter-transpose)
