@@ -163,9 +163,9 @@ This only affects the built-in handlers."
                                   (shell-quote-argument (file-truename file))
                                   " 2>&1 >/dev/null"))
                          (append (split-string (eval (cadr it)) " ")
-                                 (list (file-truename file)))))))
-        (when (not dired-open-query-before-exit)
-          (set-process-query-on-exit-flag process nil))))
+                                 (list (file-truename file))))))
+          (when (not dired-open-query-before-exit)
+            (set-process-query-on-exit-flag process nil)))))
     process))
 
 
