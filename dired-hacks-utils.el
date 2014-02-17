@@ -51,6 +51,15 @@ Should be absolute file name matched against
         (setq stop t)
         (dired-move-to-filename)))))
 
+(defun dired-utils-match-filename-alist (filename alist)
+  "Match FILENAME against each car in ALIST and return first matched cons.
+
+The matching is done using `string-match-p'."
+  (let (match)
+    (--each-while alist (not match)
+      (when (string-match-p (car it) filename)
+        (setq match it)))
+    match))
 
 (provide 'dired-hacks-utils)
 

@@ -98,6 +98,7 @@ Has the same format as `mode-line-format'."
     (define-key map "e" 'dired-filter-by-predicate)
     (define-key map "f" 'dired-filter-by-file)
     (define-key map "i" 'dired-filter-by-directory)
+    (define-key map "m" 'dired-filter-by-mode)
 
     (define-key map "v" 'dired-filter-or) ; 'v' is sort of like logical or symbol
     (define-key map "!" 'dired-filter-negate)
@@ -328,6 +329,29 @@ argument from user.
     "Toggle current view to show only files."
   (:description "file")
   (looking-at "^  -"))
+
+;;;###autoload (autoload 'dired-filter-by-mode "dired-filter")
+(dired-filter-define mode
+    "Toggle current view to files which open in mode specified by QUALIFIER.
+
+This is \"guessed\" from `auto-mode-alist'.
+
+This filter can potentially be very slow, depending on the size
+of `auto-mode-alist'."
+  (:description "mode"
+   :qualifier-description (symbol-name (cadr qualifier))
+   :reader (let ((mm (intern
+                      (completing-read
+                       "Major mode: "
+                       (-map 'symbol-name (-uniq (-remove 'listp (-map 'cdr auto-mode-alist))))
+                       nil nil nil nil
+                       (-when-let* ((file (ignore-errors (dired-get-filename)))
+                                    (mode (cdr (dired-utils-match-filename-alist
+                                                file auto-mode-alist))))
+                         (symbol-name mode))))))
+                          `',mm))
+  (-when-let (mm (cdr (dired-utils-match-filename-alist file-name auto-mode-alist)))
+    (eq mm qualifier)))
 
 ;;;###autoload
 (defun dired-filter-transpose ()
