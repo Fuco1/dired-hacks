@@ -106,6 +106,36 @@ This only affects the built-in handlers."
   :type 'boolean
   :group 'dired-open)
 
+
+(defun dired-open--start-process (file command)
+  "Open FILE with COMMAND.
+
+FILE is string, path to the file you want to open.  It is
+resolved with `file-truename'.
+
+Note that FILE should not be \"shell escaped\", that is handled
+by this function if the shell is invoked.
+
+COMMAND is a string representing the command to run.  If you want
+to call it with any switches, these should be included in this
+string as well."
+  (let ((process
+         (apply 'start-process "dired-open" nil
+                (if dired-open-use-nohup
+                    (list "sh" "-c"
+                          (concat
+                           "nohup "
+                           command
+                           " "
+                           (shell-quote-argument (file-truename file))
+                           " 2>&1 >/dev/null"))
+                  (append (split-string command " ")
+                          (list (file-truename file)))))))
+    (when (and process
+               (not dired-open-query-before-exit))
+      (set-process-query-on-exit-flag process nil))
+    process))
+
 
 ;; file opening procedures
 (defun dired-open-xdg ()
@@ -117,7 +147,6 @@ This only affects the built-in handlers."
                        "xdg-open" (file-truename file)))
     nil))
 
-;; extract the nohup madness into a helper
 (defun dired-open-by-extension ()
   "Open a file according to its extension."
   (interactive)
@@ -126,21 +155,7 @@ This only affects the built-in handlers."
     (when file
       (--each-while dired-open-extensions (not process)
         (when (string-match (concat "\\." (regexp-quote (car it)) "\\'") file)
-          (setq process
-                (apply 'start-process "dired-open" nil
-                       (apply 'start-process "dired-open" nil
-                              (if dired-open-use-nohup
-                                  (list "sh" "-c"
-                                        (concat
-                                         "nohup "
-                                         (cdr it)
-                                         " "
-                                         (shell-quote-argument (file-truename file))
-                                         " 2>&1 >/dev/null"))
-                                (append (split-string (cdr it) " ")
-                                        (list (file-truename file)))))))
-          (when (not dired-open-query-before-exit)
-            (set-process-query-on-exit-flag process nil))))
+          (setq process (dired-open--start-process file (cdr it)))))
       process)))
 
 (defun dired-open-guess-shell-alist ()
@@ -152,20 +167,7 @@ This only affects the built-in handlers."
     (when file
       (--each-while dired-guess-shell-alist-user (not process)
         (when (string-match (car it) file)
-          (setq process
-                (apply 'start-process "dired-open" nil
-                       (if dired-open-use-nohup
-                           (list "sh" "-c"
-                                 (concat
-                                  "nohup "
-                                  (eval (cadr it))
-                                  " "
-                                  (shell-quote-argument (file-truename file))
-                                  " 2>&1 >/dev/null"))
-                         (append (split-string (eval (cadr it)) " ")
-                                 (list (file-truename file))))))
-          (when (not dired-open-query-before-exit)
-            (set-process-query-on-exit-flag process nil)))))
+          (setq process (dired-open--start-process file (eval (cadr it)))))))
     process))
 
 
