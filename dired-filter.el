@@ -415,17 +415,20 @@ push all its constituents back on the stack."
       (dired-filter--update))))
 
 ;;;###autoload
-(defun dired-filter-pop ()
+(defun dired-filter-pop (&optional arg)
   "Remove the top filter in this buffer."
-  (interactive)
-  (let ((top (pop dired-filter-stack)))
-    (when dired-filter-verbose
-      (if top
-          (--if-let (let ((qualifier (cdr top)))
-                      (eval (caddr (assoc (car top) dired-filter-alist))))
-              (message "Popped filter %s: %s" (car top) it)
-            (message "Popped filter %s" (car top)))
-        (message "Filter stack was empty."))))
+  (interactive "p")
+  (while (and (> arg 0)
+              dired-filter-stack)
+    (let ((top (pop dired-filter-stack)))
+      (when dired-filter-verbose
+        (if top
+            (--if-let (let ((qualifier (cdr top)))
+                        (eval (caddr (assoc (car top) dired-filter-alist))))
+                (message "Popped filter %s: %s" (car top) it)
+              (message "Popped filter %s" (car top)))
+          (message "Filter stack was empty."))))
+    (setq arg (1- arg)))
   (dired-filter--update))
 
 ;;;###autoload
