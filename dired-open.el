@@ -90,6 +90,22 @@ The filename is appended after the program."
           :value-type (string :tag "Program"))
   :group 'dired-open)
 
+(defcustom dired-open-use-nohup t
+  "If non-nil, use nohup(1) to keep external processes opened
+even if emacs process is terminated.
+
+This only affects the built-in handlers."
+  :type 'boolean
+  :group 'dired-open)
+
+(defcustom dired-open-query-before-exit t
+  "If non-nil, ask the user if they want to kill any external
+processes started by `dired-open-file' when they exit emacs.
+
+This only affects the built-in handlers."
+  :type 'boolean
+  :group 'dired-open)
+
 
 ;; file opening procedures
 (defun dired-open-xdg ()
@@ -101,32 +117,56 @@ The filename is appended after the program."
                        "xdg-open" (file-truename file)))
     nil))
 
+;; extract the nohup madness into a helper
 (defun dired-open-by-extension ()
   "Open a file according to its extension."
   (interactive)
   (let ((file (ignore-errors (dired-get-file-for-visit)))
-        done)
+        process)
     (when file
-      (--each-while dired-open-extensions (not done)
+      (--each-while dired-open-extensions (not process)
         (when (string-match (concat "\\." (regexp-quote (car it)) "\\'") file)
-          (setq done t)
-          (apply 'start-process "dired-open" nil
-                 (-snoc (split-string (cdr it) " ") (file-truename file)))))
-      done)))
+          (setq process
+                (apply 'start-process "dired-open" nil
+                       (apply 'start-process "dired-open" nil
+                              (if dired-open-use-nohup
+                                  (list "sh" "-c"
+                                        (concat
+                                         "nohup "
+                                         (cdr it)
+                                         " "
+                                         (shell-quote-argument (file-truename file))
+                                         " 2>&1 >/dev/null"))
+                                (append (split-string (cdr it) " ")
+                                        (list (file-truename file)))))))
+          (when (not dired-open-query-before-exit)
+            (set-process-query-on-exit-flag process nil))))
+      process)))
 
 (defun dired-open-guess-shell-alist ()
   "Open the file under point in an application suggested by
 `dired-guess-shell-alist-user'."
   (interactive)
   (let ((file (ignore-errors (dired-get-file-for-visit)))
-        done)
+        process)
     (when file
-      (--each-while dired-guess-shell-alist-user (not done)
+      (--each-while dired-guess-shell-alist-user (not process)
         (when (string-match (car it) file)
-          (setq done t)
-          (apply 'start-process "dired-open" nil
-                 (-snoc (split-string (eval (cadr it)) " ") (file-truename file)))))
-      done)))
+          (setq process
+                (apply 'start-process "dired-open" nil
+                       (if dired-open-use-nohup
+                           (list "sh" "-c"
+                                 (concat
+                                  "nohup "
+                                  (eval (cadr it))
+                                  " "
+                                  (shell-quote-argument (file-truename file))
+                                  " 2>&1 >/dev/null"))
+                         (append (split-string (eval (cadr it)) " ")
+                                 (list (file-truename file)))))))
+        (when (not dired-open-query-before-exit)
+          (set-process-query-on-exit-flag process nil))))
+    process))
 
 
 ;; non-file opening procedures
