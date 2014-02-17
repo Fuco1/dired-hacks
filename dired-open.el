@@ -154,7 +154,7 @@ string as well."
         process)
     (when file
       (--each-while dired-open-extensions (not process)
-        (when (string-match (concat "\\." (regexp-quote (car it)) "\\'") file)
+        (when (string-match-p (concat "\\." (regexp-quote (car it)) "\\'") file)
           (setq process (dired-open--start-process file (cdr it)))))
       process)))
 
@@ -166,7 +166,7 @@ string as well."
         process)
     (when file
       (--each-while dired-guess-shell-alist-user (not process)
-        (when (string-match (car it) file)
+        (when (string-match-p (car it) file)
           (setq process (dired-open--start-process file (eval (cadr it)))))))
     process))
 
