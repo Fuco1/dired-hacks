@@ -1,4 +1,4 @@
-;;; dired-open.el --- Open files from dired using using custom actions.
+;;; dired-open.el --- Open files from dired using using custom actions
 
 ;; Copyright (C) 2014 Matus Goljer
 

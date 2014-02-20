@@ -1,4 +1,4 @@
-;;; dired-filter.el --- Ibuffer-like filtering for dired.
+;;; dired-filter.el --- Ibuffer-like filtering for dired
 
 ;; Copyright (C) 2014 Matus Goljer
 

@@ -1,4 +1,4 @@
-;;; dired-hacks-utils.el --- Utilities and helpers for dired-hacks collection.
+;;; dired-hacks-utils.el --- Utilities and helpers for dired-hacks collection
 
 ;; Copyright (C) 2014 Matus Goljer
 

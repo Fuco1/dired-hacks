@@ -1,4 +1,4 @@
-;;; dired-rainbow.el --- Extended file highlighting according to its type.
+;;; dired-rainbow.el --- Extended file highlighting according to its type
 
 ;; Copyright (C) 2014 Matus Goljer
 
