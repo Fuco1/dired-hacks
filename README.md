@@ -1,4 +1,13 @@
-# dired-hacks
+1. [dired-hacks](#)
+2. [Contribute!](#contribute!)
+3. [Packages](#packages)
+    1. [dired-hacks-utils](#dired-hacks-utils)
+    2. [dired-filter](#dired-filter)
+    3. [dired-avfs](#dired-avfs)
+    4. [dired-open](#dired-open)
+    5. [dired-rainbow](#dired-rainbow)
+
+# dired-hacks [![Paypal logo](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CEYP5YVHDRX8C)
 
 Collection of useful dired additions.  I don't want this become
 another `dired+`, so I'm splitting all the functionality into separate
@@ -6,15 +15,31 @@ mutually independent packages.  All shared functionality and helpers
 will be extracted into a single package `dired-hacks-utils`, so that
 will be the only dependence.
 
-# dired-hacks-utils
+In addition, all the packages require [dash.el](https://github.com/magnars/dash.el)
+
+<a name="contribute!" />
+# Contribute!
+
+Since this collection comes from my own config, it mostly contains
+stuff I use or find useful.  If you have a good idea or nice usecase
+for some addition, feel free to send patches or start an issue (but
+patches are preferred :P).
+
+<a name="packages" />
+# Packages
+
+<a name="dired-hacks-utils" />
+## dired-hacks-utils
 
 Set of utility functions used in all the `dired-hacks` packages.
 
-# dired-filter
+<a name="dired-filter" />
+## dired-filter
 
 Adds ibuffer-like filtering to dired.
 
-# dired-avfs
+<a name="dired-avfs" />
+## dired-avfs
 
 Adds [avfs](http://avf.sourceforge.net/) support for seamless archive
 browsing.  This extension therefore depends on the presence of `avfsd`
@@ -28,7 +53,8 @@ Windows, sorry.
 Once the daemon is installed, run it with `mountavfs` and everything
 "Should Just Work™".
 
-# dired-open
+<a name="dired-open" />
+## dired-open
 
 While emacs already has the `auto-mode-alist`, this is often
 insufficient.  Many times, you want to open media files, pdfs or
@@ -63,9 +89,11 @@ subdirectory under point if point is on the subdir line, see
 `dired-open-subdir`.
 
 If you write your own handler, make sure they do *not* throw errors
-but instead return nil if they can't proceed.
+but instead return nil if they can't proceed.  Please, don't forget to
+submit interesting handlers!
 
-# dired-rainbow
+<a name="dired-rainbow" />
+## dired-rainbow
 
 This package adds more customizable highlighting for files in dired
 listings.  The group `dired-faces` provides only nine faces and
