@@ -58,13 +58,16 @@
   :group 'dired-hacks
   :prefix "dired-rainbow-")
 
-(defcustom dired-rainbow-date-regexp "\\sw\\sw\\sw.......[0-9][0-9]"
+(defcustom dired-rainbow-date-regexp "\\sw\\sw\\sw....\\(?:[0-9][0-9]:[0-9][0-9]\\|.[0-9]\\{4\\}\\)"
   "A regexp matching the date/time in the dired listing.
 
 It is used to determine where the filename starts.  It should
 *not* match any characters after the last character of the
 timestamp.  It is assumed that the timestamp is preceded and
-followed by at least one space character."
+followed by at least one space character.  You should only use
+shy groups (prefixed with ?:) because the first group is used by
+the font-lock to determine what portion of the name should be
+colored."
   :type 'string
   :group 'dired-rainbow)
 
