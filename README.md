@@ -36,7 +36,64 @@ Set of utility functions used in all the `dired-hacks` packages.
 <a name="dired-filter" />
 ## dired-filter
 
-Adds ibuffer-like filtering to dired.
+The filtering system is designed after ibuffer: every dired
+buffer has associated "filter stack" where user can push
+filters (predicates).  These filters are by default
+logically "anded", meaning, only the files satsifying all the
+predicates are shown.
+
+Some filters take additional input from the user such as part of
+name, regexp or extension, other filters only use a predefined
+predicate such as "show only directories" or "omit dot files".
+
+In addition, there are two "metafilters", the `or` filter and the
+`not` filter.  These take other filters as arguments and change
+their logical interpretation.  The `or` filter takes the two
+filters on top of the stack, pops them and pushes a filter that
+matches files satisfying one or the other (or both) filters.  The
+`not` filter pops the top filter and pushes its logical negation.
+
+To enable or disable the filters, toggle minor mode
+`dired-filter-mode`.  Toggling this mode preserves the filter
+stack, so you can use it to quickly hide/unhide files filtered by
+the current filter setup.
+
+### Stack operations
+
+To remove the filter from the stack, use `dired-filter-pop` or
+`dired-filter-pop-all`
+
+To break a metafilter apart, you can use `dired-filter-decompose`
+to decompose the parts of the metafilter and push them back to
+the stack.
+
+You can transpose the filters on the top of the stack using
+`dired-filter-transpose`
+
+### Built-in filters
+
+Here's a list of built-in filters:
+
+* dired-filter-by-name
+* dired-filter-by-regexp
+* dired-filter-by-extension
+* dired-filter-by-dot-files
+* dired-filter-by-omit
+* dired-filter-by-predicate
+* dired-filter-by-file
+* dired-filter-by-directory
+* dired-filter-by-mode
+
+You can see their documentation by calling M-x `describe-function`.
+
+Specifically, `dired-filter-by-omit` removes the files that would
+be removed by `dired-omit-mode`, so you should not need to use
+both---in fact it is discouraged, as it would make the read-in
+slower.
+
+To define your own filters, you can use the macro
+`dired-filter-define`.  If you define some interesting filter,
+please consider contributing it to the upstream.
 
 <a name="dired-avfs" />
 ## dired-avfs
