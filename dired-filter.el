@@ -513,7 +513,7 @@ push all its constituents back on the stack."
       (dired-filter--expunge)
     (revert-buffer)))
 
-(add-hook 'dired-after-readin-hook 'dired-filter--expunge)
+(add-hook 'dired-after-readin-hook 'dired-filter--expunge t)
 
 (provide 'dired-filter)
 
