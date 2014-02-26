@@ -222,7 +222,7 @@ recursively."
       (dired-subtree-beginning)
       (save-excursion (dired-mark 1))
       (while (dired-subtree-next-sibling)
-        (save-excursion (dired-mark 1)))))))
+        (save-excursion (dired-mark 1))))))
 
 ;;; Insertion/deletion
 
