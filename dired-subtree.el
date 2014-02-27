@@ -177,6 +177,7 @@ depth---taht creates the prefix."
              (dired-next-line 1)
              (< depth (dired-subtree--get-depth)))))))
 
+
 (defmacro dired-subtree-with-subtree (&rest forms)
   "Run FORMS on each file in this subtree."
   (declare (debug (body)))
@@ -221,6 +222,8 @@ depth---taht creates the prefix."
     (dired-next-line 1)
     (let ((new-ov (dired-subtree--get-ov)))
       (cond
+       ((not (ignore-errors (dired-get-filename 'no-dir)))
+        nil)
        ((< (dired-subtree--get-depth current-ov)
            (dired-subtree--get-depth new-ov))
         (goto-char (overlay-end new-ov))
@@ -241,6 +244,10 @@ depth---taht creates the prefix."
     (dired-previous-line 1)
     (let ((new-ov (dired-subtree--get-ov)))
       (cond
+       ;; this will need better handlign if we have inserted
+       ;; subdirectories
+       ((not (ignore-errors (dired-get-filename 'no-dir)))
+        nil)
        ((< (dired-subtree--get-depth current-ov)
            (dired-subtree--get-depth new-ov))
         (goto-char (overlay-start new-ov))
