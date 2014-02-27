@@ -171,7 +171,7 @@ depth---taht creates the prefix."
 (defun dired-subtree--is-expanded-p ()
   "Return non-nil if directory under point is expanded."
   (save-excursion
-    (let ((file (dired-get-filename)))
+    (-when-let (file (ignore-errors (dired-get-filename)))
       (and (file-directory-p file)
            (let ((depth (dired-subtree--get-depth)))
              (dired-next-line 1)
