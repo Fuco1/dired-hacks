@@ -97,6 +97,11 @@ depth---taht creates the prefix."
   "Remove dired-subtree overlays OVS."
   (mapc 'dired-subtree--remove-overlay ovs))
 
+(defun dired-subtree--cleanup-overlays ()
+  "Remove the `nil' values from `dired-subtree-overlays'."
+  (setq dired-subtree-overlays
+        (--remove (not (overlay-buffer it)) dired-subtree-overlays)))
+
 (defun dired-subtree--get-all-ovs ()
   "Get all dired-subtree overlays in this buffer."
   (--filter (overlay-get it 'dired-subtree-depth) (overlays-in (point-min) (point-max))))
@@ -127,7 +132,7 @@ depth---taht creates the prefix."
 
 
 
-;;; this fixes revert
+;;; helpers
 (defun dired-subtree--after-readin ()
   "Insert the subtrees again after dired buffer has been reverted."
   (when dired-subtree-overlays
@@ -143,6 +148,28 @@ depth---taht creates the prefix."
           (dired-subtree-insert))))))
 
 (add-hook 'dired-after-readin-hook 'dired-subtree--after-readin)
+
+(defun dired-subtree--unmark ()
+  "Unmark a file without moving point."
+  (save-excursion (dired-unmark 1)))
+
+(defun dired-subtree--is-expanded-p ()
+  "Return non-nil if directory under point is expanded."
+  (save-excursion
+    (let ((file (dired-get-filename)))
+      (and (file-directory-p file)
+           (let ((depth (dired-subtree--get-depth)))
+             (dired-next-line 1)
+             (< depth (dired-subtree--get-depth)))))))
+
+(defmacro dired-subtree-with-subtree (&rest forms)
+  "Run FORMS on each file in this subtree."
+  (declare (debug (body)))
+  `(save-excursion
+     (dired-subtree-beginning)
+     ,@forms
+     (while (dired-subtree-next-sibling)
+       ,@forms)))
 
 
 ;;;; Interactive
@@ -258,6 +285,15 @@ recursively."
       (while (dired-subtree-next-sibling)
         (save-excursion (dired-mark 1))))))
 
+;;;###autoload
+(defun dired-subtree-unmark-subtree (&optional all)
+  "Unmark all files in this subtree.
+
+With prefix argument unmark all the files in subdirectories
+recursively."
+  (let ((dired-marker-char ? ))
+    (dired-subtree-mark-subtree all)))
+
 ;;; Insertion/deletion
 
 ;;;###autoload
@@ -318,11 +354,13 @@ recursively."
         (overlay-put ov 'dired-subtree-name dir-name)
         (overlay-put ov 'dired-subtree-parent parent)
         (overlay-put ov 'dired-subtree-depth depth)
+        (overlay-put ov 'evaporate t)
         (push ov dired-subtree-overlays))
       (goto-char beg)
       (dired-move-to-filename))
     (read-only-mode 1)))
 
+;;;###autoload
 (defun dired-subtree-remove ()
   "Remove subtree at point."
   (interactive)
@@ -336,28 +374,47 @@ recursively."
                      (overlay-end ov))
       (dired-subtree--remove-overlays ovs))))
 
-(defun dired-subtree-only-this-file ()
-  "Remove all the siblings on the route from this file to the top-most directory."
-  (interactive)
+(defun dired-subtree--filter-up (keep-dir kill-siblings)
   (save-excursion
     (let (ov)
-      (while (setq ov (dired-subtree--get-ov))
-        (dired-subtree-mark-subtree)
-        (save-excursion (dired-unmark 1))
-        (dired-do-kill-lines)
-        (dired-subtree-up)))))
+      (save-excursion
+        (while (dired-subtree-up))
+        (dired-next-line 1)
+        (dired-subtree-mark-subtree t))
+      (if keep-dir
+          (dired-subtree-unmark-subtree)
+        (dired-subtree--unmark))
+      (while (and (dired-subtree-up)
+                  (> (dired-subtree--get-depth) 0))
+        (if (not arg)
+            (dired-subtree--unmark)
+          (dired-subtree--unmark)
+          (let ((here (point)))
+            (dired-subtree-with-subtree
+             (when (and (dired-subtree--is-expanded-p)
+                        (/= (point) here))
+               (dired-subtree--unmark)
+               (save-excursion
+                 (dired-next-line 1)
+                 (dired-subtree-unmark-subtree t)))))))
+      (dired-do-kill-lines)
+      (dired-subtree--cleanup-overlays))))
 
-(defun dired-subtree-only-this-directory ()
-  "Remove all the siblings on the route from this directory to the top-most directory."
-  (interactive)
-  (save-excursion
-    (dired-subtree-up)
-    (let (ov)
-      (while (setq ov (dired-subtree--get-ov))
-        (dired-subtree-mark-subtree)
-        (save-excursion (dired-unmark 1))
-        (dired-do-kill-lines)
-        (dired-subtree-up)))))
+;;;###autoload
+(defun dired-subtree-only-this-file (&optional arg)
+  "Remove all the siblings on the route from this file to the top-most directory.
+
+With ARG non-nil, do not remove expanded directories in parents."
+  (interactive "P")
+  (dired-subtree--filter-up nil arg))
+
+;;;###autoload
+(defun dired-subtree-only-this-directory (&optional arg)
+  "Remove all the siblings on the route from this directory to the top-most directory.
+
+With ARG non-nil, do not remove expanded directories in parents."
+  (interactive "P")
+  (dired-subtree--filter-up t arg))
 
 
 ;;; Here we redefine a couple of functions from dired.el to make them
