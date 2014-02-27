@@ -82,6 +82,21 @@ depth---taht creates the prefix."
   "Subtree overlays in this buffer.")
 (make-variable-buffer-local 'dired-subtree-overlays)
 
+
+;;; Overlay manipulation
+;; Maybe we should abstract the overlay-foo into some subtree
+;; functions instead!!!
+
+(defun dired-subtree--remove-overlay (ov)
+  "Remove dired-subtree overlay OV."
+  (setq dired-subtree-overlays
+        (--remove (equal it ov) dired-subtree-overlays))
+  (delete-overlay ov))
+
+(defun dired-subtree--remove-overlays (ovs)
+  "Remove dired-subtree overlays OVS."
+  (mapc 'dired-subtree--remove-overlay ovs))
+
 (defun dired-subtree--get-all-ovs ()
   "Get all dired-subtree overlays in this buffer."
   (--filter (overlay-get it 'dired-subtree-depth) (overlays-in (point-min) (point-max))))
@@ -90,6 +105,13 @@ depth---taht creates the prefix."
   "Get all dired-subtree overlays at point P."
   (setq p (or p (point)))
   (--filter (overlay-get it 'dired-subtree-depth) (overlays-at (point))))
+
+(defun dired-subtree--get-ovs-in (beg end)
+  "Get all dired-subtree overlays between BEG and END."
+  (--filter (and (overlay-get it 'dired-subtree-depth)
+                 (>= (overlay-start it) beg)
+                 (<= (overlay-end it) end))
+            (overlays-in (point-min) (point-max))))
 
 (defun dired-subtree--get-ov (&optional p)
   "Get the parent subtree overlay at point."
@@ -102,6 +124,9 @@ depth---taht creates the prefix."
   "Get subtree depth."
   (or (and ov (overlay-get ov 'dired-subtree-depth)) 0))
 
+
+
+;;; this fixes revert
 (defun dired-subtree--after-readin ()
   "Insert the subtrees again after dired buffer has been reverted."
   (when dired-subtree-overlays
@@ -120,9 +145,6 @@ depth---taht creates the prefix."
 
 
 ;;;; Interactive
-;; Maybe we should abstract the overlay-foo into some subtree
-;; functions instead!!!
-
 ;;; Navigation
 
 ;; make the arguments actually do something
@@ -300,20 +322,18 @@ recursively."
       (dired-move-to-filename))
     (read-only-mode 1)))
 
-;; TODO: remove children as well!
 (defun dired-subtree-remove ()
   "Remove subtree at point."
   (interactive)
-  (-when-let (ov (dired-subtree--get-ov))
+  (-when-let* ((ov (dired-subtree--get-ov))
+               (ovs (dired-subtree--get-ovs-in
+                     (overlay-start ov)
+                     (overlay-end ov))))
     (let ((inhibit-read-only t))
-      (setq dired-subtree-overlays
-            (--remove (= (overlay-start it)
-                         (overlay-start ov))
-                      dired-subtree-overlays))
       (dired-subtree-up)
       (delete-region (overlay-start ov)
                      (overlay-end ov))
-      (delete-overlay ov))))
+      (dired-subtree--remove-overlays ovs))))
 
 (defun dired-subtree-only-this-file ()
   "Remove all the siblings on the route from this file to the top-most directory."
