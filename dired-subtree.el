@@ -120,8 +120,9 @@ depth---taht creates the prefix."
                   (overlay-get other 'dired-subtree-depth))
                (dired-subtree--get-all-ovs-at-point p))))
 
-(defun dired-subtree--get-depth (ov)
+(defun dired-subtree--get-depth (&optional ov)
   "Get subtree depth."
+  (setq ov (or ov (dired-subtree--get-ov)))
   (or (and ov (overlay-get ov 'dired-subtree-depth)) 0))
 
 
