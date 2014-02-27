@@ -39,8 +39,19 @@
 (defcustom dired-subtree-line-prefix "  "
   "A prefix put into each nested subtree.
 
-The prefix is repeated \"depth\" times."
-  :type 'string
+The prefix is repeated \"depth\" times.
+
+Alternatively, it can be a function taking one argument---the
+depth---taht creates the prefix."
+  :type '(choice string function)
+  :group 'dired-subtree)
+
+(defcustom dired-subtree-line-prefix-face 'parents
+  "Specifies how the prefix is fontified."
+  :type '(radio
+          (const :tag "No face applied" nil)
+          (const :tag "Inherit from current subtree" subtree)
+          (const :tag "Inherit from all parents" parents))
   :group 'dired-subtree)
 
 (defcustom dired-subtree-use-backgrounds t
@@ -222,7 +233,7 @@ recursively."
       (dired-subtree-beginning)
       (save-excursion (dired-mark 1))
       (while (dired-subtree-next-sibling)
-        (save-excursion (dired-mark 1)))))))
+        (save-excursion (dired-mark 1))))))
 
 ;;; Insertion/deletion
 
@@ -251,10 +262,36 @@ recursively."
              (ov (make-overlay beg end))
              (parent (dired-subtree--get-ov (1- beg)))
              (depth (or (and parent (1+ (overlay-get parent 'dired-subtree-depth)))
-                        1)))
+                        1))
+             (face (intern (format "dired-subtree-depth-%d-face" depth))))
         (when dired-subtree-use-backgrounds
-          (overlay-put ov 'face (intern (format "dired-subtree-depth-%d-face" depth))))
-        (overlay-put ov 'line-prefix (apply 'concat (-repeat depth "  ")))
+          (overlay-put ov 'face face))
+        ;; refactor this to some function
+        (overlay-put ov 'line-prefix
+                     (if (stringp dired-subtree-line-prefix)
+                         (if (not dired-subtree-use-backgrounds)
+                             (apply 'concat (-repeat depth dired-subtree-line-prefix))
+                           (cond
+                            ((eq nil dired-subtree-line-prefix-face)
+                             (apply 'concat
+                                    (-repeat depth dired-subtree-line-prefix)))
+                            ((eq 'subtree dired-subtree-line-prefix-face)
+                             (concat
+                              dired-subtree-line-prefix
+                              (propertize
+                               (apply 'concat
+                                      (-repeat (1- depth) dired-subtree-line-prefix))
+                               'face face)))
+                            ((eq 'parents dired-subtree-line-prefix-face)
+                             (concat
+                              dired-subtree-line-prefix
+                              (apply 'concat
+                                     (--map
+                                      (propertize dired-subtree-line-prefix
+                                                  'face
+                                                  (intern (format "dired-subtree-depth-%d-face" it)))
+                                      (number-sequence 1 (1- depth))))))))
+                       (funcall dired-subtree-line-prefix depth)))
         (overlay-put ov 'dired-subtree-name dir-name)
         (overlay-put ov 'dired-subtree-parent parent)
         (overlay-put ov 'dired-subtree-depth depth)
