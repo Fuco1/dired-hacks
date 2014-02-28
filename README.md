@@ -58,6 +58,13 @@ To enable or disable the filters, toggle minor mode
 stack, so you can use it to quickly hide/unhide files filtered by
 the current filter setup.
 
+All the provided interactive functions are available from
+`dired-filter-map`.  You can customize `dired-filter-prefix` to set a
+prefix for this map or bind it manually to a prefix of your choice
+using:
+
+    (define-key dired-mode-map (kbd "some-key") dired-filter-map)
+
 ### Stack operations
 
 To remove the filter from the stack, use `dired-filter-pop` or
