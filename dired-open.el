@@ -152,7 +152,8 @@ string as well."
   (interactive)
   (let ((file (ignore-errors (dired-get-file-for-visit)))
         process)
-    (when file
+    (when (and file
+               (not (file-directory-p file)))
       (--each-while dired-open-extensions (not process)
         (when (string-match-p (concat "\\." (regexp-quote (car it)) "\\'") file)
           (setq process (dired-open--start-process file (cdr it)))))
@@ -164,7 +165,8 @@ string as well."
   (interactive)
   (let ((file (ignore-errors (dired-get-file-for-visit)))
         process)
-    (when file
+    (when (and file
+               (not (file-directory-p file)))
       (--each-while dired-guess-shell-alist-user (not process)
         (when (string-match-p (car it) file)
           (setq process (dired-open--start-process file (eval (cadr it)))))))
