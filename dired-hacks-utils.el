@@ -72,6 +72,44 @@ The matching is done using `string-match-p'."
   (ignore-errors
     (--when-let (dired-get-filename 'no-dir)
       (file-directory-p it))))
+
+
+;;; Interactive
+;; TODO: add wrap-around option
+(defun dired-hacks-next-file (&optional arg)
+  "Move point to the next file.
+
+Optional prefix ARG says how many lines to move; default is one
+line."
+  (interactive "p")
+  (unless arg (setq arg 1))
+  (if (< arg 0)
+      (dired-hacks-previous-file (- arg))
+    (--dotimes arg
+      (forward-line)
+      (while (and (not (dired-utils-is-file-p))
+                  (= (forward-line) 0)))
+      (when (= (point) (point-max))
+        (forward-line -1)))
+    (dired-move-to-filename)))
+
+(defun dired-hacks-previous-file (&optional arg)
+  "Move point to the previous file.
+
+Optional prefix ARG says how many lines to move; default is one
+line."
+  (interactive "p")
+  (unless arg (setq arg 1))
+  (if (< arg 0)
+      (dired-hacks-next-file (- arg))
+    (--dotimes arg
+      (forward-line -1)
+      (while (and (not (dired-utils-is-file-p))
+                  (= (forward-line -1) 0)))
+      (when (= (point) (point-min))
+        (dired-hacks-next-file)))
+    (dired-move-to-filename)))
+
 (provide 'dired-hacks-utils)
 
 ;;; dired-hacks-utils.el ends here
