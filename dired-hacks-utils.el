@@ -63,6 +63,17 @@ The matching is done using `string-match-p'."
         (setq match it)))
     match))
 
+(defun dired-utils-match-filename-extension (filename alist)
+  "Match FILENAME against each car in ALIST and return first matched cons.
+
+Each car in ALIST is a string representing file extension
+*without* the delimiting dot."
+  (let (done)
+    (--each-while alist (not done)
+      (when (string-match-p (concat "\\." (regexp-quote (car it)) "\\'") file)
+        (setq done it)))
+    done))
+
 
 ;;; Predicates
 (defun dired-utils-is-file-p ()
