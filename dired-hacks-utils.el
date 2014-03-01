@@ -61,6 +61,17 @@ The matching is done using `string-match-p'."
         (setq match it)))
     match))
 
+
+;;; Predicates
+(defun dired-utils-is-file-p ()
+  "Return non-nil if the line at point is a file or a directory."
+  (ignore-errors (dired-get-filename 'no-dir)))
+
+(defun dired-utils-is-dir-p ()
+  "Return non-nil if the line at point is a directory."
+  (ignore-errors
+    (--when-let (dired-get-filename 'no-dir)
+      (file-directory-p it))))
 (provide 'dired-hacks-utils)
 
 ;;; dired-hacks-utils.el ends here

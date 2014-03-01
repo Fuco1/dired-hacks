@@ -222,7 +222,7 @@ depth---taht creates the prefix."
     (dired-next-line 1)
     (let ((new-ov (dired-subtree--get-ov)))
       (cond
-       ((not (ignore-errors (dired-get-filename 'no-dir)))
+       ((not (dired-utils-is-file-p))
         nil)
        ((< (dired-subtree--get-depth current-ov)
            (dired-subtree--get-depth new-ov))
@@ -246,7 +246,7 @@ depth---taht creates the prefix."
       (cond
        ;; this will need better handlign if we have inserted
        ;; subdirectories
-       ((not (ignore-errors (dired-get-filename 'no-dir)))
+       ((not (dired-utils-is-file-p))
         nil)
        ((< (dired-subtree--get-depth current-ov)
            (dired-subtree--get-depth new-ov))
