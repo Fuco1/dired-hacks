@@ -32,16 +32,21 @@
 
 ;; This package adds a mechanism to add "hooks" to `dired-find-file'
 ;; that will run before emacs tries its own mechanisms to open the
-;; file, thus enabling you to launch other application and suspend the
-;; default behaviour.
+;; file, thus enabling you to launch other application or code and
+;; suspend the default behaviour.
 
 ;; By default, two additional methods are enabled,
 ;; `dired-open-by-extension' and `dired-open-subdir'.
 
-;; This package also provide two other convenience hooks: first tries
-;; to open the file using `xdg-open', the other by launching
-;; applications from `dired-guess-shell-alist-user'.  These are not
-;; used by default.
+;; This package also provides other convenient hooks:
+;;
+;; * `dired-open-xdg' - try to open the file using `xdg-open'
+;; * `dired-open-guess-shell-alist' - try to open the file by
+;;   launching applications from `dired-guess-shell-alist-user'
+;; * `dired-open-call-function-by-extension' - call an elisp function
+;;   based on extension.
+;;
+;; These are not used by default.
 
 ;; You can customize the list of functions to try by customizing
 ;; `dired-open-functions'.
@@ -88,6 +93,15 @@ The filename is appended after the program."
   :type '(alist
           :key-type (string :tag "Extension")
           :value-type (string :tag "Program"))
+  :group 'dired-open)
+
+(defcustom dired-open-extensions-elisp nil
+  "Alist of extensions mapping to an elisp function to be called.
+
+The filename is passed as the only argument to the function."
+  :type '(alist
+          :key-type (string :tag "Extension")
+          :value-type (function :tag "Function"))
   :group 'dired-open)
 
 (defcustom dired-open-use-nohup t
@@ -137,7 +151,7 @@ string as well."
     process))
 
 
-;; file opening procedures
+;;; file opening procedures
 (defun dired-open-xdg ()
   "Try to run `xdg-open' to open the file under point."
   (interactive)
@@ -148,7 +162,10 @@ string as well."
     nil))
 
 (defun dired-open-by-extension ()
-  "Open a file according to its extension."
+  "Open a file according to its extension.
+
+The mappings from extensions to applications is specified by
+`dired-open-extensions'."
   (interactive)
   (let ((file (ignore-errors (dired-get-file-for-visit)))
         process)
@@ -172,8 +189,20 @@ string as well."
           (setq process (dired-open--start-process file (eval (cadr it)))))))
     process))
 
+(defun dired-open-call-function-by-extension ()
+  "Call an elisp function on file according to its extension.
+
+The mappings from extensions to applications is specified by
+`dired-open-extensions-elisp'."
+  (interactive)
+  (-when-let (file (ignore-errors (dired-get-filename)))
+    (when (not (file-directory-p file))
+      (--when-let (dired-utils-match-filename-extension file dired-open-extensions-elisp)
+        (funcall (cdr it) file)
+        it))))
+
 
-;; non-file opening procedures
+;;; non-file opening procedures
 (defun dired-open-subdir ()
   "If point is on a subdir line, open the directory under point
 in a new buffer.
@@ -192,7 +221,7 @@ the directory /home/user is opened in new buffer."
         (find-file path)))))
 
 
-;; main
+;;; main
 
 ;;;###autoload
 (defun dired-open-file (&optional arg)
