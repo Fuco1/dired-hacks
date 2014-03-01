@@ -417,11 +417,11 @@ of `auto-mode-alist'."
                        (-map 'symbol-name (-uniq (-remove 'listp (-map 'cdr auto-mode-alist))))
                        nil nil nil nil
                        (-when-let* ((file (ignore-errors (dired-get-filename)))
-                                    (mode (cdr (dired-utils-match-filename-alist
+                                    (mode (cdr (dired-utils-match-filename-regexp
                                                 file auto-mode-alist))))
                          (symbol-name mode))))))
                           `',mm))
-  (-when-let (mm (cdr (dired-utils-match-filename-alist file-name auto-mode-alist)))
+  (-when-let (mm (cdr (dired-utils-match-filename-regexp file-name auto-mode-alist)))
     (eq mm qualifier)))
 
 ;;;###autoload

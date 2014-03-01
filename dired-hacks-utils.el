@@ -51,8 +51,10 @@ Should be absolute file name matched against
         (setq stop t)
         (dired-move-to-filename)))))
 
-(defun dired-utils-match-filename-alist (filename alist)
+(defun dired-utils-match-filename-regexp (filename alist)
   "Match FILENAME against each car in ALIST and return first matched cons.
+
+Each car in ALIST is a regular expression.
 
 The matching is done using `string-match-p'."
   (let (match)
