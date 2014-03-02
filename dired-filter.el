@@ -162,6 +162,7 @@ Has the same format as `mode-line-format'."
   :group 'dired-filter)
 (put 'dired-filter-header-line-format 'risky-local-variable t)
 
+;;;###autoload
 (defvar dired-filter-map
   (let ((map (make-sparse-keymap)))
     (define-key map "n" 'dired-filter-by-name)
