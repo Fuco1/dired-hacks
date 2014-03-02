@@ -106,6 +106,9 @@
 (require 'dired-hacks-utils)
 (require 'dash)
 
+;; silence the compiler warning
+(defvar dired-filter-mode nil)
+
 (defvar dired-filter-marker-char ?\x3FF
   "Temporary marker used by Dired-Filter.")
 

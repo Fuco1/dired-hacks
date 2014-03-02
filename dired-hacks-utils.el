@@ -32,6 +32,7 @@
 ;;; Code:
 
 (require 'dash)
+(require 'dired)
 
 (defgroup dired-hacks ()
   "Collection of useful dired additions."
