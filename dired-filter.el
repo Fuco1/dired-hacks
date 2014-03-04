@@ -341,6 +341,8 @@ argument from user.
          (interactive (list ,reader))
          (dired-filter--push (cons ',name qualifier))
          (message "%s" (format ,(concat (format "Filter by %s added: " description) " %s") qualifier))
+         (when (not dired-filter-mode)
+           (dired-filter-mode 1))
          (dired-filter--update))
        (push (list ',name ,description ',qualifier-description
                    ,remove ',(if (= (length body) 1)
@@ -517,7 +519,12 @@ push all its constituents back on the stack."
 ;; mode stuff
 ;;;###autoload
 (define-minor-mode dired-filter-mode
-  "Toggle filtering of files in Dired."
+  "Toggle filtering of files in Dired.
+
+When you toggle the filter mode, the filter stack and all other
+state is preserved, except the display is not altered.  This
+allows you to quickly toggle the active filter without need of
+popping the stack and then re-inserting the filters again."
   :group 'dired-filter
   :lighter " Filter"
   (if dired-filter-mode
