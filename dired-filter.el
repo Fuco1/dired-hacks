@@ -140,6 +140,26 @@ By default, `dired-filter-by-omit' is active."
   :group 'dired-filter)
 (make-variable-buffer-local 'dired-filter-stack)
 
+(defcustom dired-filter-save-with-custom t
+  "When non-nil, use Custom to save interactively changed variables.
+
+Currently, this only applies to `dired-filter-saved-filters'."
+  :type 'boolean
+  :group 'dired-filter)
+
+(define-widget 'dired-filter 'lazy
+  "A dired filter type."
+  :tag "Filter"
+  :type '(choice (sexp :tag "Filter expression")
+                 (cons :tag "Logical OR of filters" (const or) (repeat dired-filter))
+                 (list :tag "Logical negation of a filter" (const not) dired-filter)))
+
+(defcustom dired-filter-saved-filters nil
+  "An alist of saved named filter."
+  :type '(repeat (cons (string :tag "Filter name")
+                       (repeat :tag "Filters" dired-filter)))
+  :group 'dired-filter)
+
 (defcustom dired-filter-verbose t
   "If non-nil, print debug messages."
   :type 'boolean
@@ -181,6 +201,11 @@ Has the same format as `mode-line-format'."
     (define-key map (kbd "TAB") 'dired-filter-transpose)
     (define-key map "p" 'dired-filter-pop)
     (define-key map "/" 'dired-filter-pop-all)
+
+    (define-key map "S" 'dired-filter-save-filters)
+    (define-key map "D" 'dired-filter-delete-saved-filters)
+    (define-key map "A" 'dired-filter-add-saved-filters)
+    (define-key map "L" 'dired-filter-load-saved-filters)
     map)
   "Keymap used for `dired-filter-mode'.")
 
@@ -203,6 +228,8 @@ Has the same format as `mode-line-format'."
 
 (defun dired-filter--make-filter-1 (stack)
   (cond
+   ((stringp (car stack))
+    `(and ,@(mapcar 'dired-filter--make-filter-1 (cdr stack))))
    ((eq (car stack) 'or)
     `(or ,@(mapcar 'dired-filter--make-filter-1 (cdr stack))))
    ((eq (car stack) 'not)
@@ -234,6 +261,8 @@ listing."
 (defun dired-filter--describe-filters-1 (stack)
   "Return a string describing `dired-filter-stack'."
   (cond
+   ((stringp (car stack))
+    (format "[Saved filter: %s]" (car stack)))
    ((eq (car stack) 'or)
     (concat "[OR " (mapconcat 'dired-filter--describe-filters-1 (cdr stack) " ") "]"))
    ((eq (car stack) 'not)
@@ -514,6 +543,65 @@ push all its constituents back on the stack."
   (interactive)
   (setq dired-filter-stack nil)
   (dired-filter--update))
+
+(defun dired-filter--maybe-save-stuff ()
+  (when dired-filter-save-with-custom
+    (if (not (fboundp 'customize-save-variable))
+        (message "Not saved permanently: Customize not available")
+      (customize-save-variable 'dired-filter-saved-filters
+                               dired-filter-saved-filters))))
+
+;;;###autoload
+(defun dired-filter-save-filters (name filters)
+  "Save the the FILTERS in this dired buffer under a NAME for later use."
+  (interactive
+   (if (not dired-filter-stack)
+       (error "No filters currently in effect")
+     (list
+      (read-from-minibuffer "Save current filters as: ")
+      dired-filter-stack)))
+  (--if-let (assoc name dired-filter-saved-filters)
+      (when (y-or-n-p "Filter with such name already exist; overwrite? ")
+        (setcdr it filters))
+    (push (cons name filters) dired-filter-saved-filters))
+  (dired-filter--maybe-save-stuff))
+
+(defun dired-filters--read-saved-filter-name ()
+  "Read saved filter name."
+  (list
+   (if (not dired-filter-saved-filters)
+       (error "No saved filters")
+     (completing-read "Delete saved filters: "
+                      dired-filter-saved-filters nil t nil nil
+                      (caar dired-filter-saved-filters)))))
+
+;;;###autoload
+(defun dired-filter-delete-saved-filters (name)
+  "Delete saved filters with NAME from `dired-filter-saved-filters'."
+  (interactive (dired-filters--read-saved-filter-name))
+  (setq dired-filter-saved-filters
+        (--remove (equal name (car it)) dired-filter-saved-filters))
+  (dired-filter--maybe-save-stuff))
+
+;;;###autoload
+(defun dired-filter-load-saved-filters (name)
+  "Set this buffer's filters to filters with NAME from `dired-filter-saved-filters'."
+  (interactive (dired-filters--read-saved-filter-name))
+  (--when-let (assoc name dired-filter-saved-filters)
+    (setq dired-filter-stack (list it))
+    (unless dired-filter-mode
+      (dired-filter-mode 1))
+    (dired-filter--update)))
+
+;;;###autoload
+(defun dired-filter-add-saved-filters (name)
+  "Add to this buffer's filters filters with NAME from `dired-filter-saved-filters'."
+  (interactive (dired-filters--read-saved-filter-name))
+  (--when-let (assoc name dired-filter-saved-filters)
+    (push it dired-filter-stack)
+    (unless dired-filter-mode
+      (dired-filter-mode 1))
+    (dired-filter--update)))
 
 
 ;; mode stuff
