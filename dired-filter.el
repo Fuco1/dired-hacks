@@ -241,6 +241,8 @@ Has the same format as `mode-line-format'."
                          ;; recompute the filter regexp
                          ((eq (car stack) 'omit)
                           (dired-omit-regexp))
+                         ((eq (car stack) 'extension)
+                          (concat "\\." (cdr stack) "\\'"))
                          (t (cdr stack)))))
         (if qualifier
             `(let ((qualifier ,qualifier))
@@ -405,8 +407,15 @@ argument from user.
 (dired-filter-define extension
     "Toggle current view to files with extension matching QUALIFIER."
   (:description "extension"
-   :qualifier-description (substring qualifier 2 (- (length qualifier) 2))
-   :reader (concat "\\." (regexp-quote (read-from-minibuffer "Extension: " )) "\\'"))
+   :reader (regexp-quote
+            (let* ((file (ignore-errors (dired-get-filename)))
+                   (ext (and file
+                             (when (string-match "\\.\\(.*?\\)\\'" file)
+                               (match-string 1 file)))))
+              (completing-read
+               (format "Extension: ")
+               (list ext)
+               nil nil nil nil ext))))
   (string-match qualifier file-name))
 
 ;;;###autoload (autoload 'dired-filter-by-omit "dired-filter")
