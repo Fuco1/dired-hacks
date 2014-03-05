@@ -126,8 +126,14 @@ depth---taht creates the prefix."
   (setq p (or p (point)))
   (--filter (overlay-get it 'dired-subtree-depth) (overlays-at (point))))
 
-(defun dired-subtree--get-ovs-in (beg end)
-  "Get all dired-subtree overlays between BEG and END."
+(defun dired-subtree--get-ovs-in (&optional beg end)
+  "Get all dired-subtree overlays between BEG and END.
+
+BEG and END default to the region spanned by overlay at point."
+  (when (not beg)
+    (let ((ov (dired-subtree--get-ov)))
+      (setq beg (overlay-start ov))
+      (setq end (overlay-end ov))))
   (--filter (and (overlay-get it 'dired-subtree-depth)
                  (>= (overlay-start it) beg)
                  (<= (overlay-end it) end))
