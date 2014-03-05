@@ -157,19 +157,20 @@ BEG and END default to the region spanned by overlay at point."
 (defvar dired-subtree-preserve-properties '(dired-subtree-filter)
   "Properties that should be preserved between read-ins.")
 
-(defun dired-subtree--after-readin ()
-  "Insert the subtrees again after dired buffer has been reverted."
-  (when dired-subtree-overlays
+(defun dired-subtree--after-readin (&optional subtrees)
+  "Insert the SUBTREES again after dired buffer has been reverted.
+
+If no SUBTREES are specified, use `dired-subtree-overlays'."
+  (-when-let (subtrees-to-process (or subtrees dired-subtree-overlays))
     (let* ((ovs-by-depth (--sort (< (car it) (car other))
                                  (--group-by (overlay-get it 'dired-subtree-depth)
-                                             dired-subtree-overlays)))
+                                             subtrees-to-process)))
            (sorted-ovs (--map (cons (car it)
                                     (--map (cons (overlay-get it 'dired-subtree-name)
                                                  (-map (lambda (x) (cons x (overlay-get it x)))
                                                        dired-subtree-preserve-properties)) (cdr it)))
                               ovs-by-depth)))
-      (--map (delete-overlay it) dired-subtree-overlays)
-      (setq dired-subtree-overlays nil)
+      (dired-subtree--remove-overlays subtrees-to-process)
       (--each sorted-ovs
         (--each (cdr it)
           (dired-utils-goto-line (car it))
@@ -343,6 +344,21 @@ recursively."
     (dired-subtree-mark-subtree all)))
 
 ;;; Insertion/deletion
+(defun dired-subtree--revert ()
+  "Revert the subtree.
+
+This means reinserting the content of this subtree and all its
+children."
+  (let ((inhibit-read-only t)
+        (file-name (ignore-errors (dired-get-filename))))
+    (-when-let* ((ov (dired-subtree--get-ov))
+                 (ovs (dired-subtree--get-ovs-in)))
+      (dired-subtree-up)
+      (delete-region (overlay-start ov) (overlay-end ov))
+      (dired-subtree--after-readin ovs)
+      (when file-name
+        (dired-utils-goto-line file-name)))))
+
 (defun dired-subtree--readin (dir-name)
   "Read in the directory.
 
