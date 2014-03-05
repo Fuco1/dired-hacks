@@ -393,14 +393,14 @@ argument from user.
 (dired-filter-define name
     "Toggle current view to files matching QUALIFIER."
   (:description "name"
-   :reader (regexp-quote (read-from-minibuffer "Pattern: " )))
+   :reader (regexp-quote (read-string "Pattern: ")))
   (string-match qualifier file-name))
 
 ;;;###autoload (autoload 'dired-filter-by-regexp "dired-filter")
 (dired-filter-define regexp
     "Toggle current view to files matching QUALIFIER as a regular expression."
   (:description "regexp"
-   :reader (read-from-minibuffer "Regexp: " ))
+   :reader (read-string "Regexp: " ))
   (string-match qualifier file-name))
 
 ;;;###autoload (autoload 'dired-filter-by-extension "dired-filter")
@@ -567,7 +567,7 @@ push all its constituents back on the stack."
    (if (not dired-filter-stack)
        (error "No filters currently in effect")
      (list
-      (read-from-minibuffer "Save current filters as: ")
+      (read-string "Save current filters as: ")
       dired-filter-stack)))
   (--if-let (assoc name dired-filter-saved-filters)
       (when (y-or-n-p "Filter with such name already exist; overwrite? ")
