@@ -489,6 +489,64 @@ With ARG non-nil, do not remove expanded directories in parents."
   (interactive "P")
   (dired-subtree--filter-up t arg))
 
+;;; filtering
+(defun dired-subtree--filter-update-bs (ov)
+  "Update the local filter list.
+
+This function assumes that `dired-filter-stack' is dynamically
+bound to relevant value."
+  (let* ((filt (dired-filter--describe-filters))
+         (before-str (if (equal filt "") nil (concat "  Local filters: " filt "\n"))))
+    (overlay-put ov 'before-string before-str)))
+
+(defun dired-subtree--filter-subtree (ov)
+  "Run the filter for this subtree.
+
+It is only safe to call this from readin.
+
+This depends on `dired-filter' package."
+  (when (featurep 'dired-filter)
+    (let ((dired-filter-stack (overlay-get ov 'dired-subtree-filter)))
+      (save-restriction
+        (widen)
+        (dired-subtree-narrow)
+        (dired-filter--expunge)
+        (dired-subtree--filter-update-bs ov)))))
+
+;;;###autoload
+(defun dired-subtree-apply-filter ()
+  "Push a local filter for this subtree.
+
+This depends on `dired-filter' package.
+
+It works exactly the same as global dired filters, only
+restricted to a subtree.  The global filter is also applied to
+the subtree.  The filter action is read from `dired-filter-map'."
+  (interactive)
+  (when (featurep 'dired-filter)
+    (-when-let (ov (dired-subtree--get-ov))
+      (let ((dired-filter-stack (overlay-get ov 'dired-subtree-filter))
+            (glob (current-global-map))
+            (loc (current-local-map))
+            cmd)
+        (flet ((dired-filter--update
+                ()
+                (save-restriction
+                  (overlay-put ov 'dired-subtree-filter dired-filter-stack)
+                  (widen)
+                  (dired-subtree--revert)
+                  (dired-subtree-narrow)
+                  (dired-filter--expunge)
+                  (dired-subtree--filter-update-bs ov))))
+          (unwind-protect
+              (progn
+                (use-global-map dired-filter-map)
+                (use-local-map nil)
+                (setq cmd (key-binding (read-key-sequence "Choose filter action: "))))
+            (use-global-map glob)
+            (use-local-map loc))
+          (call-interactively cmd))))))
+
 
 ;;; Here we redefine a couple of functions from dired.el to make them
 ;;; subtree-aware
