@@ -102,10 +102,12 @@ line."
     (--dotimes arg
       (forward-line)
       (while (and (not (dired-utils-is-file-p))
-                  (= (forward-line) 0)))
-      (when (= (point) (point-max))
-        (forward-line -1)))
-    (dired-move-to-filename)))
+                  (= (forward-line) 0))))
+    (if (not (= (point) (point-max)))
+        (dired-move-to-filename)
+      (forward-line -1)
+      (dired-move-to-filename)
+      nil)))
 
 (defun dired-hacks-previous-file (&optional arg)
   "Move point to the previous file.
@@ -119,10 +121,11 @@ line."
     (--dotimes arg
       (forward-line -1)
       (while (and (not (dired-utils-is-file-p))
-                  (= (forward-line -1) 0)))
-      (when (= (point) (point-min))
-        (dired-hacks-next-file)))
-    (dired-move-to-filename)))
+                  (= (forward-line -1) 0))))
+    (if (not (= (point) (point-min)))
+        (dired-move-to-filename)
+      (dired-hacks-next-file)
+      nil)))
 
 (provide 'dired-hacks-utils)
 
