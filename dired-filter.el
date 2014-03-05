@@ -242,7 +242,7 @@ Has the same format as `mode-line-format'."
                          ((eq (car stack) 'omit)
                           (dired-omit-regexp))
                          ((eq (car stack) 'extension)
-                          (concat "\\." (cdr stack) "\\'"))
+                          (concat "\\." (regexp-quote (cdr stack)) "\\'"))
                          (t (cdr stack)))))
         (if qualifier
             `(let ((qualifier ,qualifier))
@@ -322,6 +322,18 @@ from the listing."
        (looking-at " ")
        (not ,filter)))
     nil))
+
+(defun dired-filter--get-all-files (&optional localp)
+  "Return all files in this dired buffer as a list.
+
+LOCALP has same semantics as in `dired-get-filename'."
+  (save-excursion
+    (goto-char (point-min))
+    (let (r)
+      (while (= 0 (forward-line))
+        (--when-let (ignore-errors (dired-get-filename localp))
+          (push it r)))
+      (nreverse r))))
 
 
 ;; ui
@@ -407,15 +419,17 @@ argument from user.
 (dired-filter-define extension
     "Toggle current view to files with extension matching QUALIFIER."
   (:description "extension"
-   :reader (regexp-quote
-            (let* ((file (ignore-errors (dired-get-filename)))
-                   (ext (and file
-                             (when (string-match "\\.\\(.*?\\)\\'" file)
-                               (match-string 1 file)))))
-              (completing-read
-               (format "Extension: ")
-               (list ext)
-               nil nil nil nil ext))))
+   :reader (let* ((file (ignore-errors (dired-get-filename)))
+                  (ext (and file (file-name-extension file)))
+                  (exts
+                   (->> (dired-filter--get-all-files 'no-dir)
+                     (--group-by (file-name-extension it))
+                     (-map 'car)
+                     (-remove 'not))))
+             (completing-read
+              (format "Extension: ")
+              exts
+              nil nil nil nil ext)))
   (string-match qualifier file-name))
 
 ;;;###autoload (autoload 'dired-filter-by-omit "dired-filter")
