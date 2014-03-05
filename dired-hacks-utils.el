@@ -84,7 +84,7 @@ Each car in ALIST is a string representing file extension
 (defun dired-utils-is-dir-p ()
   "Return non-nil if the line at point is a directory."
   (ignore-errors
-    (--when-let (dired-get-filename 'no-dir)
+    (--when-let (dired-get-filename)
       (file-directory-p it))))
 
 

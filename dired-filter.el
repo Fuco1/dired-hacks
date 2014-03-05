@@ -182,6 +182,14 @@ Has the same format as `mode-line-format'."
   :group 'dired-filter)
 (put 'dired-filter-header-line-format 'risky-local-variable t)
 
+(defcustom dired-filter-keep-expanded-subtrees t
+  "If non-nil, keep expanded subtree headers while filtering.
+
+This setting has any effect only if `dired-subtree' is installed
+as well."
+  :type 'boolean
+  :group 'dired-filter)
+
 ;;;###autoload
 (defvar dired-filter-map
   (let ((map (make-sparse-keymap)))
@@ -308,20 +316,39 @@ from the listing."
       (if (eval (dired-filter--mark-unmarked filter))
           (setq count (dired-do-kill-lines nil (if dired-filter-verbose "Filtered %d line%s." "")))
         (when dired-filter-verbose (message "Nothing to filter")))
+      ;; we need to go over all the directories again and remove those
+      ;; without children
+      (when (and dired-filter-keep-expanded-subtrees
+                 (featurep 'dired-subtree))
+        (dired-mark-if (and (dired-utils-is-dir-p)
+                            (not (dired-subtree--is-expanded-p))) nil)
+        (dired-do-kill-lines nil ""))
       (set-buffer-modified-p (and old-modified-p
                                   (save-excursion
                                     (goto-char (point-min))
                                     (re-search-forward dired-re-mark nil t))))
       count)))
 
+;; TODO: might be possible to make this nicer. If we traverse the
+;; files backwards, we can save the extra pass to remove empty dirs.
 (defun dired-filter--mark-unmarked (filter)
-  `(dired-mark-if
-    (let ((file-name (ignore-errors (dired-get-filename 'no-dir t))))
-      (and
-       file-name
-       (looking-at " ")
-       (not ,filter)))
-    nil))
+  (if (and dired-filter-keep-expanded-subtrees
+           (featurep 'dired-subtree))
+      `(dired-mark-if
+        (let ((file-name (ignore-errors (dired-get-filename 'no-dir t))))
+          (and
+           file-name
+           (looking-at " ")
+           (not (dired-subtree--is-expanded-p))
+           (not ,filter)))
+        nil)
+    `(dired-mark-if
+      (let ((file-name (ignore-errors (dired-get-filename 'no-dir t))))
+        (and
+         file-name
+         (looking-at " ")
+         (not ,filter)))
+      nil)))
 
 (defun dired-filter--get-all-files (&optional localp)
   "Return all files in this dired buffer as a list.
