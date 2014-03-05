@@ -677,7 +677,12 @@ popping the stack and then re-inserting the filters again."
   :group 'dired-filter
   :lighter " Filter"
   (if dired-filter-mode
-      (dired-filter--expunge)
+      (progn
+        (if (and dired-filter-show-filters
+                 dired-filter-stack)
+            (add-to-list 'header-line-format '("" dired-filter-header-line-format) t))
+        (dired-filter--expunge))
+    (setq header-line-format (--remove (equal it '("" dired-filter-header-line-format)) header-line-format))
     (revert-buffer)))
 
 (add-hook 'dired-after-readin-hook 'dired-filter--expunge t)
