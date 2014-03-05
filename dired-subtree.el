@@ -148,19 +148,30 @@ depth---taht creates the prefix."
 
 
 ;;; helpers
+(defvar dired-subtree-preserve-properties '(dired-subtree-filter)
+  "Properties that should be preserved between read-ins.")
+
 (defun dired-subtree--after-readin ()
   "Insert the subtrees again after dired buffer has been reverted."
   (when dired-subtree-overlays
-    (let ((sorted-ovs (--map (cons (car it) (--map (overlay-get it 'dired-subtree-name) (cdr it)))
-                             (--sort (< (car it) (car other))
-                                     (--group-by (overlay-get it 'dired-subtree-depth)
-                                                 dired-subtree-overlays)))))
+    (let* ((ovs-by-depth (--sort (< (car it) (car other))
+                                 (--group-by (overlay-get it 'dired-subtree-depth)
+                                             dired-subtree-overlays)))
+           (sorted-ovs (--map (cons (car it)
+                                    (--map (cons (overlay-get it 'dired-subtree-name)
+                                                 (-map (lambda (x) (cons x (overlay-get it x)))
+                                                       dired-subtree-preserve-properties)) (cdr it)))
+                              ovs-by-depth)))
       (--map (delete-overlay it) dired-subtree-overlays)
       (setq dired-subtree-overlays nil)
       (--each sorted-ovs
         (--each (cdr it)
-          (dired-utils-goto-line it)
-          (dired-subtree-insert))))))
+          (dired-utils-goto-line (car it))
+          (dired-subtree-insert)
+          (let ((ov (dired-subtree--get-ov)))
+            (--each (cdr it)
+              (overlay-put ov (car it) (cdr it)))
+            (dired-subtree--filter-subtree ov)))))))
 
 (add-hook 'dired-after-readin-hook 'dired-subtree--after-readin)
 
