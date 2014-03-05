@@ -301,6 +301,11 @@ listing."
     (when file-name
       (dired-utils-goto-line file-name))))
 
+(defvar dired-filter--expanded-dirs nil
+  "List of expanded subtrees.
+
+This adds support for `dired-subtree' package.")
+
 (defun dired-filter--expunge ()
   "Remove the files specified by current `dired-filter-stack'
 from the listing."
@@ -319,28 +324,35 @@ from the listing."
       ;; without children
       (when (and dired-filter-keep-expanded-subtrees
                  (featurep 'dired-subtree))
-        (dired-mark-if (and (dired-utils-is-dir-p)
-                            (not (dired-subtree--is-expanded-p))) nil)
-        (dired-do-kill-lines nil ""))
+        (--each dired-filter--expanded-dirs
+          (save-excursion
+            (dired-utils-goto-line it)
+            (when (and (/= (point) (point-max))
+                       (not (dired-subtree--is-expanded-p)))
+              (dired-kill-line)))))
       (set-buffer-modified-p (and old-modified-p
                                   (save-excursion
                                     (goto-char (point-min))
                                     (re-search-forward dired-re-mark nil t))))
       count)))
 
-;; TODO: might be possible to make this nicer. If we traverse the
-;; files backwards, we can save the extra pass to remove empty dirs.
 (defun dired-filter--mark-unmarked (filter)
   (if (and dired-filter-keep-expanded-subtrees
            (featurep 'dired-subtree))
-      `(dired-mark-if
-        (let ((file-name (ignore-errors (dired-get-filename 'no-dir t))))
-          (and
-           file-name
-           (looking-at " ")
-           (not (dired-subtree--is-expanded-p))
-           (not ,filter)))
-        nil)
+      (progn
+        (setq dired-filter--expanded-dirs nil)
+        `(dired-mark-if
+          (let ((file-name (ignore-errors (dired-get-filename 'no-dir t))))
+            (and
+             file-name
+             (looking-at " ")
+             (if (dired-subtree--is-expanded-p)
+                 (progn
+                   (push (dired-get-filename) dired-filter--expanded-dirs)
+                   nil)
+               t)
+             (not ,filter)))
+          nil))
     `(dired-mark-if
       (let ((file-name (ignore-errors (dired-get-filename 'no-dir t))))
         (and
