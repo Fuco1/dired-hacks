@@ -200,6 +200,15 @@ depth---taht creates the prefix."
 
 
 ;;;; Interactive
+
+;;;###autoload
+(defun dired-subtree-narrow ()
+  "Narrow the buffer to this subtree."
+  (interactive)
+  (let ((ov (dired-subtree--get-ov)))
+    (narrow-to-region (overlay-start ov)
+                      (overlay-end ov))))
+
 ;;; Navigation
 
 ;; make the arguments actually do something
