@@ -293,6 +293,11 @@ listing."
   "Re-run the filters."
   (let ((file-name (ignore-errors (dired-get-filename))))
     (dired-revert)
+    (if (and dired-filter-mode
+             dired-filter-show-filters
+             dired-filter-stack)
+        (add-to-list 'header-line-format '("" dired-filter-header-line-format) t)
+      (setq header-line-format (--remove (equal it '("" dired-filter-header-line-format)) header-line-format)))
     (when file-name
       (dired-utils-goto-line file-name))))
 
@@ -300,12 +305,6 @@ listing."
   "Remove the files specified by current `dired-filter-stack'
 from the listing."
   (interactive)
-  ;; this should probably be moved elsewhere
-  (if (and dired-filter-mode
-           dired-filter-show-filters
-           dired-filter-stack)
-      (add-to-list 'header-line-format '("" dired-filter-header-line-format) t)
-    (setq header-line-format (--remove (equal it '("" dired-filter-header-line-format)) header-line-format)))
   (when (and dired-filter-mode
              dired-filter-stack)
     (let ((filter (dired-filter--make-filter))
