@@ -317,22 +317,27 @@ recursively."
     (dired-subtree-mark-subtree all)))
 
 ;;; Insertion/deletion
+(defun dired-subtree--readin (dir-name)
+  "Read in the directory.
+
+Return a string suitable for insertion in `dired' buffer."
+  (with-temp-buffer
+    (insert-directory dir-name dired-listing-switches nil t)
+    (delete-char -1)
+    (goto-char (point-min))
+    (kill-line 3)
+    (insert "  ")
+    (while (= (forward-line) 0)
+      (insert "  "))
+    (delete-char -2)
+    (buffer-string)))
 
 ;;;###autoload
 (defun dired-subtree-insert ()
   "Insert subtree under this directory."
   (interactive)
   (let* ((dir-name (dired-get-filename nil))
-         (listing (with-temp-buffer
-                    (insert-directory dir-name dired-listing-switches nil t)
-                    (delete-char -1)
-                    (goto-char (point-min))
-                    (kill-line 3)
-                    (insert "  ")
-                    (while (= (forward-line) 0)
-                      (insert "  "))
-                    (delete-char -2)
-                    (buffer-string)))
+         (listing (dired-subtree--readin dir-name))
          beg end)
     (read-only-mode -1)
     (move-end-of-line 1)
