@@ -58,6 +58,21 @@
 ;;
 ;;     (define-key dired-mode-map (kbd "some-key") dired-filter-map)
 
+;; In addition to filtering, you can also use the same predicates to
+;; only mark files without removing the rest.  All the filtering
+;; functions of the form `dired-filter-by-*' have their marking
+;; counterpart `dired-filter-mark-by-*'.  These are available from
+;; `dired-filter-mark-map'.  You can customize
+;; `dired-filter-mark-prefix' a prefix for this map or bind it
+;; manually to a prefix of your choice using:
+;;
+;;     (define-key dired-mode-map (kbd "some-key") dired-filter-mark-map)
+
+;; The marking operations are not placed on stack, instead, the
+;; marks are immediately updated by "OR"-ing them together.  To
+;; remove marks that would otherwise be selected by a filter, use
+;; prefix argument (usually bound to `C-u')
+
 ;;  Stack operations
 ;;  ----------------
 

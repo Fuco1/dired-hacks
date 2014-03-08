@@ -6,6 +6,7 @@
     3. [dired-avfs](#dired-avfs)
     4. [dired-open](#dired-open)
     5. [dired-rainbow](#dired-rainbow)
+    6. [dired-subtree](#dired-subtree)
 
 # dired-hacks [![Paypal logo](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CEYP5YVHDRX8C)
 
@@ -64,6 +65,21 @@ prefix for this map or bind it manually to a prefix of your choice
 using:
 
     (define-key dired-mode-map (kbd "some-key") dired-filter-map)
+
+In addition to filtering, you can also use the same predicates to
+only mark files without removing the rest.  All the filtering
+functions of the form `dired-filter-by-*` have their marking
+counterpart `dired-filter-mark-by-*`.  These are available from
+`dired-filter-mark-map`.  You can customize
+`dired-filter-mark-prefix` a prefix for this map or bind it
+manually to a prefix of your choice using:
+
+    (define-key dired-mode-map (kbd "some-key") dired-filter-mark-map)
+
+The marking operations are not placed on stack, instead, the
+marks are immediately updated by "OR"-ing them together.  To
+remove marks that would otherwise be selected by a filter, use
+prefix argument (usually bound to `C-u`)
 
 ### Stack operations
 
@@ -187,3 +203,55 @@ Here are some example uses:
 (dired-rainbow-define log (:inherit default
                            :italic t) ".*\\.log")
 ```
+
+<a name="dired-subtree" />
+## dired-subtree
+
+The basic command to work with subdirectories in dired is `i`,
+which inserts the subdirectory as a separate listing in the active
+dired buffer.
+
+This package defines function `dired-subtree-insert` which instead
+inserts the subdirectory directly below its line in the original
+listing, and indent the listing of subdirectory to resemble a
+tree-like structure (somewhat similar to `tree(1)` except the pretty
+graphics).  The tree display is somewhat more intuitive than the
+default "flat" subdirectory manipulation provided by `i`.
+
+There are several presentation options and faces you can customize
+to change the way subtrees are displayed.
+
+You can further remove the unwanted lines from the subtree by using
+`k` command or some of the built-in "focusing" functions, such as
+`dired-subtree-only-*` (see list below).
+
+If you have the package `dired-filter`, you can additionally filter
+the subtrees with global or local filters.
+
+A demo of basic functionality is available on youtube:
+https://www.youtube.com/watch?v=z26b8HKFsNE
+
+### Interactive functions
+
+Here's a list of available interactive functions.  You can read
+more about each one by using the built-in documentation facilities
+of emacs.  It is adviced to place bindings for these into a
+convenient prefix key map, for example `C-,`
+
+* `dired-subtree-insert`
+* `dired-subtree-remove`
+* `dired-subtree-revert`
+* `dired-subtree-narrow`
+* `dired-subtree-up`
+* `dired-subtree-down`
+* `dired-subtree-next-sibling`
+* `dired-subtree-previous-sibling`
+* `dired-subtree-beginning`
+* `dired-subtree-end`
+* `dired-subtree-mark-subtree`
+* `dired-subtree-unmark-subtree`
+* `dired-subtree-only-this-file`
+* `dired-subtree-only-this-directory`
+
+If you have package `dired-filter`, additional command
+`dired-subtree-apply-filter` is available.
