@@ -217,16 +217,45 @@ as well."
     map)
   "Keymap used for `dired-filter-mode'.")
 
+(defvar dired-filter-mark-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map "n" 'dired-filter-mark-by-name)
+    (define-key map "r" 'dired-filter-mark-by-regexp)
+    (define-key map "x" 'dired-filter-mark-by-extension)
+    (define-key map "." 'dired-filter-mark-by-dot-files)
+    (define-key map "O" 'dired-filter-mark-by-omit)
+    (define-key map "e" 'dired-filter-mark-by-predicate)
+    (define-key map "f" 'dired-filter-mark-by-file)
+    (define-key map "i" 'dired-filter-mark-by-directory)
+    (define-key map "m" 'dired-filter-mark-by-mark)
+    map)
+  "Keymap used for marking files.")
+
 (defun dired-filter--set-prefix-key (varname value)
   (when varname
     (set-default varname value))
-  (define-key dired-mode-map (kbd value) dired-filter-map))
+  (when value
+    (define-key dired-mode-map (kbd value) dired-filter-map)))
+
+(defun dired-filter--set-mark-prefix-key (varname value)
+  (when varname
+    (set-default varname value))
+  (when value
+    (define-key dired-mode-map (kbd value) dired-filter-mark-map)))
 
 (defcustom dired-filter-prefix "/"
-  "Prefix key for `dired-filter-mode-map'."
-  :type 'string
+  "Prefix key for `dired-filter-map'."
+  :type '(choice (string :tag "Prefix")
+                 (const :tag "Don't set" nil))
   :group 'dired-filter
   :set 'dired-filter--set-prefix-key)
+
+(defcustom dired-filter-mark-prefix nil
+  "Prefix key for `dired-filter-mark-map'."
+  :type '(choice (string :tag "Prefix")
+                 (const :tag "Don't set" nil))
+  :group 'dired-filter
+  :set 'dired-filter--set-mark-prefix-key)
 
 
 ;; internals
@@ -361,6 +390,24 @@ from the listing."
          (not ,filter)))
       nil)))
 
+(defun dired-filter--mark (filter)
+  "Helper used by `dired-filter-mark-by-' family.
+
+This ORs the current selection with the one specified by selected filter.
+
+If prefix argument \\[universal-argument] is used, unmark the
+matched files instead (including any perviously marked files)."
+  (let* ((dired-filter-stack (list filter))
+         (filter (if current-prefix-arg
+                     `(not ,(dired-filter--make-filter))
+                   (dired-filter--make-filter))))
+    (eval `(dired-mark-if
+            (let ((file-name (ignore-errors (dired-get-filename 'no-dir t))))
+              (and
+               file-name
+               ,filter))
+            nil))))
+
 (defun dired-filter--get-all-files (&optional localp)
   "Return all files in this dired buffer as a list.
 
@@ -411,7 +458,8 @@ argument from user.
 
 :remove reverses the default matching strategy of the filter."
   (declare (indent 2) (doc-string 2))
-  (let ((fn-name (intern (concat "dired-filter-by-" (symbol-name name)))))
+  (let ((fn-name (intern (concat "dired-filter-by-" (symbol-name name))))
+        (fn-mark-name (intern (concat "dired-filter-mark-by-" (symbol-name name)))))
     `(progn
        (defun ,fn-name (&optional qualifier)
          ,(or (and documentation
@@ -421,10 +469,23 @@ argument from user.
               "This filter is not documented.")
          (interactive (list ,reader))
          (dired-filter--push (cons ',name qualifier))
-         (message "%s" (format ,(concat (format "Filter by %s added: " description) " %s") qualifier))
+         (message "%s" (format ,(concat (format "Filter by %s added:" description) " %s") qualifier))
          (when (not dired-filter-mode)
            (dired-filter-mode 1))
          (dired-filter--update))
+       (defun ,fn-mark-name (&optional qualifier)
+         ,(or (and documentation
+                   (concat (if remove
+                               (concat documentation "\n\nBy default, files matched by this filter are /removed/.")
+                             documentation)
+                           "\n\nThis function only marks the matched files and does not filter the buffer view.
+
+If prefix argument \\[universal-argument] is used, unmark the
+matched files instead (including any perviously marked files)."))
+              "This matcher is not documented.")
+         (interactive (list ,reader))
+         (dired-filter--mark (cons ',name qualifier))
+         (message "%s" (format ,(concat (format "Marked by %s:" description) " %s") qualifier)))
        (push (list ',name ,description ',qualifier-description
                    ,remove ',(if (= (length body) 1)
                                  `,(car body)
