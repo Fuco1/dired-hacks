@@ -144,13 +144,13 @@ You can customize this variable to change what filters are active
 when new dired buffer is created.
 
 The stack is a list of conses where car is the symbol
-representing the fitler (it's the part of `dired-filter-by-...')
+representing the filter (it's the part of `dired-filter-by-...')
 and cdr is current value of its argument, or nil if filter
 doesn't take argument.
 
 By default, `dired-filter-by-omit' is active."
   :type '(repeat (cons
-                  (symbol :tag "Fitler")
+                  (symbol :tag "Filter")
                   (sexp :tag "Qualifier")))
   :group 'dired-filter)
 (make-variable-buffer-local 'dired-filter-stack)
@@ -630,6 +630,11 @@ of `auto-mode-alist'."
      (t (dired-filter--push `(or ,top ,top2))))
     (dired-filter--update)))
 
+(defun dired-filter--negated-p (filter)
+  "Return t if FILTER is negated, otherwise nil."
+  (and (> (length filter) 1)
+       (eq 'not (car filter))))
+
 ;;;###autoload
 (defun dired-filter-negate ()
   "Logically negate the top filter."
@@ -638,7 +643,9 @@ of `auto-mode-alist'."
     (when (not top)
       (error "You need at least one filter on the stack"))
     (pop dired-filter-stack)
-    (dired-filter--push `(not ,top))
+    (if (dired-filter--negated-p top)
+        (dired-filter--push (cadr top))
+      (dired-filter--push `(not ,top)))
     (dired-filter--update)))
 
 ;;;###autoload
