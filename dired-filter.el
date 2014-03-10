@@ -588,13 +588,13 @@ matched files instead (including any perviously marked files)."))
 (dired-filter-define directory
     "Toggle current view to show only directories."
   (:description "directory")
-  (looking-at "^  d"))
+  (looking-at "^[* ] d"))
 
 ;;;###autoload (autoload 'dired-filter-by-file "dired-filter")
 (dired-filter-define file
     "Toggle current view to show only files."
   (:description "file")
-  (looking-at "^  -"))
+  (looking-at "^[* ] -"))
 
 ;;;###autoload (autoload 'dired-filter-by-mode "dired-filter")
 (dired-filter-define mode
