@@ -242,7 +242,7 @@ as well."
     (define-key map "e" 'dired-filter-mark-by-predicate)
     (define-key map "f" 'dired-filter-mark-by-file)
     (define-key map "i" 'dired-filter-mark-by-directory)
-    (define-key map "m" 'dired-filter-mark-by-mark)
+    (define-key map "m" 'dired-filter-mark-by-mode)
     map)
   "Keymap used for marking files.")
 
@@ -411,7 +411,7 @@ from the listing."
 This ORs the current selection with the one specified by selected filter.
 
 If prefix argument \\[universal-argument] is used, unmark the
-matched files instead (including any perviously marked files)."
+matched files instead (including any previously marked files)."
   (let* ((dired-filter-stack (list filter))
          (filter (if current-prefix-arg
                      `(not ,(dired-filter--make-filter))
