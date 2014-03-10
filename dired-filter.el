@@ -491,7 +491,11 @@ argument from user.
               "This filter is not documented.")
          (interactive (list ,reader))
          (dired-filter--push (cons ',name qualifier))
-         (message "%s" (format ,(concat (format "Filter by %s added:" description) " %s") qualifier))
+         (when dired-filter-verbose
+           (message "%s" (concat ,(format "Filter by %s added" description)
+                                 (--if-let (eval ,qualifier-description)
+                                     (format ": %s" it)
+                                   ""))))
          (when (not dired-filter-mode)
            (dired-filter-mode 1))
          (dired-filter--update))
@@ -507,7 +511,19 @@ matched files instead (including any perviously marked files)."))
               "This matcher is not documented.")
          (interactive (list ,reader))
          (dired-filter--mark (cons ',name qualifier))
-         (message "%s" (format ,(concat (format "Marked by %s:" description) " %s") qualifier)))
+         (when dired-filter-verbose
+           (let ((qual (--if-let (eval ,qualifier-description)
+                           (format (if (equal current-prefix-arg '(16))
+                                       ": (NOT %s)"
+                                     ": %s") it)
+                         "")))
+             (message "%s" (concat
+                            (if (equal current-prefix-arg '(4)) "Unm" "M")
+                            (if (and (equal qual "")
+                                     (equal current-prefix-arg '(16)))
+                                ,(format "arked by (NOT %s)" description)
+                              ,(format "arked by %s" description))
+                            qual)))))
        (push (list ',name ,description ',qualifier-description
                    ,remove ',(if (= (length body) 1)
                                  `,(car body)
