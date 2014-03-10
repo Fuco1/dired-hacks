@@ -68,10 +68,12 @@
 ;;
 ;;     (define-key dired-mode-map (kbd "some-key") dired-filter-mark-map)
 
-;; The marking operations are not placed on stack, instead, the
-;; marks are immediately updated by "OR"-ing them together.  To
-;; remove marks that would otherwise be selected by a filter, use
-;; prefix argument (usually bound to `C-u')
+;; The marking operations are not placed on stack, instead, the marks
+;; are immediately updated by "OR"-ing them together.  To remove marks
+;; that would otherwise be selected by a filter, use prefix argument
+;; (usually bound to `C-u').  To logically negate the meaning of the
+;; filter, you can call the function with a double prefix argument
+;; (usually `C-u' `C-u')
 
 ;;  Stack operations
 ;;  ----------------
@@ -410,12 +412,17 @@ from the listing."
 
 This ORs the current selection with the one specified by selected filter.
 
-If prefix argument \\[universal-argument] is used, unmark the
-matched files instead (including any previously marked files)."
+If prefix argument \\[universal-argument] is used, unmark the matched files instead
+\(including any previously marked files).
+
+If prefix argument \\[universal-argument] \\[universal-argument] is used, mark the files that would normally
+not be marked, that is, reverse the logical meaning of the
+filter."
   (let* ((dired-filter-stack (list filter))
-         (filter (if current-prefix-arg
+         (filter (if (equal current-prefix-arg '(16))
                      `(not ,(dired-filter--make-filter))
-                   (dired-filter--make-filter))))
+                   (dired-filter--make-filter)))
+         (dired-marker-char (if (equal current-prefix-arg '(4)) ?\040 dired-marker-char)))
     (eval `(dired-mark-if
             (let ((file-name (ignore-errors (dired-get-filename 'no-dir t))))
               (and

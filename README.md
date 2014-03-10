@@ -76,10 +76,12 @@ manually to a prefix of your choice using:
 
     (define-key dired-mode-map (kbd "some-key") dired-filter-mark-map)
 
-The marking operations are not placed on stack, instead, the
-marks are immediately updated by "OR"-ing them together.  To
-remove marks that would otherwise be selected by a filter, use
-prefix argument (usually bound to `C-u`)
+The marking operations are not placed on stack, instead, the marks are
+immediately updated by "OR"-ing them together.  To remove marks that
+would otherwise be selected by a filter, use prefix argument (usually
+bound to `C-u`).  To logically negate the meaning of the filter, you
+can call the function with a double prefix argument (usually `C-u`
+`C-u`)
 
 ### Stack operations
 
@@ -164,7 +166,7 @@ You can customize the list of functions to try by customizing
 `dired-open-functions`.
 
 To fall back to the default `dired-find-file`, you can provide the
-prefix argument (usually C-u) to the `dired-open-file` function.
+prefix argument (usually `C-u`) to the `dired-open-file` function.
 This is useful for example when you configure html files to be
 opened in browser and you want to edit the file instead of view it.
 
