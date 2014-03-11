@@ -135,6 +135,41 @@ To define your own filters, you can use the macro
 `dired-filter-define`.  If you define some interesting filter,
 please consider contributing it to the upstream.
 
+### Saved filters
+
+In addition to the built-in filters and your own custom filters,
+this package provides an option to save complex compound filters
+for later use.  When you set up a filter stack you would like to
+save, call `dired-filter-save-filters`.  You will be prompted for a
+name under which this stack will be saved.
+
+The saved filter will be added to `dired-filter-saved-filters`
+variable, which you can also customize via the customize interface
+or manually add entries with `push` or `add-to-list`.  If you use
+customize, calling `dired-filter-save-filters` will automatically
+save the new value into your customize file.
+
+You can delete saved filters with `dired-filter-delete-saved-filters`.
+
+To use a saved filter, you can use either
+`dired-filter-add-saved-filters` or
+`dired-filter-load-saved-filters`.  The first pushes the saved
+filter on top of the currently active stack, the second clears
+current filter stack before loading the saved filter configuration.
+
+An example use is to create filters for "logical groups" of files,
+such as media files, image files or files used when programming in
+certain environment (for example, show files with .h and .c
+extensions).  Saved filters save you the time of setting up the
+filters each time you want this specific view.
+
+As a concrete example of above, author uses a saved filter "media"
+with value:
+
+    (extension "ogg" "flv" "mpg" "avi" "mp4" "mp3")
+    ;; show all files matching any of these extensions
+
+
 <a name="dired-avfs" />
 ## dired-avfs
 
