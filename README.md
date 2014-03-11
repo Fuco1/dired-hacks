@@ -106,15 +106,15 @@ You can transpose the filters on the top of the stack using
 
 Here's a list of built-in filters:
 
-* dired-filter-by-name
-* dired-filter-by-regexp
-* dired-filter-by-extension
-* dired-filter-by-dot-files
-* dired-filter-by-omit
-* dired-filter-by-predicate
-* dired-filter-by-file
-* dired-filter-by-directory
-* dired-filter-by-mode
+* `dired-filter-by-name`
+* `dired-filter-by-regexp`
+* `dired-filter-by-extension`
+* `dired-filter-by-dot-files`
+* `dired-filter-by-omit`
+* `dired-filter-by-predicate`
+* `dired-filter-by-file`
+* `dired-filter-by-directory`
+* `dired-filter-by-mode`
 
 You can see their documentation by calling M-x `describe-function`.
 
@@ -122,6 +122,14 @@ Specifically, `dired-filter-by-omit` removes the files that would
 be removed by `dired-omit-mode`, so you should not need to use
 both---in fact it is discouraged, as it would make the read-in
 slower.
+
+When called with negative prefix argument, some filters can read
+multiple values.  The resulting predicate is often much faster than
+having the filter repeated with single argument.  Read the
+documentation to learn more about the calling conventions.
+Currently, these filters support reading multiple arguments:
+
+* `dired-filter-by-extension`
 
 To define your own filters, you can use the macro
 `dired-filter-define`.  If you define some interesting filter,

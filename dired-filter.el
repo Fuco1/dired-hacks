@@ -100,15 +100,15 @@
 
 ;; Here's a list of built-in filters:
 
-;; * dired-filter-by-name
-;; * dired-filter-by-regexp
-;; * dired-filter-by-extension
-;; * dired-filter-by-dot-files
-;; * dired-filter-by-omit
-;; * dired-filter-by-predicate
-;; * dired-filter-by-file
-;; * dired-filter-by-directory
-;; * dired-filter-by-mode
+;; * `dired-filter-by-name'
+;; * `dired-filter-by-regexp'
+;; * `dired-filter-by-extension'
+;; * `dired-filter-by-dot-files'
+;; * `dired-filter-by-omit'
+;; * `dired-filter-by-predicate'
+;; * `dired-filter-by-file'
+;; * `dired-filter-by-directory'
+;; * `dired-filter-by-mode'
 
 ;; You can see their documentation by calling M-x `describe-function'.
 
@@ -116,6 +116,14 @@
 ;; be removed by `dired-omit-mode', so you should not need to use
 ;; both---in fact it is discouraged, as it would make the read-in
 ;; slower.
+
+;; When called with negative prefix argument, some filters can read
+;; multiple values.  The resulting predicate is often much faster than
+;; having the filter repeated with single argument.  Read the
+;; documentation to learn more about the calling conventions.
+;; Currently, these filters support reading multiple arguments:
+
+;; * `dired-filter-by-extension'
 
 ;; To define your own filters, you can use the macro
 ;; `dired-filter-define'.  If you define some interesting filter,
@@ -304,7 +312,9 @@ as well."
                          ((eq (car stack) 'omit)
                           (dired-omit-regexp))
                          ((eq (car stack) 'extension)
-                          (concat "\\." (regexp-quote (cdr stack)) "\\'"))
+                          (if (listp (cdr stack))
+                              (concat "\\." (regexp-opt (-uniq (cdr stack))) "\\'")
+                            (concat "\\." (regexp-quote (cdr stack)) "\\'")))
                          (t (cdr stack)))))
         (if qualifier
             `(let ((qualifier ,qualifier))
@@ -562,7 +572,14 @@ matched files instead (including any perviously marked files)."))
 
 ;;;###autoload (autoload 'dired-filter-by-extension "dired-filter")
 (dired-filter-define extension
-    "Toggle current view to files with extension matching QUALIFIER."
+    "Toggle current view to files with extension matching QUALIFIER.
+
+With negative prefix argument, you can specify multiple
+extensions.  If you want to filter by many extensions (that is,
+match files with any of the specified extensions), this is much
+prefered as the regexp will be optimized to match any of the
+extensions and thus much faster than matching each extension
+separately in turn and ORing the filters together."
   (:description "extension"
    :reader (let* ((file (ignore-errors (dired-get-filename)))
                   (ext (and file (file-name-extension file)))
@@ -571,10 +588,24 @@ matched files instead (including any perviously marked files)."))
                      (--group-by (file-name-extension it))
                      (-map 'car)
                      (-remove 'not))))
-             (completing-read
-              (format "Extension: ")
-              exts
-              nil nil nil nil ext)))
+             (if (< (prefix-numeric-value current-prefix-arg) 0)
+                 (let (extensions)
+                   (while (condition-case nil
+                              (progn
+                                (push (completing-read "Extensions (C-g when done): "
+                                                       exts
+                                                       nil nil nil nil ext)
+                                      extensions)
+                                ;; in the second invocation, don't present a default choice
+                                (setq ext nil)
+                                ;; and remove the selected extension from the list of suggestions
+                                (setq exts (--remove (equal (car extensions) it) exts)))
+                            (quit nil)))
+                   extensions)
+               (completing-read
+                "Extension: "
+                exts
+                nil nil nil nil ext))))
   (string-match qualifier file-name))
 
 ;;;###autoload (autoload 'dired-filter-by-omit "dired-filter")
