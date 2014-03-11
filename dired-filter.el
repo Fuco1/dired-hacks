@@ -58,6 +58,13 @@
 ;;
 ;;     (define-key dired-mode-map (kbd "some-key") dired-filter-map)
 
+;; The bindings follow a convention where the filters are mapped on
+;; lower-case letters or punctuation, operators are mapped on symbols
+;; (such as !, |, * etc.) and group commands are mapped on upper-case
+;; letters.  The exception to this is `p' which is bound to
+;; `dired-filter-pop', which is a very common operation and warrants a
+;; quick binding.
+
 ;; In addition to filtering, you can also use the same predicates to
 ;; only mark files without removing the rest.  All the filtering
 ;; functions of the form `dired-filter-by-*' have their marking
