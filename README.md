@@ -18,6 +18,11 @@ will be the only dependence.
 
 In addition, all the packages require [dash.el](https://github.com/magnars/dash.el)
 
+Please note that only the packages that are listed in this readme are
+"finished" (means in package repositories, with usable UI etc.).  All
+the other files are work-in-progress packages you could probably use,
+but it would be a bit more painful.
+
 <a name="contribute!" />
 # Contribute!
 
@@ -25,6 +30,11 @@ Since this collection comes from my own config, it mostly contains
 stuff I use or find useful.  If you have a good idea or nice usecase
 for some addition, feel free to send patches or start an issue (but
 patches are preferred :P).
+
+If you find this package useful, or if you don't, you can also donate
+arbitrary sum of money via PayPal button above (note: it links to the
+[smartparens](https://github.com/Fuco1/smartparens) "product" because
+I'm lazy to create special button for every of my projects ;)
 
 <a name="packages" />
 # Packages
