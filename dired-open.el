@@ -195,7 +195,7 @@ The mappings from extensions to applications is specified by
 The mappings from extensions to applications is specified by
 `dired-open-extensions-elisp'."
   (interactive)
-  (-when-let (file (ignore-errors (dired-get-filename)))
+  (-when-let (file (dired-utils-get-filename))
     (when (not (file-directory-p file))
       (--when-let (dired-utils-match-filename-extension file dired-open-extensions-elisp)
         (funcall (cdr it) file)

@@ -39,6 +39,10 @@
   :group 'dired
   :prefix "dired-hacks-")
 
+(defun dired-utils-get-filename (&optional localp)
+  "Like `dired-get-filename' but never signal an error."
+  (dired-get-filename localp t))
+
 (defun dired-utils-goto-line (filename)
   "Go to line describing FILENAME in listing.
 
@@ -48,7 +52,7 @@ Should be absolute file name matched against
   (let (stop)
     (while (and (not stop)
                 (= (forward-line) 0))
-      (when (equal filename (ignore-errors (dired-get-filename)))
+      (when (equal filename (dired-utils-get-filename))
         (setq stop t)
         (dired-move-to-filename)))))
 
@@ -79,13 +83,12 @@ Each car in ALIST is a string representing file extension
 ;;; Predicates
 (defun dired-utils-is-file-p ()
   "Return non-nil if the line at point is a file or a directory."
-  (ignore-errors (dired-get-filename 'no-dir)))
+  (dired-utils-get-filename 'no-dir))
 
 (defun dired-utils-is-dir-p ()
   "Return non-nil if the line at point is a directory."
-  (ignore-errors
-    (--when-let (dired-get-filename)
-      (file-directory-p it))))
+  (--when-let (dired-utils-get-filename)
+    (file-directory-p it)))
 
 
 ;;; Interactive

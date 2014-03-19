@@ -242,7 +242,7 @@ If no SUBTREES are specified, use `dired-subtree-overlays'."
 (defun dired-subtree--is-expanded-p ()
   "Return non-nil if directory under point is expanded."
   (save-excursion
-    (-when-let (file (ignore-errors (dired-get-filename)))
+    (-when-let (file (dired-utils-get-filename))
       (and (file-directory-p file)
            (let ((depth (dired-subtree--get-depth)))
              (dired-next-line 1)
@@ -406,7 +406,7 @@ This means reinserting the content of this subtree and all its
 children."
   (interactive)
   (let ((inhibit-read-only t)
-        (file-name (ignore-errors (dired-get-filename))))
+        (file-name (dired-utils-get-filename)))
     (-when-let* ((ov (dired-subtree--get-ov))
                  (ovs (dired-subtree--get-ovs-in)))
       (dired-subtree-up)

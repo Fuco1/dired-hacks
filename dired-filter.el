@@ -390,7 +390,7 @@ listing."
 
 (defun dired-filter--update ()
   "Re-run the filters."
-  (let ((file-name (ignore-errors (dired-get-filename))))
+  (let ((file-name (dired-utils-get-filename)))
     (dired-revert)
     (if (and dired-filter-mode
              dired-filter-show-filters
@@ -441,7 +441,7 @@ from the listing."
       (progn
         (setq dired-filter--expanded-dirs nil)
         `(dired-mark-if
-          (let ((file-name (ignore-errors (dired-get-filename 'no-dir t))))
+          (let ((file-name (dired-utils-get-filename 'no-dir)))
             (and
              file-name
              (looking-at " ")
@@ -453,7 +453,7 @@ from the listing."
              (not ,filter)))
           nil))
     `(dired-mark-if
-      (let ((file-name (ignore-errors (dired-get-filename 'no-dir t))))
+      (let ((file-name (dired-utils-get-filename 'no-dir)))
         (and
          file-name
          (looking-at " ")
@@ -477,7 +477,7 @@ filter."
                    (dired-filter--make-filter)))
          (dired-marker-char (if (equal current-prefix-arg '(4)) ?\040 dired-marker-char)))
     (eval `(dired-mark-if
-            (let ((file-name (ignore-errors (dired-get-filename 'no-dir t))))
+            (let ((file-name (dired-utils-get-filename 'no-dir)))
               (and
                file-name
                ,filter))
@@ -491,7 +491,7 @@ LOCALP has same semantics as in `dired-get-filename'."
     (goto-char (point-min))
     (let (r)
       (while (= 0 (forward-line))
-        (--when-let (ignore-errors (dired-get-filename localp))
+        (--when-let (dired-utils-get-filename localp)
           (push it r)))
       (nreverse r))))
 
@@ -616,7 +616,7 @@ prefered as the regexp will be optimized to match any of the
 extensions and thus much faster than matching each extension
 separately in turn and ORing the filters together."
   (:description "extension"
-   :reader (let* ((file (ignore-errors (dired-get-filename)))
+   :reader (let* ((file (dired-utils-get-filename))
                   (ext (and file (file-name-extension file)))
                   (exts
                    (->> (dired-filter--get-all-files 'no-dir)
@@ -685,7 +685,7 @@ of `auto-mode-alist'."
                        "Major mode: "
                        (-map 'symbol-name (-uniq (-remove 'listp (-map 'cdr auto-mode-alist))))
                        nil nil nil nil
-                       (-when-let* ((file (ignore-errors (dired-get-filename)))
+                       (-when-let* ((file (dired-utils-get-filename))
                                     (mode (cdr (dired-utils-match-filename-regexp
                                                 file auto-mode-alist))))
                          (symbol-name mode))))))
