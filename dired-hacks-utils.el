@@ -43,6 +43,18 @@
   "Like `dired-get-filename' but never signal an error."
   (dired-get-filename localp t))
 
+(defvar dired-utils-attributes-keywords
+  '(:isdir :nlinks :uid :gid :atime :mtime :ctime :size :modes :gidchg :inode :devnum)
+  "List of keywords to map with `file-attributes' for `dired-utils-get-info'.")
+
+(defun dired-utils-get-info (&rest args)
+  (let* ((attributes (file-attributes (dired-utils-get-filename)))
+         (mapper (lambda(arg)(nth (-elem-index arg dired-utils-attributes-keywords) attributes)))
+         (mapped-attributes (mapcar mapper args)))
+    (if (> (length mapped-attributes) 1)
+        mapped-attributes
+      (car mapped-attributes))))
+
 (defun dired-utils-goto-line (filename)
   "Go to line describing FILENAME in listing.
 
