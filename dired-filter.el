@@ -346,7 +346,7 @@ as well."
                           (let* ((predicate (cdr stack))
                                  (predicate-keywords (mapcar (lambda (sym) (intern (concat ":" (symbol-name sym))))
                                                              (-filter 'symbolp (-flatten predicate))))
-                                 (keywords (-intersection dired-utils-attributes-keywords predicate-keywords))
+                                 (keywords (-intersection dired-utils-info-keywords predicate-keywords))
                                  (varlist (mapcar (lambda (keyword)
                                                     `(,(intern (substring (symbol-name keyword) 1))
                                                       (dired-utils-get-info ,keyword))) keywords)))
@@ -667,7 +667,10 @@ separately in turn and ORing the filters together."
 
 QUALIFIER is a lisp sexp that can refer to the following variables:
 
-    `isdir'  [boolean] true if is a directory, string if symlink, or nil
+    `name'   [string]  name of item
+    `isdir'  [boolean] true if is a directory
+    `issym'  [boolean] true if is a symbolic link
+    `target' [string]  the linked-to name for symbolic links
     `nlinks' [integer] number of links to file
     `uid'    [integer] owner
     `gid'    [integer] group
@@ -682,6 +685,7 @@ QUALIFIER is a lisp sexp that can refer to the following variables:
 
 Examples:
   Mark zero-length files: `(equal 0 size)'
+  Find files ending with \"elc\": `(s-ends-with? \"elc\" name)'
   Find files modified before the 01/02/2014: `(time-less-p mtime (date-to-time \"2014-02-01 00:00:00\"))'"
   (:description "predicate"
    :qualifier-description (format "%s" qualifier)

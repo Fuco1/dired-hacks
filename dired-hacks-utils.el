@@ -43,24 +43,37 @@
   "Like `dired-get-filename' but never signal an error."
   (dired-get-filename localp t))
 
-(defvar dired-utils-attributes-keywords
+(defconst dired-utils-file-attributes-keywords
   '(:isdir :nlinks :uid :gid :atime :mtime :ctime :size :modes :gidchg :inode :devnum)
-  "List of keywords to map with `file-attributes' for `dired-utils-get-info'.")
+  "List of keywords to map with `file-attributes'.")
 
-(defun dired-utils-get-info (&rest args)
+(defconst dired-utils-info-keywords
+  `(:name :issym :target ,@dired-utils-file-attributes-keywords)
+  "List of keywords available for `dired-utils-get-info'.")
+
+(defun dired-utils--get-keyword-info (keyword)
+  (let ((filename (dired-utils-get-filename)))
+    (case keyword
+      (:name filename)
+      (:isdir (file-directory-p filename))
+      (:issym (and (file-symlink-p filename) t))
+      (:target (file-symlink-p filename))
+      (t
+       (nth (-elem-index keyword dired-utils-file-attributes-keywords)
+            (file-attributes (dired-utils-get-filename)))))))
+
+(defun dired-utils-get-info (&rest keywords)
   "Query for info about the file at point.
 
 When querying for one attribute, its value is returned.  When
 querying for more than one, a list of results is returned.
 
 The available attributes are listed in
-`dired-utils-attributes-keywords'."
-  (let* ((attributes (file-attributes (dired-utils-get-filename)))
-         (mapper (lambda (arg) (nth (-elem-index arg dired-utils-attributes-keywords) attributes)))
-         (mapped-attributes (mapcar mapper args)))
-    (if (> (length mapped-attributes) 1)
-        mapped-attributes
-      (car mapped-attributes))))
+`dired-utils-info-keywords'."
+  (let ((attributes (mapcar 'dired-utils--get-keyword-info keywords)))
+    (if (> (length attributes) 1)
+        attributes
+      (car attributes))))
 
 (defun dired-utils-goto-line (filename)
   "Go to line describing FILENAME in listing.
