@@ -48,8 +48,15 @@
   "List of keywords to map with `file-attributes' for `dired-utils-get-info'.")
 
 (defun dired-utils-get-info (&rest args)
+  "Query for info about the file at point.
+
+When querying for one attribute, its value is returned.  When
+querying for more than one, a list of results is returned.
+
+The available attributes are listed in
+`dired-utils-attributes-keywords'."
   (let* ((attributes (file-attributes (dired-utils-get-filename)))
-         (mapper (lambda(arg)(nth (-elem-index arg dired-utils-attributes-keywords) attributes)))
+         (mapper (lambda (arg) (nth (-elem-index arg dired-utils-attributes-keywords) attributes)))
          (mapped-attributes (mapcar mapper args)))
     (if (> (length mapped-attributes) 1)
         mapped-attributes

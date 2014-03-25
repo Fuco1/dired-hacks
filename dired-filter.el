@@ -348,8 +348,8 @@ as well."
                                                              (-filter 'symbolp (-flatten predicate))))
                                  (keywords (-intersection dired-utils-attributes-keywords predicate-keywords))
                                  (varlist (mapcar (lambda (keyword)
-                                                `(,(intern (substring (symbol-name keyword) 1))
-                                                  (dired-utils-get-info ,keyword))) keywords)))
+                                                    `(,(intern (substring (symbol-name keyword) 1))
+                                                      (dired-utils-get-info ,keyword))) keywords)))
                             `'(let ,varlist
                                 ,predicate)))
                          ((eq (car stack) 'omit)
