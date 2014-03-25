@@ -494,4 +494,4 @@ With ARG, do not pop to the view window."
   "docs"
   (use-local-map di-thumb-mode-map))
 
-(provide dired-images)
+(provide 'dired-images)
