@@ -672,8 +672,8 @@ QUALIFIER is a lisp sexp that can refer to the following variables:
     `uid'    [integer] owner
     `gid'    [integer] group
     `atime'  [list]    access time as a list of integers (HIGH LOW USEC PSEC)
-    `mtime'  [list]    access time as a list of integers (HIGH LOW USEC PSEC)
-    `ctime'  [list]    access time as a list of integers (HIGH LOW USEC PSEC)
+    `mtime'  [list]    modification time as a list of integers (HIGH LOW USEC PSEC)
+    `ctime'  [list]    change time as a list of integers (HIGH LOW USEC PSEC)
     `size'   [integer] file size in bytes
     `modes'  [string]  file permission bits, e.g. \"-rw-r--r--\"
     `gidchg' [boolean] true if the file's gid would change if file were deleted and recreated
@@ -681,7 +681,8 @@ QUALIFIER is a lisp sexp that can refer to the following variables:
     `devnum' [integer] filesystem device number
 
 Examples:
-  Mark zero-length files: `(equal 0 size)'"
+  Mark zero-length files: `(equal 0 size)'
+  Find files modified before the 01/02/2014: `(time-less-p mtime (date-to-time \"2014-02-01 00:00:00\"))'"
   (:description "predicate"
    :qualifier-description (format "%s" qualifier)
    :reader (read-minibuffer "Filter by predicate (form): "))
