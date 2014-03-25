@@ -342,9 +342,19 @@ as well."
    (t (let* ((def (assoc (car stack) dired-filter-alist))
              (remove (cadddr def))
              (qualifier (cond
-                         ;; special hack for omit filter, to
-                         ;; recompute the filter regexp
+                         ((eq (car stack) 'predicate)
+                          (let* ((predicate (cdr stack))
+                                 (predicate-keywords (mapcar (lambda (sym) (intern (concat ":" (symbol-name sym))))
+                                                             (-filter 'symbolp (-flatten predicate))))
+                                 (keywords (-intersection dired-utils-attributes-keywords predicate-keywords))
+                                 (varlist (mapcar (lambda (keyword)
+                                                `(,(intern (substring (symbol-name keyword) 1))
+                                                  (dired-utils-get-info ,keyword))) keywords)))
+                            `'(let ,varlist
+                                ,predicate)))
                          ((eq (car stack) 'omit)
+                          ;; special hack for omit filter, to
+                          ;; recompute the filter regexp
                           (dired-omit-regexp))
                          ((eq (car stack) 'extension)
                           (if (listp (cdr stack))
@@ -653,8 +663,27 @@ separately in turn and ORing the filters together."
 
 ;;;###autoload (autoload 'dired-filter-by-predicate "dired-filter")
 (dired-filter-define predicate
-    "Toggle current view to files for which QUALIFIER returns non-nil."
+    "Toggle current view to files for which QUALIFIER returns non-nil.
+
+QUALIFIER is a lisp sexp that can refer to the following variables:
+
+    `isdir'  [boolean] true if is a directory, string if symlink, or nil
+    `nlinks' [integer] number of links to file
+    `uid'    [integer] owner
+    `gid'    [integer] group
+    `atime'  [list]    access time as a list of integers (HIGH LOW USEC PSEC)
+    `mtime'  [list]    access time as a list of integers (HIGH LOW USEC PSEC)
+    `ctime'  [list]    access time as a list of integers (HIGH LOW USEC PSEC)
+    `size'   [integer] file size in bytes
+    `modes'  [string]  file permission bits, e.g. \"-rw-r--r--\"
+    `gidchg' [boolean] true if the file's gid would change if file were deleted and recreated
+    `inode'  [integer] the inode of the file
+    `devnum' [integer] filesystem device number
+
+Examples:
+  Mark zero-length files: `(equal 0 size)'"
   (:description "predicate"
+   :qualifier-description (format "%s" qualifier)
    :reader (read-minibuffer "Filter by predicate (form): "))
   (eval qualifier))
 
@@ -662,7 +691,7 @@ separately in turn and ORing the filters together."
 (dired-filter-define directory
     "Toggle current view to show only directories."
   (:description "directory")
-  (looking-at "^[* ] d"))
+  (looking-at dired-re-dir))
 
 ;;;###autoload (autoload 'dired-filter-by-file "dired-filter")
 (dired-filter-define file
