@@ -346,7 +346,7 @@ as well."
                           (let* ((predicate (cdr stack))
                                  (predicate-keywords (mapcar (lambda (sym) (intern (concat ":" (symbol-name sym))))
                                                              (-filter 'symbolp (-flatten predicate))))
-                                 (keywords (-intersection dired-utils-attributes-keywords predicate-keywords))
+                                 (keywords (-intersection dired-utils-info-keywords predicate-keywords))
                                  (varlist (mapcar (lambda (keyword)
                                                     `(,(intern (substring (symbol-name keyword) 1))
                                                       (dired-utils-get-info ,keyword))) keywords)))
@@ -667,13 +667,16 @@ separately in turn and ORing the filters together."
 
 QUALIFIER is a lisp sexp that can refer to the following variables:
 
-    `isdir'  [boolean] true if is a directory, string if symlink, or nil
+    `name'   [string]  name of item
+    `isdir'  [boolean] true if is a directory
+    `issym'  [boolean] true if is a symbolic link
+    `target' [string]  the linked-to name for symbolic links
     `nlinks' [integer] number of links to file
     `uid'    [integer] owner
     `gid'    [integer] group
     `atime'  [list]    access time as a list of integers (HIGH LOW USEC PSEC)
-    `mtime'  [list]    access time as a list of integers (HIGH LOW USEC PSEC)
-    `ctime'  [list]    access time as a list of integers (HIGH LOW USEC PSEC)
+    `mtime'  [list]    modification time as a list of integers (HIGH LOW USEC PSEC)
+    `ctime'  [list]    change time as a list of integers (HIGH LOW USEC PSEC)
     `size'   [integer] file size in bytes
     `modes'  [string]  file permission bits, e.g. \"-rw-r--r--\"
     `gidchg' [boolean] true if the file's gid would change if file were deleted and recreated
@@ -681,7 +684,9 @@ QUALIFIER is a lisp sexp that can refer to the following variables:
     `devnum' [integer] filesystem device number
 
 Examples:
-  Mark zero-length files: `(equal 0 size)'"
+  Mark zero-length files: `(equal 0 size)'
+  Find files ending with \"elc\": `(s-ends-with? \"elc\" name)'
+  Find files modified before the 01/02/2014: `(time-less-p mtime (date-to-time \"2014-02-01 00:00:00\"))'"
   (:description "predicate"
    :qualifier-description (format "%s" qualifier)
    :reader (read-minibuffer "Filter by predicate (form): "))
