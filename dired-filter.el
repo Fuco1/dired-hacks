@@ -689,7 +689,12 @@ Examples:
   Find files modified before the 01/02/2014: `(time-less-p mtime (date-to-time \"2014-02-01 00:00:00\"))'"
   (:description "predicate"
    :qualifier-description (format "%s" qualifier)
-   :reader (read-minibuffer "Filter by predicate (form): "))
+   :reader (let ((minibuffer-completing-symbol t))
+             (read-from-minibuffer "Filter by predicate (form): "
+                                   nil
+                                   read-expression-map
+                                   t
+                                   'read-expression-history)))
   (eval qualifier))
 
 ;;;###autoload (autoload 'dired-filter-by-directory "dired-filter")
