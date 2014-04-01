@@ -86,7 +86,8 @@ Should be absolute file name matched against
                 (= (forward-line) 0))
       (when (equal filename (dired-utils-get-filename))
         (setq stop t)
-        (dired-move-to-filename)))))
+        (dired-move-to-filename)))
+    stop))
 
 (defun dired-utils-match-filename-regexp (filename alist)
   "Match FILENAME against each car in ALIST and return first matched cons.
