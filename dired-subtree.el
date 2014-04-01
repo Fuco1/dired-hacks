@@ -265,7 +265,7 @@ If no SUBTREES are specified, use `dired-subtree-overlays'."
 (defun dired-subtree-narrow ()
   "Narrow the buffer to this subtree."
   (interactive)
-  (let ((ov (dired-subtree--get-ov)))
+  (-when-let (ov (dired-subtree--get-ov))
     (narrow-to-region (overlay-start ov)
                       (overlay-end ov))))
 
@@ -591,8 +591,6 @@ the subtree.  The filter action is read from `dired-filter-map'."
                   (overlay-put ov 'dired-subtree-filter dired-filter-stack)
                   (widen)
                   (dired-subtree-revert)
-                  (dired-subtree-narrow)
-                  (dired-filter--expunge)
                   (dired-subtree--filter-update-bs ov))))
           (unwind-protect
               (progn
@@ -601,7 +599,16 @@ the subtree.  The filter action is read from `dired-filter-map'."
                 (setq cmd (key-binding (read-key-sequence "Choose filter action: "))))
             (use-global-map glob)
             (use-local-map loc))
-          (call-interactively cmd))))))
+          (let ((p (point))
+                (beg (overlay-start ov))
+                (current-file (dired-utils-get-filename)))
+            (unwind-protect
+                (call-interactively cmd)
+              (unless (dired-utils-goto-line current-file)
+                (goto-char beg)
+                (forward-line)
+                (goto-char (min p (1- (overlay-end (dired-subtree--get-ov)))))
+                (dired-move-to-filename)))))))))
 
 
 ;;; Here we redefine a couple of functions from dired.el to make them
