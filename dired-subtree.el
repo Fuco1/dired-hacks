@@ -199,9 +199,8 @@ BEG and END default to the region spanned by overlay at point."
                   (overlay-get other 'dired-subtree-depth))
                (dired-subtree--get-all-ovs-at-point p))))
 
-(defun dired-subtree--get-depth (&optional ov)
+(defun dired-subtree--get-depth (ov)
   "Get subtree depth."
-  (setq ov (or ov (dired-subtree--get-ov)))
   (or (and ov (overlay-get ov 'dired-subtree-depth)) 0))
 
 
@@ -244,10 +243,9 @@ If no SUBTREES are specified, use `dired-subtree-overlays'."
   (save-excursion
     (-when-let (file (dired-utils-get-filename))
       (and (file-directory-p file)
-           (let ((depth (dired-subtree--get-depth)))
+           (let ((depth (dired-subtree--get-depth (dired-subtree--get-ov))))
              (dired-next-line 1)
-             (< depth (dired-subtree--get-depth)))))))
-
+             (< depth (dired-subtree--get-depth (dired-subtree--get-ov))))))))
 
 (defmacro dired-subtree-with-subtree (&rest forms)
   "Run FORMS on each file in this subtree."
@@ -514,7 +512,7 @@ Return a string suitable for insertion in `dired' buffer."
           (dired-subtree-unmark-subtree)
         (dired-subtree--unmark))
       (while (and (dired-subtree-up)
-                  (> (dired-subtree--get-depth) 0))
+                  (> (dired-subtree--get-depth (dired-subtree--get-ov)) 0))
         (if (not arg)
             (dired-subtree--unmark)
           (dired-subtree--unmark)
