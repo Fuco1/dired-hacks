@@ -5,7 +5,7 @@
 ;; Author: Matus Goljer <matus.goljer@gmail.com>
 ;; Maintainer: Matus Goljer <matus.goljer@gmail.com>
 ;; Keywords: files
-;; Version: 0.0.1
+;; Version: 0.0.2
 ;; Created: 16th February 2014
 ;; Package-requires: ((dash "2.5.0") (dired-hacks-utils "0.0.1"))
 
@@ -104,6 +104,41 @@ the entire file name."
                       (concat ".*\\." (regexp-opt matcher))
                     matcher)
                   "\\)$"))
+         (face-name (intern (concat "dired-rainbow-" (symbol-name symbol) "-face"))))
+    `(progn
+       (defface ,face-name
+         '((t ,(if (stringp face-props)
+                   `(:foreground ,face-props)
+                 face-props)))
+         ,(concat "dired-rainbow face matching " (symbol-name symbol) " files.")
+         :group 'dired-rainbow)
+       (font-lock-add-keywords 'dired-mode '((,regexp 1 ',face-name))))))
+
+(defmacro dired-rainbow-define-chmod (symbol face-props chmod)
+  "Define a custom dired face highlighting files by chmod permissions.
+
+SYMBOL is the identifier of the face.  The macro will define a face named
+
+  dired-rainbow-SYMBOL-face.
+
+FACE-PROPS is either a string or a list.  If a string, it is
+assumed to be either a color name or a hexadecimal code (#......)
+describing a color.  If a list, it is assumed to be a property
+list describing the face.  See `defface' for list of possible
+attributes.
+
+CHMOD is a regexp matching \"ls -l\" style permissions string.
+For example, the pattern
+
+  \"-.*x.*\"
+
+matches any file with executable flag set for user, group or everyone."
+  (let* ((regexp (concat
+                  "^[^!]."
+                  chmod
+                  ".*[ ]"
+                  dired-rainbow-date-regexp
+                  "[ ]\\(.*?\\)$"))
          (face-name (intern (concat "dired-rainbow-" (symbol-name symbol) "-face"))))
     `(progn
        (defface ,face-name
