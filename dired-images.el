@@ -2,6 +2,8 @@
 (require 'dash)
 (require 'eimp)
 
+(require 'image-mode)
+
 ;; thumb customizes
 (defcustom di-thumbs-directory "~/.emacs.d/di/"
   "Location where thumbnails are stored."
