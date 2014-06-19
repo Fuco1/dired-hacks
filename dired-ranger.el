@@ -24,8 +24,11 @@
 
 ;;; Commentary:
 
+;; TODO: add commentary
+
 ;;; Code:
 
+(require 'dash)
 (require 'ring)
 
 (defgroup dired-ranger ()
@@ -86,6 +89,8 @@ copy ring."
          (files (cdr data))
          (target-directory (dired-current-directory)))
     (--each files (copy-file it target-directory 0))
+    ;; TODO: abstract the revert/mark code, it is used for copy and
+    ;; paste, and I can see bunch of other uses
     (revert-buffer)
     (let ((dired-marker-char ?P))
       (--each (-map 'file-name-nondirectory files)
@@ -119,7 +124,7 @@ instead of copying them."
     (unless arg (ring-remove dired-ranger-copy-ring 0))
     (message (format "Moved %d item%s from copy ring."
                      (length files)
-                     (if (> (length files) 1) "%s" "")))))
+                     (if (> (length files) 1) "s" "")))))
 
 (provide 'dired-ranger)
 ;;; dired-ranger.el ends here
