@@ -908,4 +908,8 @@ popping the stack and then re-inserting the filters again."
 
 (provide 'dired-filter)
 
+;; Local Variables:
+;; eval: (font-lock-add-keywords nil '(("(\\(dired-filter-define\\)[[:blank:]]+\\(.+\\)" (1 'font-lock-keyword-face) (2 'font-lock-function-name-face))))
+;; End:
+
 ;;; dired-filter.el ends here
