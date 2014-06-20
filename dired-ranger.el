@@ -6,7 +6,7 @@
 ;; Maintainer: Matúš Goljer <matus.goljer@gmail.com>
 ;; Version: 0.0.1
 ;; Created: 17th June 2014
-;; Package-requires: ((dash "2.7.0"))
+;; Package-requires: ((dash "2.7.0") (dired-hacks-utils "0.0.1"))
 ;; Keywords: files
 
 ;; This program is free software; you can redistribute it and/or
@@ -28,6 +28,7 @@
 
 ;;; Code:
 
+(require 'dired-hacks-utils)
 (require 'dash)
 (require 'ring)
 
