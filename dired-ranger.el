@@ -88,8 +88,11 @@ copy ring."
          (data (ring-ref dired-ranger-copy-ring index))
          (buffers (car data))
          (files (cdr data))
-         (target-directory (dired-current-directory)))
-    (--each files (copy-file it target-directory 0))
+         (target-directory (dired-current-directory))
+         (copied-files 0))
+    (--each files (when (file-exists-p it)
+                    (copy-file it target-directory 0)
+                    (cl-incf copied-files)))
     ;; TODO: abstract the revert/mark code, it is used for copy and
     ;; paste, and I can see bunch of other uses
     (revert-buffer)
@@ -98,7 +101,8 @@ copy ring."
         (dired-utils-goto-line (concat target-directory it))
         (dired-mark 1)))
     (unless arg (ring-remove dired-ranger-copy-ring 0))
-    (message (format "Pasted %d item%s from copy ring."
+    (message (format "Pasted %d/%d item%s from copy ring."
+                     copied-files
                      (length files)
                      (if (> (length files) 1) "s" "")))))
 
@@ -112,8 +116,11 @@ instead of copying them."
          (data (ring-ref dired-ranger-copy-ring index))
          (buffers (car data))
          (files (cdr data))
-         (target-directory (dired-current-directory)))
-    (--each files (rename-file it target-directory 0))
+         (target-directory (dired-current-directory))
+         (copied-files 0))
+    (--each files (when (file-exists-p it)
+                    (rename-file it target-directory 0)
+                    (cl-incf copied-files)))
     (revert-buffer)
     (let ((dired-marker-char ?M))
       (--each (-map 'file-name-nondirectory files)
@@ -123,7 +130,8 @@ instead of copying them."
       (when (buffer-live-p it)
         (with-current-buffer it (revert-buffer))))
     (unless arg (ring-remove dired-ranger-copy-ring 0))
-    (message (format "Moved %d item%s from copy ring."
+    (message (format "Moved %d/%d item%s from copy ring."
+                     copied-files
                      (length files)
                      (if (> (length files) 1) "s" "")))))
 
