@@ -75,7 +75,7 @@ buffers for a single paste."
                          (length marked)
                          (if (> (length marked) 1) "s" "")))))))
 
-(defun dired-ranger-revert-target (char files)
+(defun dired-ranger--revert-target (char files)
   "Revert the target buffer and mark the new files."
   (let ((current-file (dired-utils-get-filename)))
     (revert-buffer)
@@ -104,7 +104,7 @@ copy ring."
                     (cl-incf copied-files)))
     ;; TODO: abstract the revert/mark code, it is used for copy and
     ;; paste, and I can see bunch of other uses
-    (dired-ranger-revert-target ?P files)
+    (dired-ranger--revert-target ?P files)
     (unless arg (ring-remove dired-ranger-copy-ring 0))
     (message (format "Pasted %d/%d item%s from copy ring."
                      copied-files
@@ -126,7 +126,7 @@ instead of copying them."
     (--each files (when (file-exists-p it)
                     (rename-file it target-directory 0)
                     (cl-incf copied-files)))
-    (dired-ranger-revert-target ?M files)
+    (dired-ranger--revert-target ?M files)
     (--each buffers
       (when (buffer-live-p it)
         (with-current-buffer it (revert-buffer))))
