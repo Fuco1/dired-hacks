@@ -5,7 +5,7 @@
 ;; Author: Matus Goljer <matus.goljer@gmail.com>
 ;; Maintainer: Matus Goljer <matus.goljer@gmail.com>
 ;; Keywords: files
-;; Version: 0.0.1
+;; Version: 0.0.2
 ;; Created: 14th February 2014
 ;; Package-requires: ((dash "2.5.0") (dired-hacks-utils "0.0.1"))
 
@@ -163,6 +163,12 @@
 
 ;;     (extension "ogg" "flv" "mpg" "avi" "mp4" "mp3")
 ;;     ;; show all files matching any of these extensions
+
+;;  Other features
+;;  --------------
+
+;; You can clone the currently visible dired buffer by calling
+;; `dired-filter-clone-filtered-buffer'.
 
 ;; See https://github.com/Fuco1/dired-hacks for the entire collection.
 
@@ -506,7 +512,7 @@ LOCALP has same semantics as in `dired-get-filename'."
       (nreverse r))))
 
 
-;; ui
+;; filters & filter definitions
 ;;;###autoload
 (cl-defmacro dired-filter-define (name documentation
                                        (&key
@@ -824,6 +830,8 @@ push all its constituents back on the stack."
   (setq dired-filter-stack nil)
   (dired-filter--update))
 
+
+;; filter groups
 (defun dired-filter--maybe-save-stuff ()
   (when dired-filter-save-with-custom
     (if (not (fboundp 'customize-save-variable))
@@ -882,6 +890,22 @@ push all its constituents back on the stack."
     (unless dired-filter-mode
       (dired-filter-mode 1))
     (dired-filter--update)))
+
+
+;; other interactive functions
+(defun dired-filter-clone-filtered-buffer (&optional name)
+  "Clone the currently filtered view of the dired buffer.
+
+A new dired buffer with just the visible files is created, with
+default filters.
+
+If the prefix argument is non-nil, you will be prompted for a
+name, otherwise a disambiguation cookie <number> is appended
+after the current buffer's name."
+  (interactive (list (if current-prefix-arg
+                         (read-string "New buffer name: " (buffer-name))
+                       (generate-new-buffer-name (buffer-name)))))
+  (dired (cons name (dired-filter--get-all-files t))))
 
 
 ;; mode stuff

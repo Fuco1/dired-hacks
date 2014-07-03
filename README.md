@@ -186,6 +186,10 @@ with value:
     (extension "ogg" "flv" "mpg" "avi" "mp4" "mp3")
     ;; show all files matching any of these extensions
 
+### Other features
+
+You can clone the currently visible dired buffer by calling
+`dired-filter-clone-filtered-buffer`.
 
 <a name="dired-avfs" />
 ## dired-avfs
