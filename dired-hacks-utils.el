@@ -53,14 +53,14 @@
 
 (defun dired-utils--get-keyword-info (keyword)
   (let ((filename (dired-utils-get-filename)))
-    (case keyword
+    (cl-case keyword
       (:name filename)
       (:isdir (file-directory-p filename))
       (:issym (and (file-symlink-p filename) t))
       (:target (file-symlink-p filename))
       (t
        (nth (-elem-index keyword dired-utils-file-attributes-keywords)
-            (file-attributes (dired-utils-get-filename)))))))
+            (file-attributes filename))))))
 
 (defun dired-utils-get-info (&rest keywords)
   "Query for info about the file at point.
