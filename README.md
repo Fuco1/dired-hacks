@@ -44,6 +44,12 @@ I'm lazy to create special button for every of my projects ;)
 
 Set of utility functions used in all the `dired-hacks` packages.
 
+This package also provides these interactive functions:
+
+* `dired-hacks-next-file` - go to next file, skipping empty and non-file lines
+* `dired-hacks-previous-file` - go to previous file, skipping empty
+  and non-file lines
+
 <a name="dired-filter" />
 ## dired-filter
 
