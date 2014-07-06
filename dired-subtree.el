@@ -95,7 +95,7 @@
 The prefix is repeated \"depth\" times.
 
 Alternatively, it can be a function taking one argument---the
-depth---taht creates the prefix."
+depth---that creates the prefix."
   :type '(choice string function)
   :group 'dired-subtree)
 
