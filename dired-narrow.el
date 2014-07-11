@@ -122,16 +122,20 @@ returns non-nil, the line is kept, otherwise it is removed.  The
 function takes one argument, which is the current filter string
 read from minibuffer."
   (let ((dired-narrow-buffer (current-buffer))
-        (dired-narrow-filter-function filter-function))
+        (dired-narrow-filter-function filter-function)
+        (current-file (dired-utils-get-filename)))
     (condition-case nil
         (progn
           (read-from-minibuffer "Filter: ")
           (with-current-buffer dired-narrow-buffer
             (let ((inhibit-read-only t))
-              (dired-narrow--remove-text-with-property 'invisible))))
+              (dired-narrow--remove-text-with-property 'invisible)))
+          (dired-next-subdir 0)
+          (dired-hacks-next-file))
       (quit
        (with-current-buffer dired-narrow-buffer
-         (dired-narrow--restore))))))
+         (dired-narrow--restore)
+         (dired-utils-goto-line current-file))))))
 
 
 ;; Interactive
