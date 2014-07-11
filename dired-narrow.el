@@ -48,8 +48,6 @@
 ;; the view.  As an inspiration, look at the built-in functions
 ;; mentioned above.
 
-(dired-narrow--internal 'dired-narrow--fuzzy-filter)
-
 ;;; Code:
 
 (require 'dash)
