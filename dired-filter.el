@@ -263,6 +263,24 @@ as well."
   :type 'boolean
   :group 'dired-filter)
 
+(defcustom dired-filter-revert 'ask
+  "Should we revert the dired buffer when applying new filter?
+
+The value 'never means never revert the buffer and add the filter
+without refreshing the content.  This might provide incorrect
+results if some previously filtered file should not be filtered
+after the change.
+
+The value 'always always reverts the buffer.
+
+The value 'ask will ask if we should revert if the revert
+function is non-standard, that is, not `dired-revert'.  This means the dired buffer might come from `find-dired' or similar operation and the reverting might be costly."
+  :type '(radio
+          (const :tag "Never revert automatically." never)
+          (const :tag "Always revert automatically." always)
+          (const :tag "Revert automatically only in standard dired buffers, ask otherwise." ask))
+  :group 'dired-filter)
+
 ;;;###autoload
 (defvar dired-filter-map
   (let ((map (make-sparse-keymap)))
@@ -407,7 +425,16 @@ listing."
 (defun dired-filter--update ()
   "Re-run the filters."
   (let ((file-name (dired-utils-get-filename)))
-    (dired-revert)
+    (if (eq revert-buffer-function 'dired-revert)
+        (revert-buffer)
+      (if (cond
+           ((eq dired-filter-revert 'never) nil)
+           ((eq dired-filter-revert 'always) t)
+           ((eq dired-filter-revert 'ask)
+            (y-or-n-p "It appears the revert function for this dired buffer is non-standard.  Reverting might take a long time.
+Do you want to apply the filters without reverting (this might provide incorrect results in some situations)?")))
+          (revert-buffer)
+        (dired-filter--expunge)))
     (if (and dired-filter-mode
              dired-filter-show-filters
              dired-filter-stack)
