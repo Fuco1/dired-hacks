@@ -48,6 +48,18 @@
   "Like `dired-get-filename' but never signal an error."
   (dired-get-filename localp t))
 
+(defun dired-utils-get-all-files (&optional localp)
+  "Return all files in this dired buffer as a list.
+
+LOCALP has same semantics as in `dired-get-filename'."
+  (save-excursion
+    (goto-char (point-min))
+    (let (r)
+      (while (= 0 (forward-line))
+        (--when-let (dired-utils-get-filename localp)
+          (push it r)))
+      (nreverse r))))
+
 (defconst dired-utils-file-attributes-keywords
   '(:isdir :nlinks :uid :gid :atime :mtime :ctime :size :modes :gidchg :inode :devnum)
   "List of keywords to map with `file-attributes'.")

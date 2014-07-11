@@ -526,18 +526,6 @@ filter."
                ,filter))
             nil))))
 
-(defun dired-filter--get-all-files (&optional localp)
-  "Return all files in this dired buffer as a list.
-
-LOCALP has same semantics as in `dired-get-filename'."
-  (save-excursion
-    (goto-char (point-min))
-    (let (r)
-      (while (= 0 (forward-line))
-        (--when-let (dired-utils-get-filename localp)
-          (push it r)))
-      (nreverse r))))
-
 
 ;; filters & filter definitions
 ;;;###autoload
@@ -662,7 +650,7 @@ separately in turn and ORing the filters together."
    :reader (let* ((file (dired-utils-get-filename))
                   (ext (and file (file-name-extension file)))
                   (exts
-                   (->> (dired-filter--get-all-files 'no-dir)
+                   (->> (dired-utils-get-all-files 'no-dir)
                      (--group-by (file-name-extension it))
                      (-map 'car)
                      (-remove 'not))))
@@ -932,7 +920,7 @@ after the current buffer's name."
   (interactive (list (if current-prefix-arg
                          (read-string "New buffer name: " (buffer-name))
                        (generate-new-buffer-name (buffer-name)))))
-  (dired (cons name (dired-filter--get-all-files t))))
+  (dired (cons name (dired-utils-get-all-files t))))
 
 
 ;; mode stuff
