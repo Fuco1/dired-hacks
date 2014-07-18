@@ -53,7 +53,7 @@
   :type 'directory
   :group 'dired-avfs)
 
-(defcustom dired-avfs-archives '("zip" "rar" "tar")
+(defcustom dired-avfs-archives '("zip" "rar" "tar" "bz2")
   "Archives that are automagically opened via avfs."
   :type '(repeat string)
   :group 'dired-avfs)
