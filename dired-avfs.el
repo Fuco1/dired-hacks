@@ -71,6 +71,13 @@ dired, but not from `find-file'."
   :type '(repeat symbol)
   :group 'dired-avfs)
 
+(defcustom dired-avfs-file-size-threshold 100
+  "Ask before opening files if their size exceeds this setting.
+
+The value is in megabytes."
+  :type 'integer
+  :group 'dired-avfs)
+
 (defun dired-avfs--archive-filename (filename)
   (file-truename (concat dired-avfs-root (file-truename filename) "#")))
 
@@ -100,7 +107,11 @@ dired, but not from `find-file'."
 automagically change the filename to the location of virtual
 directory representing this archive."
   (when (and (not (memq this-command dired-avfs-ignore-commands))
-             (dired-avfs--archive-p (ad-get-arg 0)))
+             (dired-avfs--archive-p (ad-get-arg 0))
+             (if (> (nth 7 (file-attributes (ad-get-arg 0))) (* dired-avfs-file-size-threshold 1048576))
+                 (y-or-n-p (format "Size of this file exceeds `dired-avfs-file-size-threshold' (%d MB), extracting the information might take very long time.  Do you want to continue?"
+                                   dired-avfs-file-size-threshold))
+               t))
     (ad-set-arg 0 (dired-avfs--archive-filename (ad-get-arg 0)))))
 
 (provide 'dired-avfs)
