@@ -41,10 +41,17 @@
   :type 'directory
   :group 'dired-tagsistant)
 
+(defun dired-tagsistant-root ()
+  "Return normalized value of `dired-tagsistant-root'."
+  (file-truename (concat dired-tagsistant-root "/")))
+
 (defcustom dired-tagsistant-better-header t
   "If non-nil, hide the tagsistant-specific noise in the header."
   :type 'boolean
   :group 'dired-tagsistant)
+
+
+;; Better header display
 
 (defun dired-tagsistant--better-header ()
   (save-excursion
@@ -58,21 +65,21 @@
                           (cond
                            ((save-excursion
                               (re-search-forward
-                               (concat (file-truename (concat dired-tagsistant-root "/"))
+                               (concat (dired-tagsistant-root)
                                        "store/\\(.*?\\)/@:")
                                nil t))
                             ;; TODO: Add nicer query formatting
                             (format "Query: %s" (match-string 1)))
                            ((save-excursion
                               (re-search-forward
-                               (concat (file-truename (concat dired-tagsistant-root "/"))
+                               (concat (dired-tagsistant-root)
                                        "store/\\(.*?\\)/@@:")
                                nil t))
                             ;; TODO: Add nicer query formatting
                             (format "Query (no resolver): %s" (match-string 1)))
                            ((save-excursion
                               (re-search-forward
-                               (concat (file-truename (concat dired-tagsistant-root "/"))
+                               (concat (dired-tagsistant-root)
                                        "\\(store.*?:$\\)")
                                nil t))
                             (format "Tagsistant: %s" (match-string 1)))))))
