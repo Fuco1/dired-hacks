@@ -72,7 +72,7 @@ dired, but not from `find-file'."
   :group 'dired-avfs)
 
 (defun dired-avfs--archive-filename (filename)
-  (concat dired-avfs-root (file-truename filename) "#"))
+  (file-truename (concat dired-avfs-root (file-truename filename) "#")))
 
 (defun dired-avfs--archive-p (filename)
   (let ((extensions (concat "\\." (regexp-opt dired-avfs-archives) "\\'")))
