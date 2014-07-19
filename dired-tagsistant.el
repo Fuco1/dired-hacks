@@ -6,7 +6,7 @@
 ;; Maintainer: Matúš Goljer <matus.goljer@gmail.com>
 ;; Version: 0.0.1
 ;; Created: 14th February 2014
-;; Package-requires: ((dash "2.8.0") (dired-hacks-utils "0.0.1"))
+;; Package-requires: ((dash "2.8.0") (dired-hacks-utils "0.0.1") (f "0.16") (s "1.7.0"))
 ;; Keywords: files
 
 ;; This program is free software; you can redistribute it and/or
@@ -30,6 +30,8 @@
 
 (require 'dired-hacks-utils)
 (require 'dash)
+(require 'f)
+(require 's)
 
 (defgroup dired-tagsistant ()
   "Tagsistant support for dired."
@@ -87,6 +89,52 @@
               (put-text-property (match-beginning 0) (match-end 0) 'display header))))))))
 
 (add-hook 'dired-after-readin-hook 'dired-tagsistant--better-header)
+
+
+;; Helpers
+
+(defun dired-tagsistant--get-tags ()
+  "Return a list of all available tags."
+  (let ((tagdir (concat (dired-tagsistant-root) "tags/")))
+    (--map (s-chop-prefix tagdir it)
+           (f-directories tagdir))))
+
+(defun dired-tagsistant--read-tags ()
+  "Read tags interactively from user."
+  (let (re tag (tags (dired-tagsistant--get-tags)))
+    (while (not (string= "" tag))
+      (push (setq tag (completing-read
+                       (format "Tags %s(hit RET to end): "
+                               (if re (format "[%s] " (s-join ", " (reverse re))) ""))
+                       tags nil t)) re))
+    (nreverse (cdr re))))
+
+
+;; Basic queries
+
+(defun dired-tagsistant-some-tags (tags)
+  "Display all files matching some tag in TAGS."
+  (interactive (list (dired-tagsistant--read-tags)))
+  (let ((query (concat (s-join "/+/" tags) "/@")))
+    (find-file (concat (dired-tagsistant-root) "store/" query))))
+
+(defun dired-tagsistant-all-tags (tags)
+  "Display all files matching all tags in TAGS."
+  (interactive (list (dired-tagsistant--read-tags)))
+  (let ((query (concat (s-join "/" tags) "/@")))
+    (find-file (concat (dired-tagsistant-root) "store/" query))))
+
+(defun dired-tagsistant-some-tags-regexp (regexp)
+  "Display all files where some of their tags matches REGEXP."
+  (interactive "sRegexp: ")
+  (let* ((tags (--filter (string-match-p regexp it) (dired-tagsistant--get-tags))))
+    (dired-tagsistant-some-tags tags)))
+
+(defun dired-tagsistant-all-tags-regexp (tags)
+  "Display all files where all of their tags match REGEXP."
+  (interactive "sRegexp: ")
+  (let* ((tags (--filter (string-match-p regexp it) (dired-tagsistant--get-tags))))
+    (dired-tagsistant-all-tags tags)))
 
 (provide 'dired-tagsistant)
 ;;; dired-tagsistant.el ends here
