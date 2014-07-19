@@ -61,6 +61,26 @@
 ;; cleared, so you can repeat the copy operation in another dired
 ;; buffer.
 
+;; Bookmarks
+;; ---------
+
+;; Use `dired-ranger-bookmark' to bookmark current dired buffer.  You
+;; can later quickly revisit it by calling
+;; `dired-ranger-bookmark-visit'.
+
+;; A bookmark name is any single character, letter, digit or a symbol.
+
+;; A special bookmark with name `dired-ranger-bookmark-LRU' represents
+;; the least recently used dired buffer.  Its default value is `.  If
+;; you bind `dired-ranger-bookmark-visit' to the same keybinding,
+;; hitting `` will instantly bring you to the previously used dired
+;; buffer.  This can be used to toggle between two dired buffers in a
+;; very fast way.
+
+;; These bookmarks are not persistent.  If you want persistent
+;; bookmarks use the bookmarks provided by emacs, see (info "(emacs)
+;; Bookmarks").
+
 ;;; Code:
 
 (require 'dired-hacks-utils)
@@ -88,6 +108,7 @@ With non-nil prefix argument, add the marked items to the current
 selection.  This allows you to gather files from multiple dired
 buffers for a single paste."
   (interactive "P")
+  ;; TODO: add dired+ `dired-get-marked-files' support?
   (let ((marked (dired-get-marked-files)))
     (if (or (not arg)
             (ring-empty-p dired-ranger-copy-ring))
@@ -137,8 +158,6 @@ copy ring."
     (--each files (when (file-exists-p it)
                     (copy-file it target-directory 0)
                     (cl-incf copied-files)))
-    ;; TODO: abstract the revert/mark code, it is used for copy and
-    ;; paste, and I can see bunch of other uses
     (dired-ranger--revert-target ?P files)
     (unless arg (ring-remove dired-ranger-copy-ring 0))
     (message (format "Pasted %d/%d item%s from copy ring."
@@ -170,6 +189,91 @@ instead of copying them."
                      copied-files
                      (length files)
                      (if (> (length files) 1) "s" "")))))
+
+
+;; bookmarks
+(defcustom dired-ranger-bookmark-reopen 'ask
+  "Should we reopen closed dired buffer when visiting a bookmark?
+
+This does only correctly reopen regular dired buffers listing one
+directory.  Special dired buffers like the output of `find-dired'
+or `ag-dired', virtual dired buffers and subdirectories can not
+be recreated.
+
+The value 'never means never reopen the directory.
+
+The value 'always means always reopen the directory.
+
+The value 'ask will ask if we should reopen or not.  Reopening a
+dired buffer for a directory that is already opened in dired will
+bring that up, which might be unexpected as that directory might
+come from a non-standard source (i.e. not be file-system
+backed)."
+  :type '(radio
+          (const :tag "Never reopen automatically." never)
+          (const :tag "Always reopen automatically." always)
+          (const :tag "Reopen automatically only in standard dired buffers, ask otherwise." ask))
+  :group 'dired-ranger)
+
+(defcustom dired-ranger-bookmark-LRU ?`
+  "Bookmark representing the least recently used/visited dired buffer.
+
+If a dired buffer is currently active, select the one visited
+before.  If a non-dired buffer is active, visit the least
+recently visited dired buffer."
+  :type 'char
+  :group 'dired-ranger)
+
+(defvar dired-ranger-bookmarks nil
+  "An alist mapping bookmarks to dired buffers and locations.")
+
+(defun dired-ranger-bookmark (char)
+  "Bookmark current dired buffer.
+
+CHAR is a single character (a-zA-Z0-9) representing the bookmark.
+Reusing a bookmark replaces the content.  These bookmarks are not
+persistent, they are used for quick jumping back and forth
+between currently used directories."
+  (interactive "cBookmark name: ")
+  (let ((dir (file-truename default-directory)))
+    (-if-let (value (cdr (assoc char dired-ranger-bookmarks)))
+        (setf (cdr (assoc char dired-ranger-bookmarks)) (cons dir (current-buffer)))
+      (push (-cons* char dir (current-buffer)) dired-ranger-bookmarks))
+    (message "Bookmarked directory %s as `%c'" dir char)))
+
+(defun dired-ranger-bookmark-visit (char)
+  "Visit bookmark CHAR.
+
+If the associated dired buffer was killed, we try to reopen it
+according to the setting `dired-ranger-bookmark-reopen'.
+
+The special bookmark `dired-ranger-bookmark-LRU' always jumps to
+the least recently visited dired buffer.
+
+See also `dired-ranger-bookmark'."
+  (interactive "cBookmark name: ")
+  (if (eq char dired-ranger-bookmark-LRU)
+      (progn
+        (let ((buffers (buffer-list)))
+          (when (eq (with-current-buffer (car buffers) major-mode) 'dired-mode)
+            (pop buffers))
+          (switch-to-buffer (--first (eq (with-current-buffer it major-mode) 'dired-mode) buffers))))
+    (-if-let* ((value (cdr (assoc char dired-ranger-bookmarks)))
+               (dir (car value))
+               (buffer (cdr value)))
+        (if (buffer-live-p buffer)
+            (switch-to-buffer buffer)
+          (when
+              ;; TODO: abstract this never/always/ask pattern. It is
+              ;; also used in filter.
+              (cond
+               ((eq dired-ranger-bookmark-reopen 'never) nil)
+               ((eq dired-ranger-bookmark-reopen 'always) t)
+               ((eq dired-ranger-bookmark-reopen 'ask)
+                (y-or-n-p (format "The dired buffer referenced by this bookmark does not exist.  Should we try to reopen `%s'?" dir))))
+            (find-file dir)
+            (setf (cdr (assoc char dired-ranger-bookmarks)) (cons dir (current-buffer)))))
+      (message "Bookmark `%c' does not exist." char))))
 
 (provide 'dired-ranger)
 ;;; dired-ranger.el ends here
