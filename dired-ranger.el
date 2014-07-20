@@ -101,6 +101,7 @@
 
 (defvar dired-ranger-copy-ring (make-ring dired-ranger-copy-ring-size))
 
+;;;###autoload
 (defun dired-ranger-copy (arg)
   "Place the marked items in the copy ring.
 
@@ -141,6 +142,7 @@ buffers for a single paste."
         (dired-mark 1)))
     (dired-utils-goto-line current-file)))
 
+;;;###autoload
 (defun dired-ranger-paste (arg)
   "Copy the items from copy ring to current directory.
 
@@ -165,6 +167,7 @@ copy ring."
                      (length files)
                      (if (> (length files) 1) "s" "")))))
 
+;;;###autoload
 (defun dired-ranger-move (arg)
   "Move the items from copy ring to current directory.
 
@@ -227,6 +230,7 @@ recently visited dired buffer."
 (defvar dired-ranger-bookmarks nil
   "An alist mapping bookmarks to dired buffers and locations.")
 
+;;;###autoload
 (defun dired-ranger-bookmark (char)
   "Bookmark current dired buffer.
 
@@ -241,6 +245,7 @@ between currently used directories."
       (push (-cons* char dir (current-buffer)) dired-ranger-bookmarks))
     (message "Bookmarked directory %s as `%c'" dir char)))
 
+;;;###autoload
 (defun dired-ranger-bookmark-visit (char)
   "Visit bookmark CHAR.
 
