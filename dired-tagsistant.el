@@ -121,6 +121,12 @@ If NO-NAMESPACES is non-nil, do not return namespace tags."
   "Return the store directory represented by QUERY."
   (concat (dired-tagsistant-root) "store/" query))
 
+
+;; Readers
+
+(defvar dired-tagsistant--read-history nil
+  "History of tags read from the user.")
+
 (defun dired-tagsistant--read-tags ()
   "Read tags interactively from user."
   (let (re tag (tags (dired-tagsistant--get-tags)))
@@ -128,9 +134,12 @@ If NO-NAMESPACES is non-nil, do not return namespace tags."
       (setq tag (completing-read
                  (format "Tags %s(hit RET to end): "
                          (if re (format "[%s] " (s-join ", " (reverse re))) ""))
-                 tags nil t))
+                 tags nil 'confirm nil 'dired-tagsistant--read-history))
       (if (dired-tagsistant--namespace-p tag)
-          (setq tag (s-join "/" (cons tag (dired-tagsistant--read-tripple-tag tag))))
+          (progn
+            (setq tag (s-join "/" (cons tag (dired-tagsistant--read-tripple-tag tag))))
+            (pop dired-tagsistant--read-history)
+            (push tag dired-tagsistant--read-history))
         (setq tags (--remove (equal tag it) tags)))
       (push tag re))
     (nreverse (cdr re))))
