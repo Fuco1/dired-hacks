@@ -185,5 +185,56 @@ If NO-NAMESPACES is non-nil, do not return namespace tags."
   (let* ((tags (--filter (string-match-p regexp it) (dired-tagsistant--get-tags :no-namespaces))))
     (dired-tagsistant-all-tags tags)))
 
+
+;; Tagging
+
+(defun dired-tagsistant--tag (files tags method)
+  "Tag FILES with TAGS using METHOD.
+
+FILES is a list of files to tag.
+
+TAGS is a list of tags to assign to the files.  Each tripple tag
+should be represented by one string.
+
+METHOD can be either :copy or :symlink."
+  (let* ((query (concat (s-join "/" tags) "/@@/"))
+         (store (dired-tagsistant--store query))
+         (reporter (make-progress-reporter "Tagging files" 0 (length files))))
+    (--each files
+      (cond
+       ((eq method :symlink)
+        (make-symbolic-link (f-target it) store))
+       ((eq method :copy)
+        (copy-file it store))
+       (:else (error "Unknown method")))
+      (progress-reporter-update reporter it-index))
+    (progress-reporter-done reporter)))
+
+(defun dired-tagsistant-tag (files tags)
+  "Tag FILES with TAGS by copying them into tagsistant store.
+
+FILES is a list of files to tag.
+
+TAGS is a list of tags to assign to the files.  Each tripple tag
+should be represented by one string."
+  (interactive (list (dired-get-marked-files)
+                     (dired-tagsistant--read-tags)))
+  (dired-tagsistant--tag files tags :copy))
+
+(defun dired-tagsistant-tag-symlink (files tags)
+  "Tag files with TAGS by tagging symlinks pointing to them.
+
+Symbolic links are resolved recursively and always point to the
+*real* file.  This saves space in the database and make updating
+of broken links much simpler.
+
+FILES is a list of files to tag.
+
+TAGS is a list of tags to assign to the files.  Each tripple tag
+should be represented by one string."
+  (interactive (list (dired-get-marked-files)
+                     (dired-tagsistant--read-tags)))
+  (dired-tagsistant--tag files tags :symlink))
+
 (provide 'dired-tagsistant)
 ;;; dired-tagsistant.el ends here
