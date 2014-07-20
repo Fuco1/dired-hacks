@@ -130,7 +130,7 @@
   (let* ((tags (--filter (string-match-p regexp it) (dired-tagsistant--get-tags))))
     (dired-tagsistant-some-tags tags)))
 
-(defun dired-tagsistant-all-tags-regexp (tags)
+(defun dired-tagsistant-all-tags-regexp (regexp)
   "Display all files where all of their tags match REGEXP."
   (interactive "sRegexp: ")
   (let* ((tags (--filter (string-match-p regexp it) (dired-tagsistant--get-tags))))
