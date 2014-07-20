@@ -93,21 +93,57 @@
 
 ;; Helpers
 
-(defun dired-tagsistant--get-tags ()
-  "Return a list of all available tags."
+(defun dired-tagsistant--namespace-p (tag)
+  "Return non-nil if TAG is a namespace tag."
+  (s-ends-with? ":" tag))
+
+(defun dired-tagsistant--get-tags (&optional no-namespaces)
+  "Return a list of all available tags.
+
+If NO-NAMESPACES is non-nil, do not return namespace tags."
   (let ((tagdir (concat (dired-tagsistant-root) "tags/")))
     (--map (s-chop-prefix tagdir it)
-           (f-directories tagdir))))
+           (let ((tags (f-directories tagdir)))
+             (if no-namespaces
+                 (-remove 'dired-tagsistant--namespace-p tags)
+               tags)))))
+
+(defun dired-tagsistant--get-namespace-keys (namespace)
+  "Return a list of all keys in NAMESPACE."
+  (let ((tagdir (concat (dired-tagsistant-root) "tags/" namespace "/")))
+    (--map (s-chop-prefix tagdir it) (f-directories tagdir))))
+
+(defun dired-tagsistant--get-namespace-key-values (namespace key)
+  (let ((tagdir (concat (dired-tagsistant-root) "tags/" namespace "/" key "/")))
+    (--map (s-chop-prefix tagdir it) (f-directories tagdir))))
 
 (defun dired-tagsistant--read-tags ()
   "Read tags interactively from user."
   (let (re tag (tags (dired-tagsistant--get-tags)))
     (while (not (string= "" tag))
-      (push (setq tag (completing-read
-                       (format "Tags %s(hit RET to end): "
-                               (if re (format "[%s] " (s-join ", " (reverse re))) ""))
-                       tags nil t)) re))
+      (setq tag (completing-read
+                 (format "Tags %s(hit RET to end): "
+                         (if re (format "[%s] " (s-join ", " (reverse re))) ""))
+                 tags nil t))
+      (if (dired-tagsistant--namespace-p tag)
+          (setq tag (s-join "/" (cons tag (dired-tagsistant--read-tripple-tag tag))))
+        (setq tags (--remove (equal tag it) tags)))
+      (push tag re))
     (nreverse (cdr re))))
+
+(defun dired-tagsistant--read-tripple-tag (namespace)
+  "Read key, operator and value in NAMESPACE."
+  (let* ((key (let ((namespaces (dired-tagsistant--get-namespace-keys namespace)))
+                (completing-read
+                 (format "Key [namespace %s]: " namespace)
+                 namespaces nil t nil nil (car namespaces))))
+         (op (completing-read "Operator: " '("eq" "inc" "gt" "lt") nil t nil nil "eq"))
+         (value (let ((values (dired-tagsistant--get-namespace-key-values namespace key)))
+                  (completing-read
+                   (format "Value [namespace %s]: " namespace)
+                   values
+                   nil nil nil nil (car values)))))
+    (list key op value)))
 
 
 ;; Basic queries
@@ -127,13 +163,13 @@
 (defun dired-tagsistant-some-tags-regexp (regexp)
   "Display all files where some of their tags matches REGEXP."
   (interactive "sRegexp: ")
-  (let* ((tags (--filter (string-match-p regexp it) (dired-tagsistant--get-tags))))
+  (let* ((tags (--filter (string-match-p regexp it) (dired-tagsistant--get-tags :no-namespaces))))
     (dired-tagsistant-some-tags tags)))
 
 (defun dired-tagsistant-all-tags-regexp (regexp)
   "Display all files where all of their tags match REGEXP."
   (interactive "sRegexp: ")
-  (let* ((tags (--filter (string-match-p regexp it) (dired-tagsistant--get-tags))))
+  (let* ((tags (--filter (string-match-p regexp it) (dired-tagsistant--get-tags :no-namespaces))))
     (dired-tagsistant-all-tags tags)))
 
 (provide 'dired-tagsistant)
