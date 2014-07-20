@@ -117,6 +117,10 @@ If NO-NAMESPACES is non-nil, do not return namespace tags."
   (let ((tagdir (concat (dired-tagsistant-root) "tags/" namespace "/" key "/")))
     (--map (s-chop-prefix tagdir it) (f-directories tagdir))))
 
+(defun dired-tagsistant--store (query)
+  "Return the store directory represented by QUERY."
+  (concat (dired-tagsistant-root) "store/" query))
+
 (defun dired-tagsistant--read-tags ()
   "Read tags interactively from user."
   (let (re tag (tags (dired-tagsistant--get-tags)))
@@ -152,13 +156,13 @@ If NO-NAMESPACES is non-nil, do not return namespace tags."
   "Display all files matching some tag in TAGS."
   (interactive (list (dired-tagsistant--read-tags)))
   (let ((query (concat (s-join "/+/" tags) "/@")))
-    (find-file (concat (dired-tagsistant-root) "store/" query))))
+    (find-file (dired-tagsistant--store query))))
 
 (defun dired-tagsistant-all-tags (tags)
   "Display all files matching all tags in TAGS."
   (interactive (list (dired-tagsistant--read-tags)))
   (let ((query (concat (s-join "/" tags) "/@")))
-    (find-file (concat (dired-tagsistant-root) "store/" query))))
+    (find-file (dired-tagsistant--store query))))
 
 (defun dired-tagsistant-some-tags-regexp (regexp)
   "Display all files where some of their tags matches REGEXP."
