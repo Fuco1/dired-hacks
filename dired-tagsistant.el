@@ -161,24 +161,28 @@ If NO-NAMESPACES is non-nil, do not return namespace tags."
 
 ;; Basic queries
 
+;;;###autoload
 (defun dired-tagsistant-some-tags (tags)
   "Display all files matching some tag in TAGS."
   (interactive (list (dired-tagsistant--read-tags)))
   (let ((query (concat (s-join "/+/" tags) "/@")))
     (find-file (dired-tagsistant--store query))))
 
+;;;###autoload
 (defun dired-tagsistant-all-tags (tags)
   "Display all files matching all tags in TAGS."
   (interactive (list (dired-tagsistant--read-tags)))
   (let ((query (concat (s-join "/" tags) "/@")))
     (find-file (dired-tagsistant--store query))))
 
+;;;###autoload
 (defun dired-tagsistant-some-tags-regexp (regexp)
   "Display all files where some of their tags matches REGEXP."
   (interactive "sRegexp: ")
   (let* ((tags (--filter (string-match-p regexp it) (dired-tagsistant--get-tags :no-namespaces))))
     (dired-tagsistant-some-tags tags)))
 
+;;;###autoload
 (defun dired-tagsistant-all-tags-regexp (regexp)
   "Display all files where all of their tags match REGEXP."
   (interactive "sRegexp: ")
@@ -210,6 +214,7 @@ METHOD can be either :copy or :symlink."
       (progress-reporter-update reporter it-index))
     (progress-reporter-done reporter)))
 
+;;;###autoload
 (defun dired-tagsistant-tag (files tags)
   "Tag FILES with TAGS by copying them into tagsistant store.
 
@@ -221,6 +226,7 @@ should be represented by one string."
                      (dired-tagsistant--read-tags)))
   (dired-tagsistant--tag files tags :copy))
 
+;;;###autoload
 (defun dired-tagsistant-tag-symlink (files tags)
   "Tag files with TAGS by tagging symlinks pointing to them.
 
