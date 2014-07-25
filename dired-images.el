@@ -65,11 +65,13 @@ This is only meaningful if no thumb buffer is associated.")
 
 
 ;;; misc
-(defmacro di-inc (var modulo)
-  `(setq ,var (mod (1+ ,var) ,modulo)))
+(defmacro di-inc (var modulo &optional delta)
+  (setq delta (or delta 1))
+  `(setq ,var (mod (+ ,var ,delta) ,modulo)))
 
-(defmacro di-dec (var modulo)
-  `(setq ,var (mod (1- ,var) ,modulo)))
+(defmacro di-dec (var modulo &optional delta)
+  (setq delta (or delta 1))
+  `(setq ,var (mod (- ,var ,delta) ,modulo)))
 
 
 ;;; dealing with windows
@@ -321,23 +323,26 @@ With prefix argument \\[universal-argument] \\[universal-argument] open a new th
         (di--thumb-total))
     (length di-file-list)))
 
-(defun di-view-next ()
-  (interactive)
+(defun di-view-next (&optional arg)
+  "Display next file"
+  (interactive "p")
   (if di-thumb-buffer
       (with-current-buffer di-thumb-buffer
         (di-thumb-next)
+        ;; TODO: this should set point in all the windows
         (set-window-point (car (di--get-active-thumb-windows)) (point)))
     (redisplay)
-    (di-inc di-file-list-current (di--view-total))
+    (di-inc di-file-list-current (di--view-total) arg)
     (di--open-image (nth di-file-list-current di-file-list))))
 
-(defun di-view-previous ()
-  (interactive)
+(defun di-view-previous (&optional arg)
+  "Display previous file."
+  (interactive "p")
   (if di-thumb-buffer
       (with-current-buffer di-thumb-buffer
         (di-thumb-previous)
         (set-window-point (car (di--get-active-thumb-windows)) (point)))
-    (di-dec di-file-list-current (di--view-total))
+    (di-dec di-file-list-current (di--view-total) arg)
     (di--open-image (nth di-file-list-current di-file-list))))
 
 (define-derived-mode di-view-mode special-mode
