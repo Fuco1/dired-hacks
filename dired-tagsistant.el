@@ -209,7 +209,11 @@ METHOD can be either :copy or :symlink."
        ((eq method :symlink)
         (make-symbolic-link (f-target it) store))
        ((eq method :copy)
-        (copy-file it store))
+        (cond
+         ((f-directory? it)
+          (copy-directory it store))
+         (:else
+          (copy-file it store))))
        (:else (error "Unknown method")))
       (progress-reporter-update reporter it-index))
     (progress-reporter-done reporter)))
