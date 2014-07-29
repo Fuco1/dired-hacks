@@ -93,6 +93,36 @@
 
 ;; Helpers
 
+(defun dired-tagsistant--path (dir fragments)
+  "Construct a tagsistant path.
+
+DIR is a directory under `dired-tagsistant-root'.
+
+FRAGMENTS are parts of the path which will be joined with /."
+  (let ((re (concat (dired-tagsistant-root) dir "/" (s-join "/" fragments))))
+    (if (s-ends-with? "/" re) re (concat re "/"))))
+
+(defun dired-tagsistant--store (&rest fragments)
+  "Return the store directory.
+
+Join FRAGMENTS by adding / between each two items, then append to
+the end."
+  (dired-tagsistant--path "store" fragments))
+
+(defun dired-tagsistant--tags (&rest fragments)
+  "Return the tags directory.
+
+Join FRAGMENTS by adding / between each two items, then append to
+the end."
+  (dired-tagsistant--path "tags" fragments))
+
+(defun dired-tagsistant--relations (&rest fragments)
+  "Return the relations directory.
+
+Join FRAGMENTS by adding / between each two items, then append to
+the end."
+  (dired-tagsistant--path "relations" fragments))
+
 (defun dired-tagsistant--namespace-p (tag)
   "Return non-nil if TAG is a namespace tag."
   (s-ends-with? ":" tag))
@@ -101,7 +131,7 @@
   "Return a list of all available tags.
 
 If NO-NAMESPACES is non-nil, do not return namespace tags."
-  (let ((tagdir (concat (dired-tagsistant-root) "tags/")))
+  (let ((tagdir (dired-tagsistant--tags)))
     (--map (s-chop-prefix tagdir it)
            (let ((tags (f-directories tagdir)))
              (if no-namespaces
@@ -110,16 +140,13 @@ If NO-NAMESPACES is non-nil, do not return namespace tags."
 
 (defun dired-tagsistant--get-namespace-keys (namespace)
   "Return a list of all keys in NAMESPACE."
-  (let ((tagdir (concat (dired-tagsistant-root) "tags/" namespace "/")))
+  (let ((tagdir (dired-tagsistant--tags namespace)))
     (--map (s-chop-prefix tagdir it) (f-directories tagdir))))
 
 (defun dired-tagsistant--get-namespace-key-values (namespace key)
-  (let ((tagdir (concat (dired-tagsistant-root) "tags/" namespace "/" key "/")))
+  (let ((tagdir (dired-tagsistant--tags namespace key)))
     (--map (s-chop-prefix tagdir it) (f-directories tagdir))))
 
-(defun dired-tagsistant--store (query)
-  "Return the store directory represented by QUERY."
-  (concat (dired-tagsistant-root) "store/" query))
 
 
 ;; Readers
@@ -165,15 +192,13 @@ If NO-NAMESPACES is non-nil, do not return namespace tags."
 (defun dired-tagsistant-some-tags (tags)
   "Display all files matching some tag in TAGS."
   (interactive (list (dired-tagsistant--read-tags)))
-  (let ((query (concat (s-join "/+/" tags) "/@")))
-    (find-file (dired-tagsistant--store query))))
+  (find-file (dired-tagsistant--store (s-join "/+/" tags) "@")))
 
 ;;;###autoload
 (defun dired-tagsistant-all-tags (tags)
   "Display all files matching all tags in TAGS."
   (interactive (list (dired-tagsistant--read-tags)))
-  (let ((query (concat (s-join "/" tags) "/@")))
-    (find-file (dired-tagsistant--store query))))
+  (find-file (dired-tagsistant--store (s-join "/" tags) "@")))
 
 ;;;###autoload
 (defun dired-tagsistant-some-tags-regexp (regexp)
@@ -201,8 +226,7 @@ TAGS is a list of tags to assign to the files.  Each tripple tag
 should be represented by one string.
 
 METHOD can be either :copy or :symlink."
-  (let* ((query (concat (s-join "/" tags) "/@@/"))
-         (store (dired-tagsistant--store query))
+  (let* ((store (dired-tagsistant--store (s-join "/" tags) "@@"))
          (reporter (make-progress-reporter "Tagging files" 0 (length files))))
     (--each files
       (cond
