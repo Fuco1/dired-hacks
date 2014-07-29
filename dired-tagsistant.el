@@ -147,6 +147,15 @@ If NO-NAMESPACES is non-nil, do not return namespace tags."
   (let ((tagdir (dired-tagsistant--tags namespace key)))
     (--map (s-chop-prefix tagdir it) (f-directories tagdir))))
 
+(defun dired-tagsistant--create-tag-maybe (tag &optional key value)
+  "Create TAG if it does not exist yet.
+
+If TAG is a namespace tag, create KEY if non-nil and VALUE if
+non-nil as well."
+  (let* ((parts (-remove 'null (list tag key value)))
+         (path (apply 'dired-tagsistant--tags parts)))
+    (unless (f-directory? path)
+      (make-directory path t))))
 
 
 ;; Readers
@@ -226,6 +235,15 @@ TAGS is a list of tags to assign to the files.  Each tripple tag
 should be represented by one string.
 
 METHOD can be either :copy or :symlink."
+  ;; create tags that do not exist
+  (--each tags
+    (cond
+     ;; tripple tag
+     ((s-matches? "/" it)
+      (let ((parts (-select-by-indices '(0 1 3) (s-split "/" it))))
+        (apply 'dired-tagsistant--create-tag-maybe parts)))
+     (:else (dired-tagsistant--create-tag-maybe it))))
+  ;; tag the files
   (let* ((store (dired-tagsistant--store (s-join "/" tags) "@@"))
          (reporter (make-progress-reporter "Tagging files" 0 (length files))))
     (--each files
@@ -249,7 +267,8 @@ METHOD can be either :copy or :symlink."
 FILES is a list of files to tag.
 
 TAGS is a list of tags to assign to the files.  Each tripple tag
-should be represented by one string."
+should be represented by one string.  Non-existing tags will be
+created automatically."
   (interactive (list (dired-get-marked-files)
                      (dired-tagsistant--read-tags)))
   (dired-tagsistant--tag files tags :copy))
@@ -265,7 +284,8 @@ of broken links much simpler.
 FILES is a list of files to tag.
 
 TAGS is a list of tags to assign to the files.  Each tripple tag
-should be represented by one string."
+should be represented by one string.  Non-existing tags will be
+created automatically."
   (interactive (list (dired-get-marked-files)
                      (dired-tagsistant--read-tags)))
   (dired-tagsistant--tag files tags :symlink))
