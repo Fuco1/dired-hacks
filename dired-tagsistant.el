@@ -296,15 +296,17 @@ created automatically."
 ;;;###autoload
 (defun dired-tagsistant-add-relation (parent rel child)
   (interactive (let* ((tags (dired-tagsistant--get-tags :no-namespace))
-                      (parent (completing-read "Parent: " tags nil
+                      (parent (completing-read (format "Parent (default \"%s\"): " (car tags))
+                                               tags nil
                                                t nil nil (car tags)))
-                      (rel (completing-read "Relation:"
+                      (rel (completing-read (format "Relation (default \"%s includes\"):" parent)
                                             (list "includes"
                                                   "excludes"
                                                   "is_equivalent")
                                             nil t nil nil "includes"))
                       (tags-child (-difference tags (list parent)))
-                      (child (completing-read "Child: " tags-child nil
+                      (child (completing-read (format "Child (default \"%s %s %s\"): " parent rel (car tags-child))
+                                              tags-child nil
                                               'confirm nil nil (car tags-child))))
                  (list parent rel child)))
   (let ((path (dired-tagsistant--relations parent rel child)))
