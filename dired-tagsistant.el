@@ -270,5 +270,26 @@ should be represented by one string."
                      (dired-tagsistant--read-tags)))
   (dired-tagsistant--tag files tags :symlink))
 
+
+;; Relations
+
+;;;###autoload
+(defun dired-tagsistant-add-relation (parent rel child)
+  (interactive (let* ((tags (dired-tagsistant--get-tags :no-namespace))
+                      (parent (completing-read "Parent: " tags nil
+                                               t nil nil (car tags)))
+                      (rel (completing-read "Relation:"
+                                            (list "includes"
+                                                  "excludes"
+                                                  "is_equivalent")
+                                            nil t nil nil "includes"))
+                      (tags-child (-difference tags (list parent)))
+                      (child (completing-read "Child: " tags-child nil
+                                              'confirm nil nil (car tags-child))))
+                 (list parent rel child)))
+  (let ((path (dired-tagsistant--relations parent rel child)))
+    (unless (f-directory? path)
+      (make-directory path))))
+
 (provide 'dired-tagsistant)
 ;;; dired-tagsistant.el ends here
