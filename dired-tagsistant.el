@@ -157,12 +157,25 @@ non-nil as well."
     (unless (f-directory? path)
       (make-directory path t))))
 
+(defun dired-tagsistant--get-files-tags (files)
+  "Return an alist mapping each file in FILES to a set of its tags."
+  (--map
+   (cons it (with-temp-buffer
+              (shell-command
+               (concat "cat "
+                       (shell-quote-argument it)
+                       ".tags | tr -d '\\0' | sort | uniq")
+               (current-buffer))
+              (s-split "\n" (buffer-string) :omit-nulls)))
+   files))
+
 
 ;; Readers
 
 (defvar dired-tagsistant--read-history nil
   "History of tags read from the user.")
 
+;; TODO: add prompt argument.
 (defun dired-tagsistant--read-tags ()
   "Read tags interactively from user."
   (let (re tag (tags (dired-tagsistant--get-tags)))
@@ -222,6 +235,29 @@ non-nil as well."
   (interactive "sRegexp: ")
   (let* ((tags (--filter (string-match-p regexp it) (dired-tagsistant--get-tags :no-namespaces))))
     (dired-tagsistant-all-tags tags)))
+
+;;;###autoload
+(defun dired-tagsistant-list-tags (files)
+  "Print all tags on each file of FILES.
+
+If FILES contains only one file, print in minibuffer, otherwise
+pop a window with a list of all tags for each file."
+  (interactive (list (dired-get-marked-files)))
+  (let ((tags (dired-tagsistant--get-files-tags files)))
+    (if (not (cdr files))
+        (message "%s | %s" (f-filename (caar tags)) (s-join ", " (cdar tags)))
+      (pop-to-buffer
+       (with-current-buffer (get-buffer-create "*dired-tagsistant-tags*")
+         (read-only-mode -1)
+         (erase-buffer)
+         (insert "|---+---|\n| File | Tags |\n|---+---|\n")
+         (--each tags
+           (insert "| " (f-filename (car it)) " | " (s-join ", " (cdr it)) " |\n"))
+         (insert "|---+---|")
+         (goto-char (point-min))
+         (org-table-align)
+         (special-mode)
+         (current-buffer))))))
 
 
 ;; Tagging
