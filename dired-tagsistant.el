@@ -285,7 +285,7 @@ METHOD can be either :copy or :symlink."
     (--each files
       (cond
        ((eq method :symlink)
-        (make-symbolic-link (f-target it) store))
+        (make-symbolic-link (f-canonical it) store))
        ((eq method :copy)
         (cond
          ((f-directory? it)
