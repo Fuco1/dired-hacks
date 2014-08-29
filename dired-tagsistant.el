@@ -197,12 +197,13 @@ non-nil as well."
   "Read key, operator and value in NAMESPACE."
   (let* ((key (let ((namespaces (dired-tagsistant--get-namespace-keys namespace)))
                 (completing-read
-                 (format "Key [namespace %s]: " namespace)
+                 (format "Key [%s]: " namespace)
                  namespaces nil t nil nil (car namespaces))))
-         (op (completing-read "Operator: " '("eq" "inc" "gt" "lt") nil t nil nil "eq"))
+         (op (completing-read (format "Operator [%s/%s]: " namespace key)
+                              '("eq" "inc" "gt" "lt") nil t nil nil "eq"))
          (value (let ((values (dired-tagsistant--get-namespace-key-values namespace key)))
                   (completing-read
-                   (format "Value [namespace %s]: " namespace)
+                   (format "Value [%s/%s/%s]: " namespace op key)
                    values
                    nil nil nil nil (car values)))))
     (list key op value)))
