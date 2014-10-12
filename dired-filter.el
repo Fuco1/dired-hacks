@@ -789,7 +789,7 @@ of `auto-mode-alist'."
 
 (defun dired-filter--negated-p (filter)
   "Return t if FILTER is negated, otherwise nil."
-  (and (> (length filter) 1)
+  (and (> (safe-length filter) 1)
        (eq 'not (car filter))))
 
 ;;;###autoload
