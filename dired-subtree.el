@@ -424,6 +424,7 @@ Return a string suitable for insertion in `dired' buffer."
     (delete-char -1)
     (goto-char (point-min))
     (kill-line 3)
+    (setq kill-ring (cdr kill-ring))
     (insert "  ")
     (while (= (forward-line) 0)
       (insert "  "))
