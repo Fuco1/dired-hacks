@@ -308,6 +308,9 @@ should be represented by one string.  Non-existing tags will be
 created automatically."
   (interactive (list (dired-get-marked-files)
                      (dired-tagsistant--read-tags)))
+  ;; TODO: when in a query, also copy the query string to destination
+  ;; and :rename, so we keep the original tag, add new ones and do not
+  ;; copy the files around needlessly
   (dired-tagsistant--tag files tags :copy))
 
 ;;;###autoload

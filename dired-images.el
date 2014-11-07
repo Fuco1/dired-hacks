@@ -4,6 +4,13 @@
 
 (require 'image-mode)
 
+;; TODO: add operations to
+;; - rotate
+;; - scale
+;;   - to original size
+;;   - to window size
+;;   - +/- given %
+
 ;; thumb customizes
 (defcustom di-thumbs-directory "~/.emacs.d/di/"
   "Location where thumbnails are stored."
@@ -111,6 +118,7 @@ This function sanitizes the variable `di-thumbs-directory'."
   "Return the location of temp file."
   (concat (di--thumbs-directory) ".di-temp-" (buffer-name di-active-view-buffer)))
 
+;; TODO: add optional dimensions of the thumb
 (defun di--thumb-name (file)
   "Return the thumb filename for this FILE."
   (file-truename
@@ -231,6 +239,7 @@ replacing it.
 With prefix argument \\[universal-argument] \\[universal-argument] open a new thumb buffer,
  prompting for name."
   (interactive "P")
+  ;; TODO: add dired+ `dired-get-marked-files' support
   (let ((marked-files (dired-get-marked-files))
         (buf (if (not (equal arg '(16)))
                  (di--get-active-thumb-buffer)
@@ -255,6 +264,8 @@ With prefix argument \\[universal-argument] \\[universal-argument] open a new th
       (--when-let (di--get-active-thumb-windows)
         (di--arrange-thumbs (car it))))))
 
+;; NOTE: (dired-get-marked-files) automagically returns the file under
+;; cursor if no selection is made.
 (defun di-view-files ()
   "View marked files."
   (interactive)
@@ -483,11 +494,13 @@ With ARG, do not pop to the view window."
                  di-view-buffer
                (di--spawn-view-buffer)))
         (thumb-buf (current-buffer))
+        ;; TODO: abstract this into a data structure about thumbs/views
         (tps (text-properties-at (point)))
         (inhibit-read-only t))
     (setq di-active-view-buffer buf)
     (setq di-active-thumb-buffer thumb-buf)
     (set (make-local-variable 'di-view-buffer) buf)
+    ;; TODO: only call this if there is no window displaying buf
     (if arg
         (display-buffer buf)
       (pop-to-buffer buf))
