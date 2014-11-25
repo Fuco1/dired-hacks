@@ -213,6 +213,12 @@ By default, `dired-filter-by-omit' is active."
   :group 'dired-filter)
 (make-variable-buffer-local 'dired-filter-stack)
 
+(defcustom dired-filter-inherit-filter-stack nil
+  "When non-nil, visited subdirectories should inherit the filter
+of the parent directory."
+  :type 'boolean
+  :group 'dired-filter)
+
 (defcustom dired-filter-save-with-custom t
   "When non-nil, use Custom to save interactively changed variables.
 
@@ -938,6 +944,9 @@ popping the stack and then re-inserting the filters again."
   :lighter " Filter"
   (if dired-filter-mode
       (progn
+        (when dired-filter-inherit-filter-stack
+          (-when-let (parent (cdr (--first (f-same? (f-parent default-directory) (car it)) dired-buffers)))
+            (setq dired-filter-stack (with-current-buffer parent dired-filter-stack))))
         (if (and dired-filter-show-filters
                  dired-filter-stack)
             (add-to-list 'header-line-format '("" dired-filter-header-line-format) t))
