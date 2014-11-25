@@ -274,7 +274,9 @@ after the change.
 The value 'always always reverts the buffer.
 
 The value 'ask will ask if we should revert if the revert
-function is non-standard, that is, not `dired-revert'.  This means the dired buffer might come from `find-dired' or similar operation and the reverting might be costly."
+function is non-standard, that is, not `dired-revert'.  This
+means the dired buffer might come from `find-dired' or similar
+operation and the reverting might be costly."
   :type '(radio
           (const :tag "Never revert automatically." never)
           (const :tag "Always revert automatically." always)
@@ -431,8 +433,8 @@ listing."
            ((eq dired-filter-revert 'never) nil)
            ((eq dired-filter-revert 'always) t)
            ((eq dired-filter-revert 'ask)
-            (y-or-n-p "It appears the revert function for this dired buffer is non-standard.  Reverting might take a long time.
-Do you want to apply the filters without reverting (this might provide incorrect results in some situations)?")))
+            (not (y-or-n-p "It appears the revert function for this dired buffer is non-standard.  Reverting might take a long time.
+Do you want to apply the filters without reverting (this might provide incorrect results in some situations)?"))))
           (revert-buffer)
         (dired-filter--expunge)))
     (if (and dired-filter-mode
