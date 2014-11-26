@@ -213,6 +213,12 @@ By default, `dired-filter-by-omit' is active."
   :group 'dired-filter)
 (make-variable-buffer-local 'dired-filter-stack)
 
+(defcustom dired-filter-inherit-filter-stack nil
+  "When non-nil, visited subdirectories should inherit the filter
+of the parent directory."
+  :type 'boolean
+  :group 'dired-filter)
+
 (defcustom dired-filter-save-with-custom t
   "When non-nil, use Custom to save interactively changed variables.
 
@@ -274,7 +280,9 @@ after the change.
 The value 'always always reverts the buffer.
 
 The value 'ask will ask if we should revert if the revert
-function is non-standard, that is, not `dired-revert'.  This means the dired buffer might come from `find-dired' or similar operation and the reverting might be costly."
+function is non-standard, that is, not `dired-revert'.  This
+means the dired buffer might come from `find-dired' or similar
+operation and the reverting might be costly."
   :type '(radio
           (const :tag "Never revert automatically." never)
           (const :tag "Always revert automatically." always)
@@ -431,8 +439,8 @@ listing."
            ((eq dired-filter-revert 'never) nil)
            ((eq dired-filter-revert 'always) t)
            ((eq dired-filter-revert 'ask)
-            (y-or-n-p "It appears the revert function for this dired buffer is non-standard.  Reverting might take a long time.
-Do you want to apply the filters without reverting (this might provide incorrect results in some situations)?")))
+            (not (y-or-n-p "It appears the revert function for this dired buffer is non-standard.  Reverting might take a long time.
+Do you want to apply the filters without reverting (this might provide incorrect results in some situations)?"))))
           (revert-buffer)
         (dired-filter--expunge)))
     (if (and dired-filter-mode
@@ -953,6 +961,9 @@ popping the stack and then re-inserting the filters again."
   :lighter " Filter"
   (if dired-filter-mode
       (progn
+        (when dired-filter-inherit-filter-stack
+          (-when-let (parent (cdr (--first (f-same? (f-parent default-directory) (car it)) dired-buffers)))
+            (setq dired-filter-stack (with-current-buffer parent dired-filter-stack))))
         (if (and dired-filter-show-filters
                  dired-filter-stack)
             (add-to-list 'header-line-format '("" dired-filter-header-line-format) t))
