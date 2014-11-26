@@ -448,6 +448,23 @@ Do you want to apply the filters without reverting (this might provide incorrect
 
 This adds support for `dired-subtree' package.")
 
+(defun dired-filter--extract-lines ()
+  "Extract all marked lines and return them as a string."
+  (save-excursion
+    (goto-char (point-min))
+    (let ((buffer-read-only nil)
+          (regexp (dired-marker-regexp))
+          (re nil))
+      (while (and (not (eobp))
+                  (re-search-forward regexp nil t))
+        (push (delete-and-extract-region
+               (line-beginning-position)
+               (progn (forward-line 1) (point)))
+              re))
+      (when (featurep 'dired-details)
+        (dired-details-delete-overlays))
+      (apply 'concat (nreverse re)))))
+
 (defun dired-filter--expunge ()
   "Remove the files specified by current `dired-filter-stack'
 from the listing."
