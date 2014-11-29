@@ -177,5 +177,12 @@ This filter assumes that the input is in the format of `ls -l'."
               (concat "hg locate -0 | xargs -I '{}' -0 ls -l '{}' &")
               `(lambda (ignore-auto noconfirm) (dired-list-hg-locate ,dir))))
 
+(defun dired-list-locate (needle)
+  (interactive "sLocate: ")
+  (dired-list "/"
+              (concat "locate " needle)
+              (concat "locate " (shell-quote-argument needle) " -0 | xargs -I '{}' -0 ls -ld '{}' &")
+              `(lambda (ignore-auto noconfirm) (dired-list-locate ,needle))))
+
 (provide 'dired-list)
 ;;; dired-list.el ends here
