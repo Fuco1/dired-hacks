@@ -163,12 +163,12 @@ This filter assumes that the input is in the format of `ls -l'."
                 `(lambda (ignore-auto noconfirm)
                    (dired-list-mpc ,query)))))
 
-(defun dired-list-git-ls-files ()
-  (interactive)
-  (dired-list default-directory
-              (concat "git ls-files " default-directory)
+(defun dired-list-git-ls-files (dir)
+  (interactive "DDirectory: ")
+  (dired-list dir
+              (concat "git ls-files " dir)
               (concat "git ls-files -z | xargs -I '{}' -0 ls -l '{}' &")
-              `(lambda (ignore-auto noconfirm) (dired-list-git-ls-files))))
+              `(lambda (ignore-auto noconfirm) (dired-list-git-ls-files ,dir))))
 
 (provide 'dired-list)
 ;;; dired-list.el ends here
