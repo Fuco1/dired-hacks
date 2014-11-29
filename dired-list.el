@@ -170,5 +170,12 @@ This filter assumes that the input is in the format of `ls -l'."
               (concat "git ls-files -z | xargs -I '{}' -0 ls -l '{}' &")
               `(lambda (ignore-auto noconfirm) (dired-list-git-ls-files ,dir))))
 
+(defun dired-list-hg-locate (dir)
+  (interactive "DDirectory: ")
+  (dired-list dir
+              (concat "hg locate " dir)
+              (concat "hg locate -0 | xargs -I '{}' -0 ls -l '{}' &")
+              `(lambda (ignore-auto noconfirm) (dired-list-hg-locate ,dir))))
+
 (provide 'dired-list)
 ;;; dired-list.el ends here
