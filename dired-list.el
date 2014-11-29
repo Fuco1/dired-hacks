@@ -74,8 +74,8 @@ This filter assumes that the input is in the format of `ls -l'."
                 (goto-char beg)
                 (beginning-of-line)
                 ;; Remove occurrences of default-directory.
-                (while (search-forward default-directory nil t)
-                  (replace-match "" nil t))
+                (while (search-forward (concat " " default-directory) nil t)
+                  (replace-match " " nil t))
                 (goto-char (point-max))
                 (when (search-backward "\n" (process-mark proc) t)
                   (dired-insert-set-properties (process-mark proc) (1+ (point)))
