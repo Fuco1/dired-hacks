@@ -83,6 +83,7 @@
 
 (require 'dired-hacks-utils)
 (require 'dash)
+(require 'cl-lib)
 
 (defgroup dired-subtree ()
   "Insert subdirectories in a tree-like fashion."
@@ -589,13 +590,13 @@ the subtree.  The filter action is read from `dired-filter-map'."
             (glob (current-global-map))
             (loc (current-local-map))
             cmd)
-        (flet ((dired-filter--update
-                ()
-                (save-restriction
-                  (overlay-put ov 'dired-subtree-filter dired-filter-stack)
-                  (widen)
-                  (dired-subtree-revert)
-                  (dired-subtree--filter-update-bs ov))))
+        (cl-flet ((dired-filter--update
+                   ()
+                   (save-restriction
+                     (overlay-put ov 'dired-subtree-filter dired-filter-stack)
+                     (widen)
+                     (dired-subtree-revert)
+                     (dired-subtree--filter-update-bs ov))))
           (unwind-protect
               (progn
                 (use-global-map dired-filter-map)
