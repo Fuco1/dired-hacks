@@ -361,7 +361,8 @@ operation and the reverting might be costly."
 ;; internals
 (defun dired-filter--push (filter)
   "Push FILTER onto the active filter stack."
-  (push filter dired-filter-stack))
+  (unless (member filter dired-filter-stack)
+    (push filter dired-filter-stack)))
 
 (defun dired-filter--make-filter-1 (stack)
   (cond
