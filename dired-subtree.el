@@ -519,7 +519,7 @@ Return a string suitable for insertion in `dired' buffer."
         (dired-subtree--unmark))
       (while (and (dired-subtree-up)
                   (> (dired-subtree--get-depth (dired-subtree--get-ov)) 0))
-        (if (not arg)
+        (if (not kill-siblings)
             (dired-subtree--unmark)
           (dired-subtree--unmark)
           (let ((here (point)))
