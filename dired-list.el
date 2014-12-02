@@ -184,5 +184,59 @@ This filter assumes that the input is in the format of `ls -l'."
               (concat "locate " (shell-quote-argument needle) " -0 | xargs -I '{}' -0 ls -ld '{}' &")
               `(lambda (ignore-auto noconfirm) (dired-list-locate ,needle))))
 
+
+;; taken from grep.el/rgrep
+(defun dired-list--get-ignored-stuff ()
+  "Return an argument to find which ignores uninteresting directories and files.
+
+Directories are taken form `grep-find-ignored-directories', files
+are taken from `grep-find-ignored-files'. "
+  (concat
+   (and grep-find-ignored-directories
+        (concat "-type d "
+                (shell-quote-argument "(")
+                ;; we should use shell-quote-argument here
+                " -path "
+                (mapconcat
+                 #'(lambda (ignore)
+                     (cond ((stringp ignore)
+                            (shell-quote-argument
+                             (concat "*/" ignore)))
+                           ((consp ignore)
+                            (and (funcall (car ignore) dir)
+                                 (shell-quote-argument
+                                  (concat "*/"
+                                          (cdr ignore)))))))
+                 grep-find-ignored-directories
+                 " -o -path ")
+                " "
+                (shell-quote-argument ")")
+                " -prune -o "))
+   (and grep-find-ignored-files
+        (concat (shell-quote-argument "!") " -type d "
+                (shell-quote-argument "(")
+                ;; we should use shell-quote-argument here
+                " -name "
+                (mapconcat
+                 #'(lambda (ignore)
+                     (cond ((stringp ignore)
+                            (shell-quote-argument ignore))
+                           ((consp ignore)
+                            (and (funcall (car ignore) dir)
+                                 (shell-quote-argument
+                                  (cdr ignore))))))
+                 grep-find-ignored-files
+                 " -o -name ")
+                " "
+                (shell-quote-argument ")")
+                " -prune -o "))))
+
+(defun dired-list-find-file (pattern dir)
+  (interactive "sPattern: \nDDirectory: ")
+  (dired-list dir
+              (concat "find " dir ": " pattern)
+              (concat "find " (dired-list--get-ignored-stuff) " -name " pattern " -ls &")
+              `(lambda (ignore-auto noconfirm) (dired-list-find-file ,pattern ,dir))))
+
 (provide 'dired-list)
 ;;; dired-list.el ends here
