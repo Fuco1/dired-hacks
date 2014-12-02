@@ -235,7 +235,7 @@ are taken from `grep-find-ignored-files'. "
   (interactive "sPattern: \nDDirectory: ")
   (dired-list dir
               (concat "find " dir ": " pattern)
-              (concat "find " (dired-list--get-ignored-stuff) " -name " pattern " -ls &")
+              (concat "find " (dired-list--get-ignored-stuff) " -name " (shell-quote-argument pattern) " -ls &")
               `(lambda (ignore-auto noconfirm) (dired-list-find-file ,pattern ,dir))))
 
 (provide 'dired-list)
