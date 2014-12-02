@@ -95,6 +95,9 @@
 ;; You can transpose the filters on the top of the stack using
 ;; `dired-filter-transpose'
 
+;; Using `dired-filter-uniquify' you can remove duplicates from the
+;; current stack of filters.
+
 ;;  Built-in filters
 ;;  ----------------
 
@@ -308,6 +311,7 @@ operation and the reverting might be costly."
     (define-key map (kbd "TAB") 'dired-filter-transpose)
     (define-key map "p" 'dired-filter-pop)
     (define-key map "/" 'dired-filter-pop-all)
+    (define-key map "u" 'dired-filter-uniquify)
 
     (define-key map "S" 'dired-filter-save-filters)
     (define-key map "D" 'dired-filter-delete-saved-filters)
@@ -930,6 +934,13 @@ push all its constituents back on the stack."
     (unless dired-filter-mode
       (dired-filter-mode 1))
     (dired-filter--update)))
+
+;;;###autoload
+(defun dired-filter-uniquify ()
+  "Remove duplicate filters from the stack."
+  (interactive)
+  (delete-dups dired-filter-stack)
+  (dired-filter--update))
 
 
 ;; other interactive functions
