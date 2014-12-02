@@ -109,6 +109,7 @@
 ;; * `dired-filter-by-file'
 ;; * `dired-filter-by-directory'
 ;; * `dired-filter-by-mode'
+;; * `dired-filter-by-symlink'
 
 ;; You can see their documentation by calling M-x `describe-function'.
 
@@ -301,6 +302,7 @@ operation and the reverting might be costly."
     (define-key map "f" 'dired-filter-by-file)
     (define-key map "d" 'dired-filter-by-directory)
     (define-key map "m" 'dired-filter-by-mode)
+    (define-key map "s" 'dired-filter-by-symlink)
 
     (define-key map "|" 'dired-filter-or)
     (define-key map "!" 'dired-filter-negate)
@@ -328,6 +330,7 @@ operation and the reverting might be costly."
     (define-key map "f" 'dired-filter-mark-by-file)
     (define-key map "d" 'dired-filter-mark-by-directory)
     (define-key map "m" 'dired-filter-mark-by-mode)
+    (define-key map "s" 'dired-filter-mark-by-symlink)
     map)
   "Keymap used for marking files.")
 
@@ -777,6 +780,12 @@ of `auto-mode-alist'."
                           `',mm))
   (-when-let (mm (cdr (dired-utils-match-filename-regexp file-name auto-mode-alist)))
     (eq mm qualifier)))
+
+;;;###autoload (autoload 'dired-filter-by-symlink "dired-filter")
+(dired-filter-define symlink
+    "Toggle current view to show only symbolic links."
+  (:description "symlink")
+  (file-symlink-p file-name))
 
 ;;;###autoload
 (defun dired-filter-transpose ()

@@ -133,6 +133,7 @@ Here's a list of built-in filters:
 * `dired-filter-by-file`
 * `dired-filter-by-directory`
 * `dired-filter-by-mode`
+* `dired-filter-by-symlink`
 
 You can see their documentation by calling M-x `describe-function`.
 
