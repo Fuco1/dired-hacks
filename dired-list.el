@@ -34,7 +34,7 @@
 (defun dired-list-align-size-column ()
   (beginning-of-line)
   (save-match-data
-    (when (and (looking-at "^  ")
+    (when (and (looking-at "^  [^0-9]")
                (re-search-forward dired-move-to-filename-regexp nil t))
       (goto-char (match-beginning 7))
       (backward-char 1)
