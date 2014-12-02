@@ -107,6 +107,8 @@ The value is in megabytes."
 automagically change the filename to the location of virtual
 directory representing this archive."
   (when (and (not (memq this-command dired-avfs-ignore-commands))
+             (or (not (featurep 'tramp))
+                 (not (tramp-file-name-p (ad-get-arg 0))))
              (dired-avfs--archive-p (ad-get-arg 0))
              (if (> (nth 7 (file-attributes (ad-get-arg 0))) (* dired-avfs-file-size-threshold 1048576))
                  (y-or-n-p (format "Size of this file exceeds `dired-avfs-file-size-threshold' (%d MB), extracting the information might take very long time.  Do you want to continue?"
