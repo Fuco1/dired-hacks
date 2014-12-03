@@ -213,6 +213,26 @@ By default, `dired-filter-by-omit' is active."
   :group 'dired-filter)
 (make-variable-buffer-local 'dired-filter-stack)
 
+(defcustom dired-filter-group "default"
+  "Active filter group.
+
+Can be either a named filter group specified in
+`dired-filter-saved-filter-groups' or an anonymous filter stack."
+  ;; TODO: add type
+  :group 'dired-filter)
+
+(defcustom dired-filter-saved-filter-groups '(("default"))
+  "An alist of saved named filter groups.
+
+A filter group is a list of lists of the form (NAME . FILTER-STACK).
+
+See `dired-filter-stack' for the format of FILTER-STACK.
+
+Each FILTER-STACK defines a \"drawer\" where the matching files
+are moved."
+  ;; TODO: add type
+  :group 'dired-filter)
+
 (defcustom dired-filter-inherit-filter-stack nil
   "When non-nil, visited subdirectories should inherit the filter
 of the parent directory."
