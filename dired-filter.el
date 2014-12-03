@@ -451,11 +451,6 @@ Do you want to apply the filters without reverting (this might provide incorrect
     (when file-name
       (dired-utils-goto-line file-name))))
 
-(defvar dired-filter--expanded-dirs nil
-  "List of expanded subtrees.
-
-This adds support for `dired-subtree' package.")
-
 (defun dired-filter--extract-lines ()
   "Extract all marked lines and return them as a string."
   (save-excursion
@@ -472,6 +467,11 @@ This adds support for `dired-subtree' package.")
       (when (featurep 'dired-details)
         (dired-details-delete-overlays))
       (apply 'concat (nreverse re)))))
+
+(defvar dired-filter--expanded-dirs nil
+  "List of expanded subtrees.
+
+This adds support for `dired-subtree' package.")
 
 (defun dired-filter--expunge ()
   "Remove the files specified by current `dired-filter-stack'
