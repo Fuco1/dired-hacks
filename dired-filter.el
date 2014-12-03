@@ -451,19 +451,22 @@ Do you want to apply the filters without reverting (this might provide incorrect
     (when file-name
       (dired-utils-goto-line file-name))))
 
-(defun dired-filter--extract-lines ()
+(defun dired-filter--extract-lines (filter)
   "Extract all marked lines and return them as a string."
   (save-excursion
     (goto-char (point-min))
-    (let ((buffer-read-only nil)
-          (regexp (dired-marker-regexp))
-          (re nil))
-      (while (and (not (eobp))
-                  (re-search-forward regexp nil t))
-        (push (delete-and-extract-region
-               (line-beginning-position)
-               (progn (forward-line 1) (point)))
-              re))
+    (let* ((buffer-read-only nil)
+           (filter (dired-filter--make-filter filter))
+           (re nil))
+      (while (not (eobp))
+        (let ((file-name (dired-utils-get-filename 'no-dir)))
+          (if (and file-name
+                   (eval filter))
+              (push (delete-and-extract-region
+                     (line-beginning-position)
+                     (progn (forward-line 1) (point)))
+                    re)
+            (forward-line 1))))
       (when (featurep 'dired-details)
         (dired-details-delete-overlays))
       (apply 'concat (nreverse re)))))
