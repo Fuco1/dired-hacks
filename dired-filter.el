@@ -451,6 +451,20 @@ Do you want to apply the filters without reverting (this might provide incorrect
     (when file-name
       (dired-utils-goto-line file-name))))
 
+(defun dired-filter--narow-to-subdir (&optional p)
+  "Narrow to subdir at POINT.
+
+POINT defaults to current point."
+  (setq p (or p (point)))
+  (let ((beg (progn
+               (dired-next-subdir 0)
+               (line-beginning-position)))
+        (end (progn
+               (if (dired-next-subdir 1 t)
+                   (line-beginning-position)
+                 (point-max)))))
+    (narrow-to-region beg end)))
+
 (defun dired-filter--extract-lines (filter)
   "Extract all marked lines and return them as a string."
   (save-excursion
