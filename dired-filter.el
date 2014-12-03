@@ -402,12 +402,12 @@ operation and the reverting might be costly."
               `(not ,(car (cddddr def)))
             (car (cddddr def))))))))
 
-(defun dired-filter--make-filter ()
+(defun dired-filter--make-filter (filter-stack)
   "Build the expression that filters the files.
 
 When this expression evals to non-nil, file is kept in the
 listing."
-  `(and ,@(mapcar 'dired-filter--make-filter-1 dired-filter-stack)))
+  `(and ,@(mapcar 'dired-filter--make-filter-1 filter-stack)))
 
 (defun dired-filter--describe-filters-1 (stack)
   "Return a string describing `dired-filter-stack'."
@@ -479,7 +479,7 @@ from the listing."
   (interactive)
   (when (and dired-filter-mode
              dired-filter-stack)
-    (let ((filter (dired-filter--make-filter))
+    (let ((filter (dired-filter--make-filter dired-filter-stack))
           (dired-marker-char dired-filter-marker-char)
           (old-modified-p (buffer-modified-p))
           count)
@@ -539,10 +539,9 @@ If prefix argument \\[universal-argument] is used, unmark the matched files inst
 If prefix argument \\[universal-argument] \\[universal-argument] is used, mark the files that would normally
 not be marked, that is, reverse the logical meaning of the
 filter."
-  (let* ((dired-filter-stack (list filter))
-         (filter (if (equal current-prefix-arg '(16))
-                     `(not ,(dired-filter--make-filter))
-                   (dired-filter--make-filter)))
+  (let* ((filter (if (equal current-prefix-arg '(16))
+                     `(not ,(dired-filter--make-filter (list filter)))
+                   (dired-filter--make-filter (list filter))))
          (dired-marker-char (if (equal current-prefix-arg '(4)) ?\040 dired-marker-char)))
     (eval `(dired-mark-if
             (let ((file-name (dired-utils-get-filename 'no-dir)))
