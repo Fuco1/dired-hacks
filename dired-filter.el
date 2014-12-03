@@ -616,7 +616,11 @@ argument from user.
                            "\n\nThis function only marks the matched files and does not filter the buffer view.
 
 If prefix argument \\[universal-argument] is used, unmark the
-matched files instead (including any perviously marked files)."))
+matched files instead (including any perviously marked files).
+
+If prefix argument \\[universal-argument] \\[universal-argument] is used, mark the files that would normally
+not be marked, that is, reverse the logical meaning of the
+filter."))
               "This matcher is not documented.")
          (interactive (list ,reader))
          (dired-filter--mark (cons ',name qualifier))
