@@ -7,7 +7,7 @@
 ;; Keywords: files
 ;; Version: 0.0.2
 ;; Created: 14th February 2014
-;; Package-requires: ((dash "2.5.0") (dired-hacks-utils "0.0.1"))
+;; Package-requires: ((dash "2.10.0") (dired-hacks-utils "0.0.1"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -220,6 +220,7 @@ Can be either a named filter group specified in
 `dired-filter-saved-filter-groups' or an anonymous filter stack."
   ;; TODO: add type
   :group 'dired-filter)
+(make-variable-buffer-local 'dired-filter-group)
 
 (defcustom dired-filter-saved-filter-groups '(("default"))
   "An alist of saved named filter groups.
@@ -450,6 +451,14 @@ listing."
 (defun dired-filter--describe-filters ()
   (mapconcat 'dired-filter--describe-filters-1 dired-filter-stack " "))
 
+(defun dired-filter--apply ()
+  "Apply the filters and filter groups."
+  (dired-filter--expunge)
+  (dired-filter--apply-filter-group
+   (if (stringp dired-filter-group)
+       (assoc dired-filter-group dired-filter-saved-filter-groups)
+     (cons "Anonymous" dired-filter-group))))
+
 (defun dired-filter--update ()
   "Re-run the filters."
   (let ((file-name (dired-utils-get-filename)))
@@ -462,7 +471,7 @@ listing."
             (not (y-or-n-p "It appears the revert function for this dired buffer is non-standard.  Reverting might take a long time.
 Do you want to apply the filters without reverting (this might provide incorrect results in some situations)?"))))
           (revert-buffer)
-        (dired-filter--expunge)))
+        (dired-filter--apply)))
     (if (and dired-filter-mode
              dired-filter-show-filters
              dired-filter-stack)
@@ -486,24 +495,68 @@ POINT defaults to current point."
     (narrow-to-region beg end)))
 
 (defun dired-filter--extract-lines (filter)
-  "Extract all marked lines and return them as a string."
+  "Extract all lines in the current directory matching FILTER.
+
+The matched lines are returned as a string."
   (save-excursion
-    (goto-char (point-min))
-    (let* ((buffer-read-only nil)
-           (filter (dired-filter--make-filter filter))
-           (re nil))
-      (while (not (eobp))
-        (let ((file-name (dired-utils-get-filename 'no-dir)))
-          (if (and file-name
-                   (eval filter))
-              (push (delete-and-extract-region
-                     (line-beginning-position)
-                     (progn (forward-line 1) (point)))
-                    re)
-            (forward-line 1))))
-      (when (featurep 'dired-details)
-        (dired-details-delete-overlays))
-      (apply 'concat (nreverse re)))))
+    (save-restriction
+      (widen)
+      (dired-filter--narow-to-subdir)
+      (goto-char (point-min))
+      (let* ((buffer-read-only nil)
+             (filter (dired-filter--make-filter filter))
+             (re nil))
+        (while (not (eobp))
+          (let ((file-name (dired-utils-get-filename 'no-dir)))
+            (if (and file-name
+                     (eval filter))
+                (push (delete-and-extract-region
+                       (line-beginning-position)
+                       (progn (forward-line 1) (point)))
+                      re)
+              (forward-line 1))))
+        (apply 'concat (nreverse re))))))
+
+(defun dired-filter--apply-filter-group (filter-group)
+  (when (and dired-filter-group-mode
+             dired-filter-group)
+    (save-excursion
+      (save-restriction
+        (widen)
+        (when (ignore-errors (dired-next-subdir 0))
+          (goto-char (point-min))
+          (read-only-mode -1)
+          (unwind-protect
+              (progn
+                ;; TODO: replace header-line with our own face
+                (while (--when-let (text-property-any (point-min) (point-max) 'font-lock-face 'header-line)
+                         (goto-char it))
+                  (delete-region (line-beginning-position) (1+ (line-end-position))))
+                (goto-char (point-min))
+                (let ((next t))
+                  (while next
+                    (-when-let ((_ . filter-stacks) filter-group)
+                      (let ((insert-default nil))
+                        (when (> (length filter-stacks) 0)
+                          (dired-hacks-next-file)
+                          (beginning-of-line)
+                          (--each filter-stacks
+                            (-let* (((name . filter-stack) it)
+                                    ;; TODO: extract only from last following the last
+                                    ;; filter group
+                                    (group (dired-filter--extract-lines filter-stack)))
+                              (when (/= (length group) 0)
+                                (insert "  " (propertize (format "[ %s ]" name) 'font-lock-face 'header-line) "\n"
+                                        group)
+                                (setq insert-default t))))
+                          (when (and insert-default
+                                     (save-excursion (dired-hacks-next-file)))
+                            (insert "  " (propertize "[ Default ]" 'font-lock-face 'header-line) "\n")))))
+                    (setq next (ignore-errors (dired-next-subdir 1))))))
+            (read-only-mode 1))
+          (when (featurep 'dired-details)
+            (dired-details-delete-overlays)
+            (dired-details-activate)))))))
 
 (defvar dired-filter--expanded-dirs nil
   "List of expanded subtrees.
@@ -972,6 +1025,26 @@ push all its constituents back on the stack."
     (dired-filter--update)))
 
 
+;; dired filter groups
+(defun dired-filter-load-filter-group (name)
+  "Load a filter group from `dired-filter-saved-filter-groups'."
+  (interactive (list
+                (if (not dired-filter-saved-filter-groups)
+                    (error "No saved filter groups")
+                  (completing-read "Load filter group: "
+                                   dired-filter-saved-filter-groups nil t nil nil
+                                   (caar dired-filter-saved-filter-groups)))))
+  (setq dired-filter-group (assoc name dired-filter-saved-filter-groups)))
+
+(define-minor-mode dired-filter-group-mode
+  "Toggle filter grouping of files in Dired."
+  :group 'dired-filter
+  :lighter ""
+  (if dired-filter-group-mode
+      (dired-filter--apply)
+    (revert-buffer)))
+
+
 ;; other interactive functions
 (defun dired-filter-clone-filtered-buffer (&optional name)
   "Clone the currently filtered view of the dired buffer.
@@ -1007,11 +1080,11 @@ popping the stack and then re-inserting the filters again."
         (if (and dired-filter-show-filters
                  dired-filter-stack)
             (add-to-list 'header-line-format '("" dired-filter-header-line-format) t))
-        (dired-filter--expunge))
+        (dired-filter--apply))
     (setq header-line-format (--remove (equal it '("" dired-filter-header-line-format)) header-line-format))
     (revert-buffer)))
 
-(add-hook 'dired-after-readin-hook 'dired-filter--expunge t)
+(add-hook 'dired-after-readin-hook 'dired-filter--apply t)
 
 (provide 'dired-filter)
 
