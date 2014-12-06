@@ -934,19 +934,19 @@ push all its constituents back on the stack."
     (push (cons name filters) dired-filter-saved-filters))
   (dired-filter--maybe-save-stuff))
 
-(defun dired-filters--read-saved-filter-name ()
+(defun dired-filters--read-saved-filter-name (prompt)
   "Read saved filter name."
   (list
    (if (not dired-filter-saved-filters)
        (error "No saved filters")
-     (completing-read "Delete saved filters: "
+     (completing-read (concat prompt " saved filters: ")
                       dired-filter-saved-filters nil t nil nil
                       (caar dired-filter-saved-filters)))))
 
 ;;;###autoload
 (defun dired-filter-delete-saved-filters (name)
   "Delete saved filters with NAME from `dired-filter-saved-filters'."
-  (interactive (dired-filters--read-saved-filter-name))
+  (interactive (dired-filters--read-saved-filter-name "Delete"))
   (setq dired-filter-saved-filters
         (--remove (equal name (car it)) dired-filter-saved-filters))
   (dired-filter--maybe-save-stuff))
@@ -954,7 +954,7 @@ push all its constituents back on the stack."
 ;;;###autoload
 (defun dired-filter-load-saved-filters (name)
   "Set this buffer's filters to filters with NAME from `dired-filter-saved-filters'."
-  (interactive (dired-filters--read-saved-filter-name))
+  (interactive (dired-filters--read-saved-filter-name "Load"))
   (--when-let (assoc name dired-filter-saved-filters)
     (setq dired-filter-stack (list it))
     (unless dired-filter-mode
@@ -964,7 +964,7 @@ push all its constituents back on the stack."
 ;;;###autoload
 (defun dired-filter-add-saved-filters (name)
   "Add to this buffer's filters filters with NAME from `dired-filter-saved-filters'."
-  (interactive (dired-filters--read-saved-filter-name))
+  (interactive (dired-filters--read-saved-filter-name "Add"))
   (--when-let (assoc name dired-filter-saved-filters)
     (push it dired-filter-stack)
     (unless dired-filter-mode
