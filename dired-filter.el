@@ -315,6 +315,11 @@ operation and the reverting might be costly."
           (const :tag "Revert automatically only in standard dired buffers, ask otherwise." ask))
   :group 'dired-filter)
 
+(defface dired-filter-group-header
+  '((t (:inherit header-line)))
+  "The face used to highlight pair overlays."
+  :group 'dired-filter-group)
+
 ;;;###autoload
 (defvar dired-filter-map
   (let ((map (make-sparse-keymap)))
@@ -533,8 +538,7 @@ The matched lines are returned as a string."
           (read-only-mode -1)
           (unwind-protect
               (progn
-                ;; TODO: replace header-line with our own face
-                (while (--when-let (text-property-any (point-min) (point-max) 'font-lock-face 'header-line)
+                (while (--when-let (text-property-any (point-min) (point-max) 'font-lock-face 'dired-filter-group-header)
                          (goto-char it))
                   (delete-region (line-beginning-position) (1+ (line-end-position))))
                 (goto-char (point-min))
@@ -551,12 +555,12 @@ The matched lines are returned as a string."
                                     ;; filter group
                                     (group (dired-filter--extract-lines filter-stack)))
                               (when (/= (length group) 0)
-                                (insert "  " (propertize (format "[ %s ]" name) 'font-lock-face 'header-line) "\n"
+                                (insert "  " (propertize (format "[ %s ]" name) 'font-lock-face 'dired-filter-group-header) "\n"
                                         group)
                                 (setq insert-default t))))
                           (when (and insert-default
                                      (save-excursion (dired-hacks-next-file)))
-                            (insert "  " (propertize "[ Default ]" 'font-lock-face 'header-line) "\n")))))
+                            (insert "  " (propertize "[ Default ]" 'font-lock-face 'dired-filter-group-header) "\n")))))
                     (setq next (ignore-errors (dired-next-subdir 1))))))
             (read-only-mode 1))
           (when (featurep 'dired-details)
