@@ -218,27 +218,6 @@ By default, `dired-filter-by-omit' is active."
   :group 'dired-filter)
 (make-variable-buffer-local 'dired-filter-stack)
 
-(defcustom dired-filter-group "default"
-  "Active filter group.
-
-Can be either a named filter group specified in
-`dired-filter-saved-filter-groups' or an anonymous filter stack."
-  ;; TODO: add type
-  :group 'dired-filter)
-(make-variable-buffer-local 'dired-filter-group)
-
-(defcustom dired-filter-saved-filter-groups '(("default"))
-  "An alist of saved named filter groups.
-
-A filter group is a list of lists of the form (NAME . FILTER-STACK).
-
-See `dired-filter-stack' for the format of FILTER-STACK.
-
-Each FILTER-STACK defines a \"drawer\" where the matching files
-are moved."
-  ;; TODO: add type
-  :group 'dired-filter)
-
 (defcustom dired-filter-inherit-filter-stack nil
   "When non-nil, visited subdirectories should inherit the filter
 of the parent directory."
@@ -314,6 +293,27 @@ operation and the reverting might be costly."
           (const :tag "Always revert automatically." always)
           (const :tag "Revert automatically only in standard dired buffers, ask otherwise." ask))
   :group 'dired-filter)
+
+(defcustom dired-filter-group "default"
+  "Active filter group.
+
+Can be either a named filter group specified in
+`dired-filter-group-saved-groups' or an anonymous filter stack."
+  ;; TODO: add type
+  :group 'dired-filter-group)
+(make-variable-buffer-local 'dired-filter-group)
+
+(defcustom dired-filter-group-saved-groups '(("default"))
+  "An alist of saved named filter groups.
+
+A filter group is a list of lists of the form (NAME . FILTER-STACK).
+
+See `dired-filter-stack' for the format of FILTER-STACK.
+
+Each FILTER-STACK defines a \"drawer\" where the matching files
+are moved."
+  ;; TODO: add type
+  :group 'dired-filter-group)
 
 (defface dired-filter-group-header
   '((t (:inherit header-line)))
@@ -464,9 +464,9 @@ listing."
 (defun dired-filter--apply ()
   "Apply the filters and filter groups."
   (dired-filter--expunge)
-  (dired-filter--apply-filter-group
+  (dired-filter-group--apply
    (if (stringp dired-filter-group)
-       (assoc dired-filter-group dired-filter-saved-filter-groups)
+       (assoc dired-filter-group dired-filter-group-saved-groups)
      (cons "Anonymous" dired-filter-group))))
 
 (defun dired-filter--update ()
@@ -527,7 +527,7 @@ The matched lines are returned as a string."
               (forward-line 1))))
         (apply 'concat (nreverse re))))))
 
-(defun dired-filter--apply-filter-group (filter-group)
+(defun dired-filter-group--apply (filter-group)
   (when (and dired-filter-group-mode
              dired-filter-group)
     (save-excursion
@@ -1035,15 +1035,15 @@ push all its constituents back on the stack."
 
 
 ;; dired filter groups
-(defun dired-filter-load-filter-group (name)
-  "Load a filter group from `dired-filter-saved-filter-groups'."
+(defun dired-filter-group-load-group (name)
+  "Load a filter group from `dired-filter-group-saved-groups'."
   (interactive (list
-                (if (not dired-filter-saved-filter-groups)
+                (if (not dired-filter-group-saved-groups)
                     (error "No saved filter groups")
                   (completing-read "Load filter group: "
-                                   dired-filter-saved-filter-groups nil t nil nil
-                                   (caar dired-filter-saved-filter-groups)))))
-  (setq dired-filter-group (assoc name dired-filter-saved-filter-groups)))
+                                   dired-filter-group-saved-groups nil t nil nil
+                                   (caar dired-filter-group-saved-groups)))))
+  (setq dired-filter-group (assoc name dired-filter-group-saved-groups)))
 
 (define-minor-mode dired-filter-group-mode
   "Toggle filter grouping of files in Dired."
