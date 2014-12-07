@@ -545,22 +545,21 @@ The matched lines are returned as a string."
                 (let ((next t))
                   (while next
                     (-when-let ((_ . filter-stacks) filter-group)
-                      (let ((insert-default nil))
-                        (when (> (length filter-stacks) 0)
-                          (dired-hacks-next-file)
-                          (beginning-of-line)
-                          (--each filter-stacks
-                            (-let* (((name . filter-stack) it)
-                                    ;; TODO: extract only from last following the last
-                                    ;; filter group
-                                    (group (dired-filter--extract-lines filter-stack)))
-                              (when (/= (length group) 0)
-                                (insert "  " (propertize (format "[ %s ]" name) 'font-lock-face 'dired-filter-group-header) "\n"
-                                        group)
-                                (setq insert-default t))))
-                          (when (and insert-default
-                                     (save-excursion (dired-hacks-next-file)))
-                            (insert "  " (propertize "[ Default ]" 'font-lock-face 'dired-filter-group-header) "\n")))))
+                      (dired-hacks-next-file)
+                      (beginning-of-line)
+                      (--each filter-stacks
+                        (-let* (((name . filter-stack) it)
+                                ;; TODO: extract only from last line following the last
+                                ;; filter group
+                                (group (dired-filter--extract-lines filter-stack)))
+                          (when (/= (length group) 0)
+                            (insert "  " (propertize (format "[ %s ]" name) 'font-lock-face 'dired-filter-group-header) "\n"
+                                    group))))
+                      (when (and (text-property-any
+                                  (save-excursion (dired-next-subdir 0))
+                                  (point-max) 'font-lock-face 'dired-filter-group-header)
+                                 (save-excursion (dired-hacks-next-file)))
+                        (insert "  " (propertize "[ Default ]" 'font-lock-face 'dired-filter-group-header) "\n")))
                     (setq next (ignore-errors (dired-next-subdir 1))))))
             (read-only-mode 1))
           (when (featurep 'dired-details)
