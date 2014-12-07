@@ -191,9 +191,14 @@
 Entries are of type (name desc body) ")
 
 (defgroup dired-filter ()
-  "Ibuffer-like filtering for dired."
+  "Ibuffer-like filtering for `dired'."
   :group 'dired-hacks
   :prefix "dired-filter-")
+
+(defgroup dired-filter-group ()
+  "Ibuffer-like filter groups for `dired-filter'."
+  :group 'dired-filter
+  :prefix "dired-filter-group")
 
 (defcustom dired-filter-stack '((omit))
   "Filter stack.
@@ -1038,7 +1043,7 @@ push all its constituents back on the stack."
 
 (define-minor-mode dired-filter-group-mode
   "Toggle filter grouping of files in Dired."
-  :group 'dired-filter
+  :group 'dired-filter-group
   :lighter ""
   (if dired-filter-group-mode
       (dired-filter--apply)
