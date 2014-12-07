@@ -1043,7 +1043,7 @@ push all its constituents back on the stack."
                   (completing-read "Load filter group: "
                                    dired-filter-group-saved-groups nil t nil nil
                                    (caar dired-filter-group-saved-groups)))))
-  (setq dired-filter-group (assoc name dired-filter-group-saved-groups)))
+  (setq dired-filter-group name))
 
 (define-minor-mode dired-filter-group-mode
   "Toggle filter grouping of files in Dired."
