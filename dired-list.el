@@ -151,6 +151,7 @@ This filter assumes that the input is in the format of `ls -l'."
   :type 'directory
   :group 'dired-list)
 
+;;;###autoload
 (defun dired-list-mpc (query)
   (interactive "sMPC search query: ")
   (let ((dired-list-before-buffer-creation-hook
@@ -163,6 +164,7 @@ This filter assumes that the input is in the format of `ls -l'."
                 `(lambda (ignore-auto noconfirm)
                    (dired-list-mpc ,query)))))
 
+;;;###autoload
 (defun dired-list-git-ls-files (dir)
   (interactive "DDirectory: ")
   (dired-list dir
@@ -170,6 +172,7 @@ This filter assumes that the input is in the format of `ls -l'."
               (concat "git ls-files -z | xargs -I '{}' -0 ls -l '{}' &")
               `(lambda (ignore-auto noconfirm) (dired-list-git-ls-files ,dir))))
 
+;;;###autoload
 (defun dired-list-hg-locate (dir)
   (interactive "DDirectory: ")
   (dired-list dir
@@ -177,6 +180,7 @@ This filter assumes that the input is in the format of `ls -l'."
               (concat "hg locate -0 | xargs -I '{}' -0 ls -l '{}' &")
               `(lambda (ignore-auto noconfirm) (dired-list-hg-locate ,dir))))
 
+;;;###autoload
 (defun dired-list-locate (needle)
   (interactive "sLocate: ")
   (dired-list "/"
@@ -231,6 +235,7 @@ are taken from `grep-find-ignored-files'. "
                 (shell-quote-argument ")")
                 " -prune -o "))))
 
+;;;###autoload
 (defun dired-list-find-file (pattern dir)
   (interactive "sPattern: \nDDirectory: ")
   (dired-list dir
