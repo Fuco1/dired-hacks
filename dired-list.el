@@ -31,7 +31,10 @@
 (require 'dash)
 (require 'dired-hacks-utils)
 
+(require 'grep)
+
 (defun dired-list-align-size-column ()
+  "Align the filesize column."
   (beginning-of-line)
   (save-match-data
     (when (and (looking-at "^  [^0-9]")
@@ -112,6 +115,24 @@ This filter assumes that the input is in the format of `ls -l'."
            (error nil)))))
 
 (defun dired-list (dir buffer-name cmd &optional revert-function filter sentinel)
+  "Present output of a command as a `dired-buffer'.
+
+DIR is the default directory of the resulting `dired' buffer.
+
+BUFFER-NAME is name of the created buffer.  If such buffer
+exists, it is erased first.
+
+CMD is a sh(1) invocation to produce output for dired to process.
+It should be in the format similar to `ls -l'.
+
+Optional argument REVERT-FUNCTION is used to revert (bound to
+\\[revert-buffer]) the buffer.
+
+Optional argument FILTER is a function used to post-process the
+process's output after it was inserted to dired buffer.
+
+Optional argument SENTINEL is a function called on each change of
+state of the buffer's process."
   (let* ((dired-buffers nil) ;; do not mess with regular dired buffers
          (dir (file-name-as-directory (expand-file-name dir)))
          (filter (or filter 'dired-list-default-filter))
@@ -153,6 +174,7 @@ This filter assumes that the input is in the format of `ls -l'."
 
 ;;;###autoload
 (defun dired-list-mpc (query)
+  "Search mpd(1) database using QUERY and display results as a `dired' buffer."
   (interactive "sMPC search query: ")
   (let ((dired-list-before-buffer-creation-hook
          '((lambda () (cd dired-list-mpc-music-directory)))))
@@ -166,6 +188,7 @@ This filter assumes that the input is in the format of `ls -l'."
 
 ;;;###autoload
 (defun dired-list-git-ls-files (dir)
+  "List all files in DIR managed by git and display results as a `dired' buffer."
   (interactive "DDirectory: ")
   (dired-list dir
               (concat "git ls-files " dir)
@@ -174,6 +197,7 @@ This filter assumes that the input is in the format of `ls -l'."
 
 ;;;###autoload
 (defun dired-list-hg-locate (dir)
+  "List all files in DIR managed by mercurial and display results as a `dired' buffer."
   (interactive "DDirectory: ")
   (dired-list dir
               (concat "hg locate " dir)
@@ -182,6 +206,7 @@ This filter assumes that the input is in the format of `ls -l'."
 
 ;;;###autoload
 (defun dired-list-locate (needle)
+  "Locate(1) all files matching NEEDLE and display results as a `dired' buffer."
   (interactive "sLocate: ")
   (dired-list "/"
               (concat "locate " needle)
@@ -194,7 +219,7 @@ This filter assumes that the input is in the format of `ls -l'."
   "Return an argument to find which ignores uninteresting directories and files.
 
 Directories are taken form `grep-find-ignored-directories', files
-are taken from `grep-find-ignored-files'. "
+are taken from `grep-find-ignored-files'."
   (concat
    (and grep-find-ignored-directories
         (concat "-type d "
@@ -237,6 +262,20 @@ are taken from `grep-find-ignored-files'. "
 
 ;;;###autoload
 (defun dired-list-find-file (pattern dir)
+  "Run find(1) using name PATTERN inside DIR and display results as a `dired' buffer.
+
+By default, directories matching `grep-find-ignored-directories'
+and files matching `grep-find-ignored-files' are ignored.
+
+If called with raw prefix argument \\[universal-argument],
+PATTERN is interpreted not as -name pattern, but as complete
+predicate.  It should not contain -print or -ls.  The predicate
+to ignore directories and files as above is prefixed to PATTERN.
+
+If called with double raw prefix argument \\[universal-argument] \\[universal-argument],
+PATTERN is interpreted as full predicate to be passed to find, no
+processing on it will be done.  It must contain -ls somewhere to
+produce output suitable for `dired'."
   (interactive "sPattern: \nDDirectory: ")
   (dired-list dir
               (concat "find " dir ": " pattern)
