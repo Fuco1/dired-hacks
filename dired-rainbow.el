@@ -80,6 +80,12 @@ colored."
   :type 'string
   :group 'dired-rainbow)
 
+(defvar dired-rainbow-ext-to-face nil
+  "An alist mapping extension groups to face and compiled regexp.
+
+This alist is constructed in `dired-rainbow-define' for the case
+when the user wants to reuse the associations outside of dired.")
+
 (defmacro dired-rainbow-define (symbol face-props extensions)
   "Define a custom dired face highlighting files by extension.
 
@@ -121,7 +127,10 @@ the entire file name."
                  face-props)))
          ,(concat "dired-rainbow face matching " (symbol-name symbol) " files.")
          :group 'dired-rainbow)
-       (font-lock-add-keywords 'dired-mode '((,regexp 1 ',face-name))))))
+       (font-lock-add-keywords 'dired-mode '((,regexp 1 ',face-name)))
+       ,(if (listp matcher) `(push
+                              '(,matcher ,face-name ,(concat "\\." (regexp-opt matcher)))
+                              dired-rainbow-ext-to-face)))))
 
 (defmacro dired-rainbow-define-chmod (symbol face-props chmod)
   "Define a custom dired face highlighting files by chmod permissions.
