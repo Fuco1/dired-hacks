@@ -221,6 +221,22 @@ Entries are of type (name desc body) ")
   :group 'dired-filter
   :prefix "dired-filter-group")
 
+(define-widget 'dired-filter 'lazy
+  "A dired filter type."
+  :tag "Filter"
+  :type '(choice (cons :tag "Filter expression"
+                   (symbol :tag "Filter")
+                   (sexp :tag "Qualifier"))
+                 (cons :tag "Logical OR of filters" (const or) (repeat dired-filter))
+                 (list :tag "Logical negation of a filter" (const not) dired-filter)))
+
+(define-widget 'dired-filter-saved 'lazy
+  "A named dired filter."
+  :tag "Named filter"
+  :type '(cons
+           (string :tag "Filter name")
+           (repeat :tag "Filter stack" dired-filter)))
+
 (defcustom dired-filter-stack '((omit))
   "Filter stack.
 
@@ -233,9 +249,7 @@ and cdr is current value of its argument, or nil if filter
 doesn't take argument.
 
 By default, `dired-filter-by-omit' is active."
-  :type '(repeat (cons
-                  (symbol :tag "Filter")
-                  (sexp :tag "Qualifier")))
+  :type '(repeat dired-filter)
   :group 'dired-filter)
 (make-variable-buffer-local 'dired-filter-stack)
 
@@ -252,17 +266,9 @@ Currently, this only applies to `dired-filter-saved-filters'."
   :type 'boolean
   :group 'dired-filter)
 
-(define-widget 'dired-filter 'lazy
-  "A dired filter type."
-  :tag "Filter"
-  :type '(choice (sexp :tag "Filter expression")
-                 (cons :tag "Logical OR of filters" (const or) (repeat dired-filter))
-                 (list :tag "Logical negation of a filter" (const not) dired-filter)))
-
 (defcustom dired-filter-saved-filters nil
   "An alist of saved named filter."
-  :type '(repeat (cons (string :tag "Filter name")
-                       (repeat :tag "Filters" dired-filter)))
+  :type '(repeat :tag "Saved filters" dired-filter-saved)
   :group 'dired-filter)
 
 (defcustom dired-filter-verbose t
@@ -320,7 +326,9 @@ operation and the reverting might be costly."
 
 Can be either a named filter group specified in
 `dired-filter-group-saved-groups' or an anonymous filter stack."
-  ;; TODO: add type
+  :type '(choice
+          (string :tag "Filter group")
+          (repeat :tag "Filter stacks" dired-filter-saved))
   :group 'dired-filter-group)
 (make-variable-buffer-local 'dired-filter-group)
 
@@ -335,7 +343,11 @@ Each NAME defines the name of the drawer where files matching
 FILTER-STACK are grouped together.
 
 See `dired-filter-stack' for the format of FILTER-STACK."
-  ;; TODO: add type
+  :type '(repeat
+          :tag "Filter groups"
+          (cons
+           (string :tag "Filter group name")
+           (repeat :tag "Filter stacks" dired-filter-saved)))
   :group 'dired-filter-group)
 
 (defface dired-filter-group-header
