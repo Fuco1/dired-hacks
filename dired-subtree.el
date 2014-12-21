@@ -438,7 +438,9 @@ Return a string suitable for insertion in `dired' buffer."
     (insert-directory dir-name dired-listing-switches nil t)
     (delete-char -1)
     (goto-char (point-min))
-    (kill-line 3)
+    (delete-region
+     (progn (beginning-of-line) (point))
+     (progn (forward-line 3) (point)))
     (insert "  ")
     (while (= (forward-line) 0)
       (insert "  "))
