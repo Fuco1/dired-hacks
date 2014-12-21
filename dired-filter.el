@@ -46,7 +46,7 @@
 ;; matches files satisfying one or the other (or both) filters.  The
 ;; `not' filter pops the top filter and pushes its logical negation.
 
-;; To enable or disable the filters, toggle minor mode
+;; To enable or disable the filters toggle minor mode
 ;; `dired-filter-mode'.  Toggling this mode preserves the filter
 ;; stack, so you can use it to quickly hide/unhide files filtered by
 ;; the current filter setup.
@@ -163,6 +163,26 @@
 
 ;;     (extension "ogg" "flv" "mpg" "avi" "mp4" "mp3")
 ;;     ;; show all files matching any of these extensions
+
+;;  Filter groups
+;;  -------------
+
+;; Furthermore, instead of only filtering the dired buffer by
+;; removing lines you are not interested in, you can also group
+;; lines together by filters.  That is, lines (files,
+;; directories...) satisfying a filter will be moved together under
+;; a common header.  This mechanism works in analogy with ibuffer
+;; filter groups.
+
+;; The variable `dired-filter-group-saved-groups' contains
+;; definitions of filter groups.  You can create and save multiple
+;; filter groups (views) and switch between them by setting the
+;; `dired-filter-group' variable.
+
+;; To enable or disable the filter groups toggle minor mode
+;; `dired-filter-group-mode'.  Toggling this mode preserves the active
+;; filter group so you can use it to quickly group and ungroup the
+;; files.
 
 ;;  Other features
 ;;  --------------
@@ -306,12 +326,14 @@ Can be either a named filter group specified in
 (defcustom dired-filter-group-saved-groups '(("default"))
   "An alist of saved named filter groups.
 
-A filter group is a list of lists of the form (NAME . FILTER-STACK).
+A filter group is a list whose car is the name of the filter
+group and whose cdr is a list of lists of the form
+\(NAME . FILTER-STACK).
 
-See `dired-filter-stack' for the format of FILTER-STACK.
+Each NAME defines the name of the drawer where files matching
+FILTER-STACK are grouped together.
 
-Each FILTER-STACK defines a \"drawer\" where the matching files
-are moved."
+See `dired-filter-stack' for the format of FILTER-STACK."
   ;; TODO: add type
   :group 'dired-filter-group)
 

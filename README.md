@@ -187,6 +187,47 @@ with value:
     (extension "ogg" "flv" "mpg" "avi" "mp4" "mp3")
     ;; show all files matching any of these extensions
 
+### Filter groups
+
+Furthermore, instead of only filtering the dired buffer by
+removing lines you are not interested in, you can also group
+lines together by filters.  That is, lines (files,
+directories...) satisfying a filter will be moved together under
+a common header.  This mechanism works in analogy with ibuffer
+filter groups.
+
+The variable `dired-filter-group-saved-groups` contains
+definitions of filter groups.  You can create and save multiple
+filter groups (views) and switch between them by setting the
+`dired-filter-group` variable.
+
+To enable or disable the filter groups toggle minor mode
+`dired-filter-group-mode`.  Toggling this mode preserves the active
+filter group so you can use it to quickly group and ungroup the
+files.
+
+Here is a screenshot with an active filter group.  Notice that regular
+filtering works also with filter groups.
+
+![Filter group](http://i.imgur.com/qtiDX1c.png)
+
+The `dired-filter-group-saved-groups` used in the above screenshot is the following:
+
+```elisp
+(("default"
+  ("PDF"
+   (extension . "pdf"))
+  ("LaTeX"
+   (extension "tex" "bib"))
+  ("Org"
+   (extension . "org"))
+  ("Archives"
+   (extension "zip" "rar" "gz" "bz2" "tar"))))
+```
+
+You can of course be more imaginative and use filtering based on other
+criteria than just extensions ;)
+
 ### Other features
 
 You can clone the currently visible dired buffer by calling
