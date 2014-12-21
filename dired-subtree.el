@@ -113,6 +113,16 @@ depth---that creates the prefix."
   :type 'boolean
   :group 'dired-subtree)
 
+(defcustom dired-subtree-after-insert-hook ()
+  "Hook run at the end of `dired-subtree-insert'."
+  :type 'hook
+  :group 'dired-subtree)
+
+(defcustom dired-subtree-after-remove-hook ()
+  "Hook run at the end of `dired-subtree-remove'."
+  :type 'hook
+  :group 'dired-subtree)
+
 (defgroup dired-subtree-faces ()
   "Faces used in `dired-subtree'."
   :group 'dired-subtree)
@@ -492,7 +502,8 @@ Return a string suitable for insertion in `dired' buffer."
       (push ov dired-subtree-overlays))
     (goto-char beg)
     (dired-move-to-filename)
-    (read-only-mode 1)))
+    (read-only-mode 1)
+    (run-hooks 'dired-subtree-after-insert-hook)))
 
 ;;;###autoload
 (defun dired-subtree-remove ()
@@ -506,7 +517,8 @@ Return a string suitable for insertion in `dired' buffer."
       (dired-subtree-up)
       (delete-region (overlay-start ov)
                      (overlay-end ov))
-      (dired-subtree--remove-overlays ovs))))
+      (dired-subtree--remove-overlays ovs)))
+  (run-hooks 'dired-subtree-after-remove-hook))
 
 (defun dired-subtree--filter-up (keep-dir kill-siblings)
   (save-excursion
