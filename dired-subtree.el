@@ -440,7 +440,12 @@ Return a string suitable for insertion in `dired' buffer."
     (goto-char (point-min))
     (delete-region
      (progn (beginning-of-line) (point))
-     (progn (forward-line 3) (point)))
+     (progn (forward-line
+             (if (save-excursion
+                   (forward-line 1)
+                   (end-of-line)
+                   (looking-back "\\."))
+                 3 1)) (point)))
     (insert "  ")
     (while (= (forward-line) 0)
       (insert "  "))
