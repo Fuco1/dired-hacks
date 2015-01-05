@@ -564,7 +564,7 @@ Return a string suitable for insertion in `dired' buffer."
 	(while (dired-subtree-previous-sibling)
 	  (dired-subtree--insert-recursive (1+ depth) max-depth))))))
 
-(defvar dired-subtree--cycle-expanded nil
+(defvar dired-subtree--cycle-previous nil
   "Remember previous action for `dired-subtree-cycle'")
 
 ;;;###autoload
