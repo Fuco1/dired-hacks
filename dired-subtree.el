@@ -61,6 +61,8 @@
 
 ;; * `dired-subtree-insert'
 ;; * `dired-subtree-remove'
+;; * `dired-subtree-toggle'
+;; * `dired-subtree-cycle'
 ;; * `dired-subtree-revert'
 ;; * `dired-subtree-narrow'
 ;; * `dired-subtree-up'
@@ -121,6 +123,17 @@ depth---that creates the prefix."
 (defcustom dired-subtree-after-remove-hook ()
   "Hook run at the end of `dired-subtree-remove'."
   :type 'hook
+  :group 'dired-subtree)
+
+(defcustom dired-subtree-cycle-depth 3
+  "Default depth expanded by `dired-subtree-cycle'."
+  :type 'integer
+  :group 'dired-subtree)
+
+(defcustom dired-subtree-ignored-regexp
+  (concat "^" (regexp-opt vc-directory-exclusion-list) "$")
+  "Matching directories will not be expanded in `dired-subtree-cycle'."
+  :type 'string
   :group 'dired-subtree)
 
 (defgroup dired-subtree-faces ()
@@ -526,6 +539,71 @@ Return a string suitable for insertion in `dired' buffer."
                      (overlay-end ov))
       (dired-subtree--remove-overlays ovs)))
   (run-hooks 'dired-subtree-after-remove-hook))
+
+;;;###autoload
+(defun dired-subtree-toggle ()
+  "Insert subtree at point or remove it if it was not present."
+  (interactive)
+  (cond
+   ((dired-subtree--is-expanded-p)
+    (dired-next-line 1)
+    (dired-subtree-remove))
+   (t
+    (save-excursion
+      (dired-subtree-insert)))))
+
+(defun dired-subtree--insert-recursive (depth max-depth)
+  "Insert full subtree at point."
+  (save-excursion
+    (let ((name (dired-get-filename nil t)))
+      (when (and name (file-directory-p name)
+                 (<= depth (or max-depth depth))
+                 (or (= 1 depth)
+		     (not (string-match-p dired-subtree-ignored-regexp
+					  (file-name-nondirectory name)))))
+	(if (dired-subtree--is-expanded-p)
+	    (dired-next-line 1)
+	  (dired-subtree-insert))
+	(dired-subtree-end)
+	(dired-subtree--insert-recursive (1+ depth) max-depth)
+	(while (dired-subtree-previous-sibling)
+	  (dired-subtree--insert-recursive (1+ depth) max-depth))))))
+
+(defvar dired-subtree--cycle-previous nil
+  "Remember previous action for `dired-subtree-cycle'")
+
+;;;###autoload
+(defun dired-subtree-cycle (&optional max-depth)
+  "Org-mode like cycle visibility:
+
+1) Show subtree
+2) Show subtree recursively (if previous command was cycle)
+3) Remove subtree
+
+Numeric prefix will set max depth"
+  (interactive "P")
+  (save-excursion
+    (cond
+     ;; prefix - show subtrees up to max-depth
+     (max-depth
+      (when (dired-subtree--is-expanded-p)
+	(dired-next-line 1)
+	(dired-subtree-remove))
+      (dired-subtree--insert-recursive 1 (if (integerp max-depth) max-depth nil))
+      (setq dired-subtree--cycle-previous :full))
+     ;; if directory is not expanded, expand one level
+     ((not (dired-subtree--is-expanded-p))
+      (dired-subtree-insert)
+      (setq dired-subtree--cycle-previous :insert))
+     ;; hide if previous command was not cycle or tree was fully expanded
+     ((or (not (eq last-command 'dired-subtree-cycle))
+	  (eq dired-subtree--cycle-previous :full))
+      (dired-next-line 1)
+      (dired-subtree-remove)
+      (setq dired-subtree--cycle-previous :remove))
+     (t
+      (dired-subtree--insert-recursive 1 dired-subtree-cycle-depth)
+      (setq dired-subtree--cycle-previous :full)))))
 
 (defun dired-subtree--filter-up (keep-dir kill-siblings)
   (save-excursion
