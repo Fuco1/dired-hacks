@@ -172,7 +172,7 @@
 ;; removing lines you are not interested in, you can also group
 ;; lines together by filters.  That is, lines (files,
 ;; directories...) satisfying a filter will be moved together under
-;; a common header.  This mechanism works in analogy with ibuffer
+;; a common drawer.  This mechanism works in analogy with ibuffer
 ;; filter groups.
 
 ;; The variable `dired-filter-group-saved-groups' contains
@@ -237,6 +237,13 @@ Entries are of type (name desc body) ")
   :type '(cons
            (string :tag "Filter name")
            (repeat :tag "Filter stack" dired-filter)))
+
+(define-widget 'dired-filter-drawer 'lazy
+  "A named dired filter drawer."
+  :tag "Drawer"
+  :type '(cons
+          (string :tag "Drawer name")
+          (repeat :tag "Filter stack" dired-filter)))
 
 (defcustom dired-filter-stack '((omit))
   "Filter stack.
@@ -329,7 +336,7 @@ Can be either a named filter group specified in
 `dired-filter-group-saved-groups' or an anonymous filter stack."
   :type '(choice
           (string :tag "Filter group")
-          (repeat :tag "Filter stacks" dired-filter-saved))
+          (repeat :tag "Drawers" dired-filter-drawer))
   :group 'dired-filter-group)
 (make-variable-buffer-local 'dired-filter-group)
 
@@ -348,7 +355,7 @@ See `dired-filter-stack' for the format of FILTER-STACK."
           :tag "Filter groups"
           (cons
            (string :tag "Filter group name")
-           (repeat :tag "Filter stacks" dired-filter-saved)))
+           (repeat :tag "Drawers" dired-filter-drawer)))
   :group 'dired-filter-group)
 
 (defface dired-filter-group-header
