@@ -194,7 +194,7 @@ Furthermore, instead of only filtering the dired buffer by
 removing lines you are not interested in, you can also group
 lines together by filters.  That is, lines (files,
 directories...) satisfying a filter will be moved together under
-a common header.  This mechanism works in analogy with ibuffer
+a common drawer.  This mechanism works in analogy with ibuffer
 filter groups.
 
 The variable `dired-filter-group-saved-groups` contains
