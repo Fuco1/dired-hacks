@@ -32,6 +32,7 @@
 (require 'dired-hacks-utils)
 
 (require 'grep)
+(require 'find-dired)
 
 (defun dired-list-align-size-column ()
   "Align the filesize column."
@@ -260,27 +261,42 @@ are taken from `grep-find-ignored-files'."
                 (shell-quote-argument ")")
                 " -prune -o "))))
 
+;; TODO: this should allow me to specify the command line manually
 ;;;###autoload
-(defun dired-list-find-file (pattern dir)
-  "Run find(1) using name PATTERN inside DIR and display results as a `dired' buffer.
+(defun dired-list-find-file (dir pattern)
+  (interactive "DDirectory: \nsPattern: ")
+  (dired-list dir
+              (concat "find " dir ": " pattern)
+              (concat "find " (dired-list--get-ignored-stuff) " -name " (shell-quote-argument pattern) " -ls &")
+              `(lambda (ignore-auto noconfirm) (dired-list-find-file ,dir ,pattern))))
+
+;;;###autoload
+(defun dired-list-find-name (dir pattern)
+  "Search DIR recursively for files matching the globbing pattern PATTERN,
+and run dired on those files.
+
+PATTERN is a shell wildcard (not an Emacs regexp) and need not be quoted.
 
 By default, directories matching `grep-find-ignored-directories'
 and files matching `grep-find-ignored-files' are ignored.
 
-If called with raw prefix argument \\[universal-argument],
-PATTERN is interpreted not as -name pattern, but as complete
-predicate.  It should not contain -print or -ls.  The predicate
-to ignore directories and files as above is prefixed to PATTERN.
-
-If called with double raw prefix argument \\[universal-argument] \\[universal-argument],
-PATTERN is interpreted as full predicate to be passed to find, no
-processing on it will be done.  It must contain -ls somewhere to
-produce output suitable for `dired'."
-  (interactive "sPattern: \nDDirectory: ")
+If called with raw prefix argument \\[universal-argument], no
+files will be ignored."
+  (interactive "DDirectory: \nsPattern: ")
   (dired-list dir
               (concat "find " dir ": " pattern)
-              (concat "find " (dired-list--get-ignored-stuff) " -name " (shell-quote-argument pattern) " -ls &")
-              `(lambda (ignore-auto noconfirm) (dired-list-find-file ,pattern ,dir))))
+              (concat "find . " (if current-prefix-arg "" (dired-list--get-ignored-stuff)) " -name " (shell-quote-argument pattern) " -ls &")
+              `(lambda (ignore-auto noconfirm) (dired-list-find-file ,dir ,pattern))))
+
+(defun dired-list-find-grep (dir regexp arg)
+  "Find files in DIR containing a regexp REGEXP and start Dired on output."
+  (interactive "DDirectory: \nsRegexp: \nP")
+  (dired-list dir
+              (concat "find grep " dir ": " regexp)
+              (concat "find . " (dired-list--get-ignored-stuff)
+                      " \\( -type f -exec " grep-program " " find-grep-options
+                      " -e " (shell-quote-argument regexp) " {} \\; \\) -ls &")
+              `(lambda (ignore-auto noconfirm) (dired-list-find-grep ,dir ,regexp))))
 
 (provide 'dired-list)
 ;;; dired-list.el ends here
