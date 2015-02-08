@@ -229,7 +229,8 @@ Entries are of type (name desc body) ")
                    (symbol :tag "Filter")
                    (sexp :tag "Qualifier"))
                  (cons :tag "Logical OR of filters" (const or) (repeat dired-filter))
-                 (list :tag "Logical negation of a filter" (const not) dired-filter)))
+                 (list :tag "Logical negation of a filter" (const not) dired-filter)
+                 (string :tag "Saved filter stack")))
 
 (define-widget 'dired-filter-saved 'lazy
   "A named dired filter."
@@ -441,6 +442,10 @@ See `dired-filter-stack' for the format of FILTER-STACK."
 
 (defun dired-filter--make-filter-1 (stack)
   (cond
+   ((stringp stack)
+    `(and ,@(mapcar 'dired-filter--make-filter-1
+                    (or (cdr (assoc stack dired-filter-saved-filters))
+                        (error "saved filter %s does not exist" filter)))))
    ((stringp (car stack))
     `(and ,@(mapcar 'dired-filter--make-filter-1 (cdr stack))))
    ((eq (car stack) 'or)
@@ -488,6 +493,8 @@ listing."
 (defun dired-filter--describe-filters-1 (stack)
   "Return a string describing `dired-filter-stack'."
   (cond
+   ((stringp stack)
+    (format "[Saved filter: %s]" stack))
    ((stringp (car stack))
     (format "[Saved filter: %s]" (car stack)))
    ((eq (car stack) 'or)
@@ -998,12 +1005,12 @@ of `auto-mode-alist'."
     (pop dired-filter-stack)
     (pop dired-filter-stack)
     (cond
-     ((and (eq (car top) 'or)
-           (eq (car top2) 'or))
+     ((and (eq (car-safe top) 'or)
+           (eq (car-safe top2) 'or))
       (dired-filter--push (append '(or) (cdr top) (cdr top2))))
-     ((eq (car top) 'or)
+     ((eq (car-safe top) 'or)
       (dired-filter--push (append '(or) (cdr top) `(,top2))))
-     ((eq (car top2) 'or)
+     ((eq (car-safe top2) 'or)
       (dired-filter--push (append `(or ,top) (cdr top2))))
      (t (dired-filter--push `(or ,top ,top2))))
     (dired-filter--update)))
@@ -1051,10 +1058,12 @@ push all its constituents back on the stack."
     (let ((top (pop dired-filter-stack)))
       (when dired-filter-verbose
         (if top
-            (--if-let (let ((qualifier (cdr top)))
-                        (eval (caddr (assoc (car top) dired-filter-alist))))
-                (message "Popped filter %s: %s" (car top) it)
-              (message "Popped filter %s" (car top)))
+            (if (stringp top)
+                (message "Popped saved filter %s" top)
+              (--if-let (let ((qualifier (cdr top)))
+                          (eval (caddr (assoc (car top) dired-filter-alist))))
+                  (message "Popped filter %s: %s" (car top) it)
+                (message "Popped filter %s" (car top))))
           (message "Filter stack was empty."))))
     (setq arg (1- arg)))
   (dired-filter--update))
