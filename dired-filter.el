@@ -199,6 +199,7 @@
 (require 'dired-aux)
 (require 'dired-hacks-utils)
 (require 'dash)
+(require 'thingatpt)
 
 ;; silence the compiler warning
 (defvar dired-filter-mode nil)
@@ -564,6 +565,24 @@ The matched lines are returned as a string."
               (forward-line 1))))
         (apply 'concat (nreverse re))))))
 
+(defvar dired-filter-group-header-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "RET") 'dired-filter-group-toggle-header)
+    map)
+  "Keymap used when over a group header.")
+
+(defun dired-filter-group--make-header (name &optional collapsed)
+  "Make group header named by NAME."
+  (concat (propertize
+           (concat
+            "  "
+            (propertize (format "[ %s%s ]" name (if collapsed " ..." ""))
+                        'font-lock-face 'dired-filter-group-header))
+           'keymap dired-filter-group-header-map
+           'dired-filter-group-collapsed collapsed
+           'dired-filter-group-header name)
+          "\n"))
+
 (defun dired-filter-group--apply (filter-group)
   (when (and dired-filter-group-mode
              dired-filter-group)
@@ -590,18 +609,44 @@ The matched lines are returned as a string."
                                 ;; filter group
                                 (group (dired-filter--extract-lines filter-stack)))
                           (when (/= (length group) 0)
-                            (insert "  " (propertize (format "[ %s ]" name) 'font-lock-face 'dired-filter-group-header) "\n"
-                                    group))))
+                            (insert (dired-filter-group--make-header name) group))))
                       (when (and (text-property-any
                                   (save-excursion (dired-next-subdir 0))
                                   (point-max) 'font-lock-face 'dired-filter-group-header)
                                  (save-excursion (dired-hacks-next-file)))
-                        (insert "  " (propertize "[ Default ]" 'font-lock-face 'dired-filter-group-header) "\n")))
+                        (insert (dired-filter-group--make-header "Default"))))
                     (setq next (ignore-errors (dired-next-subdir 1))))))
             (read-only-mode 1))
           (when (featurep 'dired-details)
             (dired-details-delete-overlays)
             (dired-details-activate)))))))
+
+(defun dired-filter-group-toggle-header ()
+  "Collapse or expand a filter group."
+  (interactive)
+  (let ((inhibit-read-only t)
+        (name (save-excursion
+                (beginning-of-line)
+                (get-text-property (point) 'dired-filter-group-header)))
+        (collapsed (save-excursion
+                     (beginning-of-line)
+                     (get-text-property (point) 'dired-filter-group-collapsed)))
+        (beg (save-excursion
+               (forward-line 1)
+               (point)))
+        (end (save-excursion
+               (end-of-line)
+               (or (next-single-property-change (point) 'dired-filter-group-header)
+                   (save-excursion
+                     (goto-char (point-max))
+                     (dired-hacks-previous-file)
+                     (line-end-position))))))
+    (if collapsed
+        (remove-text-properties beg end '(invisible))
+      (put-text-property beg end 'invisible t))
+    (save-excursion
+      (-let [(beg . end) (bounds-of-thing-at-point 'line)] (delete-region beg end))
+      (insert (dired-filter-group--make-header name (not collapsed))))))
 
 (defvar dired-filter--expanded-dirs nil
   "List of expanded subtrees.
