@@ -212,6 +212,11 @@ filtering works also with filter groups.
 
 ![Filter group](http://i.imgur.com/qtiDX1c.png)
 
+Placing the point on the drawer header and hitting `RET` folds it.
+Hitting `RET` again expands it.
+
+![Folding](http://i.imgur.com/TDUsEKq.png)
+
 The `dired-filter-group-saved-groups` used in the above screenshot is the following:
 
 ```elisp

@@ -185,6 +185,28 @@
 ;; filter group so you can use it to quickly group and ungroup the
 ;; files.
 
+;; Here is a screenshot with an active filter group.  Notice that regular
+;; filtering works also with filter groups.
+
+;; http://i.imgur.com/qtiDX1c.png
+
+;; Placing the point on the drawer header and hitting `RET' folds it.
+;; Hitting `RET' again expands it.
+
+;; http://i.imgur.com/TDUsEKq.png
+
+;; The `dired-filter-group-saved-groups' used in the above screenshot is the following:
+
+;; (("default"
+;;   ("PDF"
+;;    (extension . "pdf"))
+;;   ("LaTeX"
+;;    (extension "tex" "bib"))
+;;   ("Org"
+;;    (extension . "org"))
+;;   ("Archives"
+;;    (extension "zip" "rar" "gz" "bz2" "tar"))))
+
 ;;  Other features
 ;;  --------------
 
