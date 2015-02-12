@@ -864,21 +864,21 @@ filter."))
   (:description "dot-files"
    :reader nil
    :remove t)
-  (string-match "^\\." file-name))
+  (string-match-p "^\\." file-name))
 
 ;;;###autoload (autoload 'dired-filter-by-name "dired-filter")
 (dired-filter-define name
     "Toggle current view to files matching QUALIFIER."
   (:description "name"
    :reader (regexp-quote (read-string "Pattern: ")))
-  (string-match qualifier file-name))
+  (string-match-p qualifier file-name))
 
 ;;;###autoload (autoload 'dired-filter-by-regexp "dired-filter")
 (dired-filter-define regexp
     "Toggle current view to files matching QUALIFIER as a regular expression."
   (:description "regexp"
    :reader (read-string "Regexp: " ))
-  (string-match qualifier file-name))
+  (string-match-p qualifier file-name))
 
 ;;;###autoload (autoload 'dired-filter-by-extension "dired-filter")
 (dired-filter-define extension
@@ -916,7 +916,7 @@ separately in turn and ORing the filters together."
                 "Extension: "
                 exts
                 nil nil nil nil ext))))
-  (string-match qualifier file-name))
+  (string-match-p qualifier file-name))
 
 ;;;###autoload (autoload 'dired-filter-by-omit "dired-filter")
 (dired-filter-define omit
@@ -924,7 +924,7 @@ separately in turn and ORing the filters together."
   (:description "omit"
    :qualifier-description nil
    :remove t)
-  (string-match qualifier file-name))
+  (string-match-p qualifier file-name))
 
 ;;;###autoload (autoload 'dired-filter-by-predicate "dired-filter")
 (dired-filter-define predicate
