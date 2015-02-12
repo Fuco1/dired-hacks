@@ -261,14 +261,30 @@ are taken from `grep-find-ignored-files'."
                 (shell-quote-argument ")")
                 " -prune -o "))))
 
-;; TODO: this should allow me to specify the command line manually
 ;;;###autoload
-(defun dired-list-find-file (dir pattern)
-  (interactive "DDirectory: \nsPattern: ")
-  (dired-list dir
-              (concat "find " dir ": " pattern)
-              (concat "find " (dired-list--get-ignored-stuff) " -name " (shell-quote-argument pattern) " -ls &")
-              `(lambda (ignore-auto noconfirm) (dired-list-find-file ,dir ,pattern))))
+(defun dired-list-find-file (dir cmd)
+  "Run find(1) on DIR.
+
+By default, directories matching `grep-find-ignored-directories'
+and files matching `grep-find-ignored-files' are ignored.
+
+If called with raw prefix argument \\[universal-argument], no
+files will be ignored."
+  (interactive (let ((base-cmd (concat "find . "
+                                  (if current-prefix-arg "" (dired-list--get-ignored-stuff))
+                                  " -ls &")))
+                 (list (read-directory-name "Directory: " nil nil t)
+                       (read-from-minibuffer
+                        "Find command: "
+                        (cons base-cmd (string-match-p "-ls &" base-cmd))))))
+  (let ((short-cmd (save-match-data
+                     (if (string-match ".* -prune -o \\(.*?\\) -ls &" cmd)
+                         (match-string 1 cmd)
+                       cmd))))
+    (dired-list dir
+                (concat "find " dir ": " short-cmd)
+                cmd
+                `(lambda (ignore-auto noconfirm) (dired-list-find-file ,dir ,cmd)))))
 
 ;;;###autoload
 (defun dired-list-find-name (dir pattern)
