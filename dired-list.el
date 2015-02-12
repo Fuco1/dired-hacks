@@ -286,7 +286,7 @@ files will be ignored."
   (dired-list dir
               (concat "find " dir ": " pattern)
               (concat "find . " (if current-prefix-arg "" (dired-list--get-ignored-stuff)) " -name " (shell-quote-argument pattern) " -ls &")
-              `(lambda (ignore-auto noconfirm) (dired-list-find-file ,dir ,pattern))))
+              `(lambda (ignore-auto noconfirm) (dired-list-find-name ,dir ,pattern))))
 
 (defun dired-list-find-grep (dir regexp arg)
   "Find files in DIR containing a regexp REGEXP and start Dired on output."
