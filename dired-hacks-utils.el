@@ -154,7 +154,8 @@ line."
       (dired-hacks-previous-file (- arg))
     (--dotimes arg
       (forward-line)
-      (while (and (not (dired-utils-is-file-p))
+      (while (and (or (not (dired-utils-is-file-p))
+                      (get-text-property (point) 'invisible))
                   (= (forward-line) 0))))
     (if (not (= (point) (point-max)))
         (dired-move-to-filename)
@@ -173,7 +174,8 @@ line."
       (dired-hacks-next-file (- arg))
     (--dotimes arg
       (forward-line -1)
-      (while (and (not (dired-utils-is-file-p))
+      (while (and (or (not (dired-utils-is-file-p))
+                      (get-text-property (point) 'invisible))
                   (= (forward-line -1) 0))))
     (if (not (= (point) (point-min)))
         (dired-move-to-filename)
