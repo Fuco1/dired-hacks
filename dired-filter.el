@@ -466,6 +466,7 @@ See `dired-filter-stack' for the format of FILTER-STACK."
   "Push FILTER onto the active filter stack."
   (push filter dired-filter-stack))
 
+;; TODO: save the filters in better structure to avoid undescriptive `cadddr'
 (defun dired-filter--make-filter-1 (stack)
   (cond
    ((stringp stack)
@@ -759,9 +760,11 @@ If prefix argument \\[universal-argument] is used, unmark the matched files inst
 If prefix argument \\[universal-argument] \\[universal-argument] is used, mark the files that would normally
 not be marked, that is, reverse the logical meaning of the
 filter."
-  (let* ((filter (if (equal current-prefix-arg '(16))
+  (let* ((remove (cadddr (assoc (car filter) dired-filter-alist)))
+         (filter (if (equal current-prefix-arg '(16))
                      `(not ,(dired-filter--make-filter (list filter)))
                    (dired-filter--make-filter (list filter))))
+         (filter (if remove `(not ,filter) filter))
          (dired-marker-char (if (equal current-prefix-arg '(4)) ?\040 dired-marker-char)))
     (eval `(dired-mark-if
             (let ((file-name (dired-utils-get-filename 'no-dir)))
