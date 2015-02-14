@@ -400,6 +400,7 @@ See `dired-filter-stack' for the format of FILTER-STACK."
     (define-key map "d" 'dired-filter-by-directory)
     (define-key map "m" 'dired-filter-by-mode)
     (define-key map "s" 'dired-filter-by-symlink)
+    (define-key map "x" 'dired-filter-by-executable)
 
     (define-key map "|" 'dired-filter-or)
     (define-key map "!" 'dired-filter-negate)
@@ -429,6 +430,7 @@ See `dired-filter-stack' for the format of FILTER-STACK."
     (define-key map "d" 'dired-filter-mark-by-directory)
     (define-key map "m" 'dired-filter-mark-by-mode)
     (define-key map "s" 'dired-filter-mark-by-symlink)
+    (define-key map "x" 'dired-filter-mark-by-executable)
     map)
   "Keymap used for marking files.")
 
@@ -935,6 +937,14 @@ separately in turn and ORing the filters together."
    :qualifier-description nil
    :remove t)
   (string-match-p dired-garbage-files-regexp file-name))
+
+;;;###autoload (autoload 'dired-filter-by-executable "dired-filter")
+(dired-filter-define executable
+    "Toggle current view to executable files."
+  (:description "executable"
+   :qualifier-description nil)
+  (and (not (file-directory-p file-name))
+       (file-executable-p file-name)))
 
 ;;;###autoload (autoload 'dired-filter-by-predicate "dired-filter")
 (dired-filter-define predicate
