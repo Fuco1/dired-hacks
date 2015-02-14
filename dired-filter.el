@@ -414,7 +414,7 @@ See `dired-filter-stack' for the format of FILTER-STACK."
     (define-key map "A" 'dired-filter-add-saved-filters)
     (define-key map "L" 'dired-filter-load-saved-filters)
     map)
-  "Keymap used for `dired-filter-mode'.")
+  "Keymap used for filtering files.")
 
 ;;;###autoload
 (defvar dired-filter-mark-map
@@ -459,6 +459,13 @@ See `dired-filter-stack' for the format of FILTER-STACK."
                  (const :tag "Don't set" nil))
   :group 'dired-filter
   :set 'dired-filter--set-mark-prefix-key)
+
+(defvar dired-filter-group-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "<tab>") 'dired-filter-group-forward-drawer)
+    (define-key map (kbd "<backtab>") 'dired-filter-group-backward-drawer)
+    map)
+  "Keymap used in `dired-filter-group-mode'.")
 
 
 ;; internals
@@ -688,6 +695,33 @@ The matched lines are returned as a string."
     (save-excursion
       (-let [(beg . end) (bounds-of-thing-at-point 'line)] (delete-region beg end))
       (insert (dired-filter-group--make-header name (not collapsed))))))
+
+(defun dired-filter-group-forward-drawer (&optional count)
+  "Move point forward by COUNT drawers."
+  (interactive "p")
+  (--dotimes count
+    (-when-let (next-drawer (progn
+                              (end-of-line)
+                              (or (next-single-property-change (point) 'dired-filter-group-header)
+                                  (progn
+                                    (goto-char (point-min))
+                                    (next-single-property-change (point) 'dired-filter-group-header)))))
+      (goto-char next-drawer)
+      (forward-char 2))))
+
+(defun dired-filter-group-backward-drawer (&optional count)
+  "Move point backward by COUNT drawers."
+  (interactive "p")
+  (--dotimes count
+    (-when-let (previous-drawer (progn
+                              (beginning-of-line)
+                              (or (previous-single-property-change (point) 'dired-filter-group-header)
+                                  (progn
+                                    (goto-char (point-max))
+                                    (previous-single-property-change (point) 'dired-filter-group-header)))))
+      (goto-char previous-drawer)
+      (beginning-of-line)
+      (forward-char 2))))
 
 (defvar dired-filter--expanded-dirs nil
   "List of expanded subtrees.
@@ -1197,6 +1231,7 @@ push all its constituents back on the stack."
   "Toggle filter grouping of files in Dired."
   :group 'dired-filter-group
   :lighter ""
+  :keymap dired-filter-group-mode-map
   (if dired-filter-group-mode
       (dired-filter--apply)
     (revert-buffer)))
