@@ -563,15 +563,15 @@ Return a string suitable for insertion in `dired' buffer."
       (when (and name (file-directory-p name)
                  (<= depth (or max-depth depth))
                  (or (= 1 depth)
-		     (not (string-match-p dired-subtree-ignored-regexp
-					  (file-name-nondirectory name)))))
-	(if (dired-subtree--is-expanded-p)
-	    (dired-next-line 1)
-	  (dired-subtree-insert))
-	(dired-subtree-end)
-	(dired-subtree--insert-recursive (1+ depth) max-depth)
-	(while (dired-subtree-previous-sibling)
-	  (dired-subtree--insert-recursive (1+ depth) max-depth))))))
+                     (not (string-match-p dired-subtree-ignored-regexp
+                                          (file-name-nondirectory name)))))
+        (if (dired-subtree--is-expanded-p)
+            (dired-next-line 1)
+          (dired-subtree-insert))
+        (dired-subtree-end)
+        (dired-subtree--insert-recursive (1+ depth) max-depth)
+        (while (dired-subtree-previous-sibling)
+          (dired-subtree--insert-recursive (1+ depth) max-depth))))))
 
 (defvar dired-subtree--cycle-previous nil
   "Remember previous action for `dired-subtree-cycle'")
@@ -591,8 +591,8 @@ Numeric prefix will set max depth"
      ;; prefix - show subtrees up to max-depth
      (max-depth
       (when (dired-subtree--is-expanded-p)
-	(dired-next-line 1)
-	(dired-subtree-remove))
+        (dired-next-line 1)
+        (dired-subtree-remove))
       (dired-subtree--insert-recursive 1 (if (integerp max-depth) max-depth nil))
       (setq dired-subtree--cycle-previous :full))
      ;; if directory is not expanded, expand one level
@@ -601,7 +601,7 @@ Numeric prefix will set max depth"
       (setq dired-subtree--cycle-previous :insert))
      ;; hide if previous command was not cycle or tree was fully expanded
      ((or (not (eq last-command 'dired-subtree-cycle))
-	  (eq dired-subtree--cycle-previous :full))
+          (eq dired-subtree--cycle-previous :full))
       (dired-next-line 1)
       (dired-subtree-remove)
       (setq dired-subtree--cycle-previous :remove))
