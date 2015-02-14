@@ -394,6 +394,7 @@ See `dired-filter-stack' for the format of FILTER-STACK."
     (define-key map "." 'dired-filter-by-extension)
     (define-key map "h" 'dired-filter-by-dot-files) ;; hidden-files
     (define-key map "o" 'dired-filter-by-omit)
+    (define-key map "g" 'dired-filter-by-garbage)
     (define-key map "e" 'dired-filter-by-predicate)
     (define-key map "f" 'dired-filter-by-file)
     (define-key map "d" 'dired-filter-by-directory)
@@ -422,6 +423,7 @@ See `dired-filter-stack' for the format of FILTER-STACK."
     (define-key map "." 'dired-filter-mark-by-extension)
     (define-key map "h" 'dired-filter-mark-by-dot-files) ;; hidden-files
     (define-key map "o" 'dired-filter-mark-by-omit)
+    (define-key map "g" 'dired-filter-mark-by-garbage)
     (define-key map "e" 'dired-filter-mark-by-predicate)
     (define-key map "f" 'dired-filter-mark-by-file)
     (define-key map "d" 'dired-filter-mark-by-directory)
@@ -925,6 +927,14 @@ separately in turn and ORing the filters together."
    :qualifier-description nil
    :remove t)
   (string-match-p qualifier file-name))
+
+;;;###autoload (autoload 'dired-filter-by-garbage "dired-filter")
+(dired-filter-define garbage
+    "Toggle current view to files matched by `dired-garbage-files-regexp'."
+  (:description "garbage"
+   :qualifier-description nil
+   :remove t)
+  (string-match-p dired-garbage-files-regexp file-name))
 
 ;;;###autoload (autoload 'dired-filter-by-predicate "dired-filter")
 (dired-filter-define predicate
