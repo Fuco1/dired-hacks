@@ -448,7 +448,11 @@ children."
 
 Return a string suitable for insertion in `dired' buffer."
   (with-temp-buffer
-    (insert-directory dir-name dired-listing-switches nil t)
+    (let ((insert-dir-fun  (if (and (featurep 'tramp)
+                                    (tramp-tramp-file-p dir-name))
+                               #'tramp-handle-insert-directory
+                             #'insert-directory)))
+      (funcall insert-dir-fun dir-name dired-listing-switches nil t))
     (delete-char -1)
     (goto-char (point-min))
     (delete-region
