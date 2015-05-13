@@ -288,6 +288,7 @@ With prefix argument \\[universal-argument] \\[universal-argument] open a new th
     (set-keymap-parent map image-mode-map)
     (define-key map (kbd ".") 'di-view-next)
     (define-key map (kbd ",") 'di-view-previous)
+    (define-key map (kbd "s s") 'di-view-fit-image-to-window)
     (define-key map (kbd "<right>") 'di-view-next)
     (define-key map (kbd "<left>") 'di-view-previous)
     map))
@@ -359,6 +360,11 @@ With prefix argument \\[universal-argument] \\[universal-argument] open a new th
         (set-window-point (car (di--get-active-thumb-windows)) (point)))
     (di-dec di-file-list-current (di--view-total) arg)
     (di--open-image (nth di-file-list-current di-file-list))))
+
+(defun di-view-fit-image-to-window ()
+  "Fit image to window."
+  (interactive)
+  (di--open-image (di--view-current-file)))
 
 (define-derived-mode di-view-mode special-mode
   "DI View"
