@@ -144,14 +144,18 @@ RELIEF and MARGIN specify the image properties.  See also
                    :margin ,(or margin 0))))
     (insert-image i)))
 
+(defun di--resize-image (in-file out-file width height)
+  "Resize IN-FILE to WIDTH and HEIGHT, save to OUT-FILE"
+  (call-process "convert" nil nil nil "-resize"
+                (format "%dx%d" width height)
+                in-file out-file))
+
 (defun di--create-fitted-image (file &optional window)
   "Resize FILE to fit current view window."
   (let* ((edges (window-inside-pixel-edges window))
          (width (- (nth 2 edges) (nth 0 edges)))
          (height (- (nth 3 edges) (nth 1 edges))))
-    (call-process "convert" nil nil nil "-resize"
-                  (format "%dx%d" width height)
-                  file (di--temp-file))))
+    (di--resize-image file (di--temp-file) width height)))
 
 (defun di--open-image (file &optional window)
   "Open FILE as image in current buffer."
