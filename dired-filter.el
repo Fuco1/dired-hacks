@@ -932,6 +932,7 @@ prefered as the regexp will be optimized to match any of the
 extensions and thus much faster than matching each extension
 separately in turn and ORing the filters together."
   (:description "extension"
+   :qualifier-description (format "%s" qualifier)
    :reader (let* ((file (dired-utils-get-filename))
                   (ext (and file (file-name-extension file)))
                   (exts
