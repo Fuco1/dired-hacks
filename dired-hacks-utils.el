@@ -182,6 +182,23 @@ line."
       (dired-hacks-next-file)
       nil)))
 
+(defun dired-hacks-compare-files (file-a file-b)
+  "Test if two files FILE-A and FILE-B are the (probably) the same."
+  (interactive (let ((other-dir (dired-dwim-target-directory)))
+                 (list (read-file-name "File A: " default-directory (car (dired-get-marked-files)) t)
+                       (read-file-name "File B: " other-dir (with-current-buffer (cdr (assoc other-dir dired-buffers))
+                                                              (car (dired-get-marked-files))) t))))
+  (let ((md5-a (with-temp-buffer
+                 (shell-command (format "md5sum %s" file-a) (current-buffer))
+                 (buffer-string)))
+        (md5-b (with-temp-buffer
+                 (shell-command (format "md5sum %s" file-b) (current-buffer))
+                 (buffer-string))))
+    (message "%s%sFiles are %s." md5-a md5-b
+             (if (equal (car (split-string md5-a))
+                        (car (split-string md5-b)))
+                 "probably the same" "different"))))
+
 (provide 'dired-hacks-utils)
 
 ;;; dired-hacks-utils.el ends here
