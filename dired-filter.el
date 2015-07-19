@@ -664,7 +664,7 @@ by default."
                       (when (and (text-property-any
                                   (save-excursion (dired-next-subdir 0))
                                   (point-max) 'font-lock-face 'dired-filter-group-header)
-                                 (save-excursion (dired-hacks-next-file)))
+                                 (save-excursion (backward-char 1) (dired-hacks-next-file)))
                         (insert (dired-filter-group--make-header "Default"))))
                     (setq next (ignore-errors (dired-next-subdir 1))))))
             (read-only-mode 1))
