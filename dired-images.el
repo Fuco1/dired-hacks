@@ -205,7 +205,7 @@ The number of thumbs per row is calculated using
       (save-excursion (replace-string "\n" ""))
       (while (not (eobp))
         (forward-char row)
-        (insert "\n")))))
+        (unless (eobp) (insert "\n"))))))
 
 (defun di--insert-thumb (file dired-buffer)
   "Insert thumbnail image FILE.
@@ -264,12 +264,14 @@ With prefix argument \\[universal-argument] \\[universal-argument] open a new th
         (erase-buffer))
       (when (equal arg '(4))
         (goto-char (point-max)))
-      (di--insert-thumbs marked-files dir-buf)
-      (--when-let (di--get-active-thumb-windows)
-        (di--arrange-thumbs (car it))))))
+      (save-excursion
+        (di--insert-thumbs marked-files dir-buf)
+        (--when-let (di--get-active-thumb-windows)
+          (di--arrange-thumbs (car it)))))))
 
 ;; NOTE: (dired-get-marked-files) automagically returns the file under
 ;; cursor if no selection is made.
+;; TODO: cleanup: remove the temp files for views which no longer exists
 (defun di-view-files ()
   "View marked files."
   (interactive)
