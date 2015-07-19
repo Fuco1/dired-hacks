@@ -307,7 +307,8 @@ With prefix argument \\[universal-argument] \\[universal-argument] open a new th
                                      "*")))))
     (setq di-active-view-buffer buf)
     (with-current-buffer di-active-view-buffer
-      (di-view-mode))
+      (di-view-mode)
+      (add-hook 'kill-buffer-hook `(lambda () (delete-file ,(di--temp-file (current-buffer)))) nil 'local))
     buf))
 
 (defun di--get-active-view-buffer ()
