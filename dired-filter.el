@@ -620,7 +620,10 @@ The matched lines are returned as a string."
   "Keymap used when over a group header.")
 
 (defun dired-filter-group--make-header (name &optional collapsed)
-  "Make group header named by NAME."
+  "Make group header named by NAME.
+
+Optional argument COLLAPSED specifies if the header is collapsed
+by default."
   (concat (propertize
            (concat
             "  "
