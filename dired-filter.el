@@ -684,11 +684,9 @@ The matched lines are returned as a string."
                (point)))
         (end (save-excursion
                (end-of-line)
-               (or (next-single-property-change (point) 'dired-filter-group-header)
-                   (save-excursion
-                     (goto-char (point-max))
-                     (dired-hacks-previous-file)
-                     (line-end-position))))))
+               (min (or (next-single-property-change (point) 'dired-filter-group-header)
+                        (point-max))
+                    (dired-subdir-max)))))
     (if collapsed
         (remove-text-properties beg end '(invisible))
       (put-text-property beg end 'invisible t))
