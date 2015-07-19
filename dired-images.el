@@ -114,9 +114,12 @@ This function sanitizes the variable `di-thumbs-directory'."
     dir))
 
 ;; TODO this should go to /tmp/
-(defun di--temp-file ()
-  "Return the location of temp file."
-  (concat (di--thumbs-directory) ".di-temp-" (buffer-name di-active-view-buffer)))
+(defun di--temp-file (&optional buffer)
+  "Return the location of temp file for a view buffer.
+
+Optional argument BUFFER is a view buffer, otherwise default to
+the active one."
+  (concat (di--thumbs-directory) ".di-temp-" (buffer-name (or buffer di-active-view-buffer))))
 
 ;; TODO: add optional dimensions of the thumb
 (defun di--thumb-name (file)
