@@ -222,6 +222,7 @@
 (require 'dired-hacks-utils)
 (require 'dash)
 (require 'thingatpt)
+(require 'cl)
 
 ;; silence the compiler warning
 (defvar dired-filter-mode nil)
@@ -487,7 +488,7 @@ See `dired-filter-stack' for the format of FILTER-STACK."
    ((eq (car stack) 'not)
     `(not ,@(mapcar 'dired-filter--make-filter-1 (cdr stack))))
    (t (let* ((def (assoc (car stack) dired-filter-alist))
-             (remove (cadddr def))
+             (remove (cl-cadddr def))
              (qualifier (cond
                          ((eq (car stack) 'predicate)
                           (let* ((predicate (cdr stack))
@@ -511,11 +512,11 @@ See `dired-filter-stack' for the format of FILTER-STACK."
         (if qualifier
             `(let ((qualifier ,qualifier))
                ,(if remove
-                    `(not ,(car (cddddr def)))
-                  (car (cddddr def))))
+                    `(not ,(car (cl-cddddr def)))
+                  (car (cl-cddddr def))))
           (if remove
-              `(not ,(car (cddddr def)))
-            (car (cddddr def))))))))
+              `(not ,(car (cl-cddddr def)))
+            (car (cl-cddddr def))))))))
 
 (defun dired-filter--make-filter (filter-stack)
   "Build the expression that filters the files.
@@ -537,7 +538,7 @@ listing."
     (concat "[NOT " (mapconcat 'dired-filter--describe-filters-1 (cdr stack) " ") "]"))
    (t (let* ((def (assoc (car stack) dired-filter-alist))
              (desc (cadr def))
-             (desc-qual (caddr def))
+             (desc-qual (cl-caddr def))
              (qualifier (cdr stack))
              (qual-formatted (eval desc-qual)))
         (if qual-formatted
@@ -795,7 +796,7 @@ If prefix argument \\[universal-argument] is used, unmark the matched files inst
 If prefix argument \\[universal-argument] \\[universal-argument] is used, mark the files that would normally
 not be marked, that is, reverse the logical meaning of the
 filter."
-  (let* ((remove (cadddr (assoc (car filter) dired-filter-alist)))
+  (let* ((remove (cl-cadddr (assoc (car filter) dired-filter-alist)))
          (filter (if (equal current-prefix-arg '(16))
                      `(not ,(dired-filter--make-filter (list filter)))
                    (dired-filter--make-filter (list filter))))
@@ -1142,7 +1143,7 @@ push all its constituents back on the stack."
             (if (stringp top)
                 (message "Popped saved filter %s" top)
               (--if-let (let ((qualifier (cdr top)))
-                          (eval (caddr (assoc (car top) dired-filter-alist))))
+                          (eval (cl-caddr (assoc (car top) dired-filter-alist))))
                   (message "Popped filter %s: %s" (car top) it)
                 (message "Popped filter %s" (car top))))
           (message "Filter stack was empty."))))
