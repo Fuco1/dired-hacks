@@ -1,6 +1,6 @@
 ;;; dired-narrow.el --- Live-narrowing of search results for dired
 
-;; Copyright (C) 2014 Matúš Goljer <matus.goljer@gmail.com>
+;; Copyright (C) 2014-2015 Matúš Goljer
 
 ;; Author: Matúš Goljer <matus.goljer@gmail.com>
 ;; Maintainer: Matúš Goljer <matus.goljer@gmail.com>

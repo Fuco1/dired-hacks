@@ -1,9 +1,9 @@
 ;;; dired-filter.el --- Ibuffer-like filtering for dired
 
-;; Copyright (C) 2014 Matus Goljer
+;; Copyright (C) 2014-2015 Matúš Goljer
 
-;; Author: Matus Goljer <matus.goljer@gmail.com>
-;; Maintainer: Matus Goljer <matus.goljer@gmail.com>
+;; Author: Matúš Goljer <matus.goljer@gmail.com>
+;; Maintainer: Matúš Goljer <matus.goljer@gmail.com>
 ;; Keywords: files
 ;; Version: 0.0.2
 ;; Created: 14th February 2014
