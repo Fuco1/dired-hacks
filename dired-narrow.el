@@ -48,6 +48,8 @@
 ;; the view.  As an inspiration, look at the built-in functions
 ;; mentioned above.
 
+;; See https://github.com/Fuco1/dired-hacks for the entire collection.
+
 ;;; Code:
 
 (require 'dash)
