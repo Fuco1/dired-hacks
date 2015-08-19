@@ -9,6 +9,7 @@
     6. [dired-subtree](#dired-subtree)
     7. [dired-ranger](#dired-ranger)
     8. [dired-narrow](#dired-narrow)
+    9. [dired-list](#dired-list)
 
 # dired-hacks [![Paypal logo](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CEYP5YVHDRX8C)
 
@@ -470,3 +471,40 @@ at each line that describes a file with point at the beginning of
 the file name.  If the filter returns nil, the file is removed from
 the view.  As an inspiration, look at the built-in functions
 mentioned above.
+
+<a name="dired-list" />
+## dired-list
+
+Produce a file listing with a shell incantation and make a dired
+out of it!
+
+This package provides one principal function, `dired-list` which
+can be used to produce dired buffers from shell programs outputing
+text roughly in the format of `la -ls`.
+
+For most standard output formats the default filter and sentinel
+should work, but you can also provide your own if the situation
+requires it.
+
+Most of the time you can pipe a zero-delimited list of files to `ls`
+through `xargs(1)` using
+
+    | xargs -I '{}' -0 ls -l '{}'
+
+which creates a compatible listing.  For more information read the
+documentation of `dired-list`, for example by invoking
+
+    C-h f dired-list RET
+
+in emacs.
+
+In addition to the generic interface this package implements common
+listings (patches and extensions welcome!), these are:
+
+* `dired-list-mpc`
+* `dired-list-git-ls-files`
+* `dired-list-hg-locate`
+* `dired-list-locate`
+* `dired-list-find-file`
+* `dired-list-find-name`
+* `dired-list-grep`
