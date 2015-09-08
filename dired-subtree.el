@@ -258,7 +258,19 @@ If no SUBTREES are specified, use `dired-subtree-overlays'."
                 (overlay-put ov (car it) (cdr it)))
               (dired-subtree--filter-subtree ov))))))))
 
+(defun dired-subtree--after-insert ()
+  "After inserting the subtree, setup dired-details/dired-hide-details-mode."
+  (if (fboundp 'dired-insert-set-properties)
+      (let ((inhibit-read-only t)
+            (ov (dired-subtree--get-ov)))
+        (dired-insert-set-properties (overlay-start ov) (overlay-end ov)))
+    (when (featurep 'dired-details)
+      (dired-details-delete-overlays)
+      (dired-details-activate))))
+
 (add-hook 'dired-after-readin-hook 'dired-subtree--after-readin)
+
+(add-hook 'dired-subtree-after-insert-hook 'dired-subtree--after-insert)
 
 (defun dired-subtree--unmark ()
   "Unmark a file without moving point."
