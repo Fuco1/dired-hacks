@@ -63,18 +63,47 @@
 
 ;; Utils
 
-;; this is `gnus-remove-text-with-property'
-(defun dired-narrow--remove-text-with-property (prop)
-  "Delete all text in the current buffer with text property PROP."
-  (let ((start (point-min))
-        end)
-    (unless (get-text-property start prop)
-      (setq start (next-single-property-change start prop)))
+
+;; helper function for `dired-narrow--operate-over-property-range'
+(defun dired-narrow--next-property-with-value (start prop val)
+  "Return the starting position of text with property, PROP, and value, VAL.
+VAL can be a list, in which case PROP's value is an element of
+the list. If VAL is t, return the starting position of the text
+with a non-nil PROP."
+  (while (and start
+              (not (or
+                    (and (eq val t) (get-text-property start prop))
+                    (and (listp val)
+                         (memq (get-text-property start prop) val))
+                    (eq (get-text-property start prop) val))))
+    (setq start (next-single-property-change start prop)))
+  start)
+
+(defun dired-narrow--operate-over-property-range (function prop val)
+  "Call FUNCTION for every range of PROP with value, VAL.
+VAL can be a list, in which case PROP's value is an element of
+the list. If VAL is t, then call FUNCTION on all non-nil ranges
+of PROP. FUNCTION takes two arguments, the start and end of the
+range, respectively."
+  (let ((start (dired-narrow--next-property-with-value (point-min) prop val))
+         end)
     (while start
-      (setq end (text-property-any start (point-max) prop nil))
-      (delete-region start (or end (point-max)))
-      (setq start (when end
-                    (next-single-property-change start prop))))))
+      (setq end
+            (or (and (eq val t) (text-property-any start (point-max) prop nil))
+                (text-property-not-all
+                 start (point-max) prop (get-text-property start prop))))
+
+      (funcall function start (if end end (point-max)))
+
+      (setq start (dired-narrow--next-property-with-value
+                   (when end
+                     (next-single-property-change start prop)) prop val)))))
+
+(defun dired-narrow--remove-text-with-property (prop val)
+  "Delete all text in the current buffer with text property PROP
+and value VAL."
+  (dired-narrow--operate-over-property-range
+   #'delete-region prop val))
 
 (defvar dired-narrow-filter-function 'identity
   "Filter function used to filter the dired view.")
@@ -83,18 +112,22 @@
   "Make the files not matching the filter invisible."
   (goto-char (point-min))
   (let ((inhibit-read-only t))
-    ;; TODO: we might want to call this only if the filter gets less
-    ;; specialized.
-    (dired-narrow--restore)
     (while (dired-hacks-next-file)
-      (unless (funcall dired-narrow-filter-function filter)
-        (put-text-property (line-beginning-position) (1+ (line-end-position)) 'invisible :dired-narrow)))))
+      (let ((matched (funcall dired-narrow-filter-function filter)))
+        (put-text-property (line-beginning-position) (1+ (line-end-position))
+                           'invisible (unless matched :dired-narrow))
+        (when matched
+          ;; For Emacs 24.4+ restore invisible text properties to line
+          (when (fboundp 'dired-insert-set-properties)
+            (dired-insert-set-properties
+             (line-beginning-position) (1+ (line-end-position)))))))))
+
 
 (defun dired-narrow--restore ()
   "Restore the invisible files of the current buffer."
-  (let ((inhibit-read-only t))
-    ;; TODO: figure out how to only remove it if the value is :dired-narrow
-    (remove-text-properties (point-min) (point-max) '(invisible))))
+  (remove-from-invisibility-spec :dired-narrow)
+  (when (fboundp 'dired-insert-set-properties)
+    (dired-insert-set-properties (point-min) (point-max))))
 
 
 ;; Live filtering
@@ -126,17 +159,22 @@ read from minibuffer."
   (let ((dired-narrow-buffer (current-buffer))
         (dired-narrow-filter-function filter-function)
         (current-file (dired-utils-get-filename)))
-    (condition-case nil
-        (progn
-          (read-from-minibuffer "Filter: ")
-          (with-current-buffer dired-narrow-buffer
+    (with-current-buffer dired-narrow-buffer
+      (add-to-invisibility-spec :dired-narrow)
+      (condition-case nil
+          (progn
+            (read-from-minibuffer "Filter: ")
             (let ((inhibit-read-only t))
-              (dired-narrow--remove-text-with-property 'invisible)))
-          (dired-next-subdir 0)
-          (dired-hacks-next-file))
-      (quit
-       (with-current-buffer dired-narrow-buffer
-         (dired-narrow--restore)
+              (dired-narrow--remove-text-with-property
+               'invisible :dired-narrow))
+            (when (featurep 'dired-details)
+              (dired-details-delete-overlays)
+              (dired-details-activate))
+            (dired-next-subdir 0)
+            (dired-hacks-next-file))
+        (quit
+         (let ((inhibit-read-only t))
+           (dired-narrow--restore))
          (dired-utils-goto-line current-file))))))
 
 

@@ -79,6 +79,15 @@ LOCALP has same semantics as in `dired-get-filename'."
        (nth (-elem-index keyword dired-utils-file-attributes-keywords)
             (file-attributes filename))))))
 
+(defun dired-utils--skip-non-file-line (&optional reverse)
+  "Move point to the next line when current line is not a file.
+
+If REVERSE is non-nil, move point to the line above."
+  (while (and (or (not (dired-utils-is-file-p))
+                  (let ((invisible (get-text-property (point) 'invisible)))
+                    (and invisible (not (eq invisible :dired-narrow)))))
+              (= (forward-line (if reverse -1 1)) 0))))
+
 (defun dired-utils-get-info (&rest keywords)
   "Query for info about the file at point.
 
@@ -154,9 +163,7 @@ line."
       (dired-hacks-previous-file (- arg))
     (--dotimes arg
       (forward-line)
-      (while (and (or (not (dired-utils-is-file-p))
-                      (get-text-property (point) 'invisible))
-                  (= (forward-line) 0))))
+      (dired-utils--skip-non-file-line))
     (if (not (= (point) (point-max)))
         (dired-move-to-filename)
       (forward-line -1)
@@ -174,9 +181,7 @@ line."
       (dired-hacks-next-file (- arg))
     (--dotimes arg
       (forward-line -1)
-      (while (and (or (not (dired-utils-is-file-p))
-                      (get-text-property (point) 'invisible))
-                  (= (forward-line -1) 0))))
+      (dired-utils--skip-non-file-line 'reverse))
     (if (not (= (point) (point-min)))
         (dired-move-to-filename)
       (dired-hacks-next-file)
