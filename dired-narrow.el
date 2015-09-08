@@ -87,14 +87,18 @@
     ;; specialized.
     (dired-narrow--restore)
     (while (dired-hacks-next-file)
-      (unless (funcall dired-narrow-filter-function filter)
+      (if (funcall dired-narrow-filter-function filter)
+          (when (fboundp 'dired-insert-set-properties)
+            (dired-insert-set-properties (line-beginning-position) (1+ (line-end-position))))
+        (put-text-property (line-beginning-position) (1+ (line-end-position)) :dired-narrow t)
         (put-text-property (line-beginning-position) (1+ (line-end-position)) 'invisible :dired-narrow)))))
 
 (defun dired-narrow--restore ()
   "Restore the invisible files of the current buffer."
   (let ((inhibit-read-only t))
-    ;; TODO: figure out how to only remove it if the value is :dired-narrow
-    (remove-text-properties (point-min) (point-max) '(invisible))))
+    (remove-text-properties (point-min) (point-max) '(invisible)))
+  (when (fboundp 'dired-insert-set-properties)
+    (dired-insert-set-properties (point-min) (point-max))))
 
 
 ;; Live filtering
@@ -126,18 +130,19 @@ read from minibuffer."
   (let ((dired-narrow-buffer (current-buffer))
         (dired-narrow-filter-function filter-function)
         (current-file (dired-utils-get-filename)))
-    (condition-case nil
+    (unwind-protect
         (progn
+          (add-to-invisibility-spec :dired-narrow)
           (read-from-minibuffer "Filter: ")
           (with-current-buffer dired-narrow-buffer
             (let ((inhibit-read-only t))
-              (dired-narrow--remove-text-with-property 'invisible)))
+              (dired-narrow--remove-text-with-property :dired-narrow)))
           (dired-next-subdir 0)
           (dired-hacks-next-file))
-      (quit
-       (with-current-buffer dired-narrow-buffer
-         (dired-narrow--restore)
-         (dired-utils-goto-line current-file))))))
+      (with-current-buffer dired-narrow-buffer
+        (remove-from-invisibility-spec :dired-narrow)
+        (dired-narrow--restore)
+        (dired-utils-goto-line current-file)))))
 
 
 ;; Interactive
