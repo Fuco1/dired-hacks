@@ -82,6 +82,9 @@
 ;; filter, you can call the function with a double prefix argument
 ;; (usually `C-u' `C-u')
 
+;; You can use saved filters to mark files by calling
+;; `dired-filter-mark-by-saved-filters'.
+
 ;;  Stack operations
 ;;  ----------------
 
@@ -432,6 +435,7 @@ See `dired-filter-stack' for the format of FILTER-STACK."
     (define-key map "m" 'dired-filter-mark-by-mode)
     (define-key map "s" 'dired-filter-mark-by-symlink)
     (define-key map "x" 'dired-filter-mark-by-executable)
+    (define-key map "L" 'dired-filter-mark-by-saved-filters)
     map)
   "Keymap used for marking files.")
 
@@ -1254,6 +1258,15 @@ after the current buffer's name."
                          (read-string "New buffer name: " (buffer-name))
                        (generate-new-buffer-name (buffer-name)))))
   (dired (cons name (dired-utils-get-all-files t))))
+
+(defun dired-filter-mark-by-saved-filters (filter)
+  "Mark files using saved FILTER.
+
+The marking logic regarding prefix arguments is exactly the same
+as that of `dired-filter-mark-by-name'."
+  (interactive (dired-filters--read-saved-filter-name "Load"))
+  (--when-let (assoc filter dired-filter-saved-filters)
+    (dired-filter--mark it)))
 
 
 ;; mode stuff

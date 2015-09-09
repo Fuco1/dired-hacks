@@ -109,6 +109,9 @@ bound to `C-u`).  To logically negate the meaning of the filter, you
 can call the function with a double prefix argument (usually `C-u`
 `C-u`)
 
+You can use saved filters to mark files by calling
+`dired-filter-mark-by-saved-filters`.
+
 ### Stack operations
 
 To remove the filter from the stack, use `dired-filter-pop` or
