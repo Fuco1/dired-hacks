@@ -112,6 +112,11 @@ This filter assumes that the input is in the format of `ls -l'."
                 ;; Remove occurrences of default-directory.
                 (while (search-forward (concat " " default-directory) nil t)
                   (replace-match " " nil t))
+                ;; remove '\ ' and replace with just a space
+                (goto-char beg)
+                (beginning-of-line)
+                (while (search-forward "\\ " nil t)
+                  (replace-match " " nil t))
                 (goto-char (point-max))
                 (when (search-backward "\n" (process-mark proc) t)
                   (dired-insert-set-properties (process-mark proc) (1+ (point)))
