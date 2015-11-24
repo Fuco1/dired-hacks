@@ -129,17 +129,20 @@ function takes one argument, which is the current filter string
 read from minibuffer."
   (let ((dired-narrow-buffer (current-buffer))
         (dired-narrow-filter-function filter-function)
-        (current-file (dired-utils-get-filename)))
+        (current-file (dired-utils-get-filename))
+        (disable-narrow nil))
     (unwind-protect
         (progn
+          (dired-narrow-mode 1)
           (add-to-invisibility-spec :dired-narrow)
-          (read-from-minibuffer "Filter: ")
+          (setq disable-narrow (read-from-minibuffer "Filter: "))
           (with-current-buffer dired-narrow-buffer
             (let ((inhibit-read-only t))
               (dired-narrow--remove-text-with-property :dired-narrow)))
           (dired-next-subdir 0)
           (dired-hacks-next-file))
       (with-current-buffer dired-narrow-buffer
+        (unless disable-narrow (dired-narrow-mode -1))
         (remove-from-invisibility-spec :dired-narrow)
         (dired-narrow--restore)
         (dired-utils-goto-line current-file)))))
@@ -188,6 +191,16 @@ A fuzzy string is constructed from the filter string by inserting
 expression against the file name."
   (interactive)
   (dired-narrow--internal 'dired-narrow--fuzzy-filter))
+
+(define-minor-mode dired-narrow-mode
+  "Minor mode for indicating when narrowing is in progress."
+  :lighter "dired-narrow")
+
+(defun dired-narrow--disable-on-revert ()
+  "Disable `dired-narrow-mode' after revert."
+  (dired-narrow-mode -1))
+
+(add-hook 'dired-after-readin-hook 'dired-narrow--disable-on-revert)
 
 (provide 'dired-narrow)
 ;;; dired-narrow.el ends here
