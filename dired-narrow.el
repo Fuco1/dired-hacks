@@ -194,7 +194,7 @@ expression against the file name."
 
 (define-minor-mode dired-narrow-mode
   "Minor mode for indicating when narrowing is in progress."
-  :lighter "dired-narrow")
+  :lighter " dired-narrow")
 
 (defun dired-narrow--disable-on-revert ()
   "Disable `dired-narrow-mode' after revert."
