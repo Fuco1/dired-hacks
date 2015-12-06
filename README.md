@@ -29,15 +29,31 @@ but it would be a bit more painful.
 <a name="contribute!" />
 # Contribute!
 
-Since this collection comes from my own config, it mostly contains
-stuff I use or find useful.  If you have a good idea or nice usecase
-for some addition, feel free to send patches or start an issue (but
-patches are preferred :P).
+If you want to support this project, you can do it in the following ways:
 
-If you find this package useful, or if you don't, you can also donate
-arbitrary sum of money via PayPal button above (note: it links to the
-[smartparens](https://github.com/Fuco1/smartparens) "product" because
-I'm lazy to create special button for every of my projects ;)
+* Contribute code. Since this collection comes from my own config, it
+  mostly contains stuff I use or find useful.  If you have an idea
+  that is not yet implemented and will benefit this project, feel free
+  to implement it and submit a pull request. If you have any concerns
+  whether your contribution will be accepted, ask beforehand. You can
+  email the author or
+  [start an issue](https://github.com/Fuco1/dired-hacks/issues/new) on
+  the tracker.
+* Contribute ideas. Even if you can't code Emacs Lisp, you can still
+  contribute valuable ideas for other programmers to implement. Simply
+  [start new issue](https://github.com/Fuco1/dired-hacks/issues/new)
+  on the tracker and submit your suggestion.
+* You can make a
+  [financial donation](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=TAWNECQR3TTUY)
+  through PayPal.  If you like dired-hacks and can spare a modest
+  amount on a donation, feel free to do so.  These donations are
+  expressions of your gratitude and are used for my personal "rewards"
+  (books, games, music etc.).  You can also gift me a game on
+  [Steam](http://steamcommunity.com/profiles/76561198265034071/wishlist)
+  or buy something on
+  [Amazon](http://www.amazon.com/gp/registry/wishlist/2I8DOQH8OZEUR).
+  Regardless of the donations, dired-hacks will always be free both as
+  in beer and as in speech.
 
 <a name="packages" />
 # Packages
