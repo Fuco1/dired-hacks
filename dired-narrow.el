@@ -60,6 +60,25 @@
   :group 'dired-hacks
   :prefix "dired-narrow-")
 
+(defvar dired-narrow-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "<up>") 'dired-narrow-previous-file)
+    (define-key map (kbd "<down>") 'dired-narrow-next-file)
+    (define-key map (kbd "C-g") 'minibuffer-keyboard-quit)
+    (define-key map (kbd "RET") 'exit-minibuffer)
+    (define-key map (kbd "<return>") 'exit-minibuffer)
+    map)
+  "Keymap used while `dired-narrow' is reading the pattern.")
+
+(defcustom dired-narrow-exit-action 'ignore
+  "Function to call after exiting minibuffer.
+
+Function takes no argument and is called with point over the file
+we should act on."
+  :type '(choice (const :tag "Open file under point" dired-narrow-find-file)
+                 (function :tag "Use custom function."))
+  :group 'dired-narrow)
+
 
 ;; Utils
 
@@ -144,23 +163,26 @@ function takes one argument, which is the current filter string
 read from minibuffer."
   (let ((dired-narrow-buffer (current-buffer))
         (dired-narrow-filter-function filter-function)
-        (current-file (dired-utils-get-filename))
         (disable-narrow nil))
     (unwind-protect
         (progn
           (dired-narrow-mode 1)
           (add-to-invisibility-spec :dired-narrow)
-          (setq disable-narrow (read-from-minibuffer "Filter: "))
-          (with-current-buffer dired-narrow-buffer
-            (let ((inhibit-read-only t))
-              (dired-narrow--remove-text-with-property :dired-narrow)))
-          (dired-next-subdir 0)
-          (dired-hacks-next-file))
+          (setq disable-narrow (read-from-minibuffer "Filter: " nil dired-narrow-map))
+          (let ((inhibit-read-only t))
+            (dired-narrow--remove-text-with-property :dired-narrow))
+          ;; If the file no longer exists, we can't do anything, so
+          ;; set to nil
+          (unless (dired-utils-goto-line dired-narrow--current-file)
+            (setq dired-narrow--current-file nil)))
       (with-current-buffer dired-narrow-buffer
         (unless disable-narrow (dired-narrow-mode -1))
         (remove-from-invisibility-spec :dired-narrow)
-        (dired-narrow--restore)
-        (dired-utils-goto-line current-file)))))
+        (dired-narrow--restore))
+      (when (and disable-narrow
+                 dired-narrow--current-file
+                 dired-narrow-exit-action)
+        (funcall dired-narrow-exit-action)))))
 
 
 ;; Interactive
@@ -177,6 +199,25 @@ read from minibuffer."
 (defun dired-narrow--string-filter (filter)
   (let ((words (split-string filter " ")))
     (--all? (save-excursion (search-forward it (line-end-position) t)) words)))
+
+(defun dired-narrow-next-file ()
+  "Move point to the next file."
+  (interactive)
+  (with-current-buffer dired-narrow-buffer
+    (dired-hacks-next-file)))
+
+(defun dired-narrow-previous-file ()
+  "Move point to the previous file."
+  (interactive)
+  (with-current-buffer dired-narrow-buffer
+    (dired-hacks-previous-file)))
+
+(defun dired-narrow-find-file ()
+  "Run `dired-find-file' or any remapped action on file under point."
+  (interactive)
+  (let ((function (or (command-remapping 'dired-find-file)
+                      'dired-find-file)))
+    (funcall function)))
 
 ;;;###autoload
 (defun dired-narrow ()
