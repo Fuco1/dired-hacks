@@ -79,19 +79,27 @@
 (defvar dired-narrow-filter-function 'identity
   "Filter function used to filter the dired view.")
 
+(defvar dired-narrow--current-file nil
+  "Value of point just before exiting minibuffer.")
+
 (defun dired-narrow--update (filter)
-  "Make the files not matching the filter invisible."
-  (goto-char (point-min))
-  (let ((inhibit-read-only t))
-    ;; TODO: we might want to call this only if the filter gets less
-    ;; specialized.
-    (dired-narrow--restore)
-    (while (dired-hacks-next-file)
-      (if (funcall dired-narrow-filter-function filter)
-          (when (fboundp 'dired-insert-set-properties)
-            (dired-insert-set-properties (line-beginning-position) (1+ (line-end-position))))
-        (put-text-property (line-beginning-position) (1+ (line-end-position)) :dired-narrow t)
-        (put-text-property (line-beginning-position) (1+ (line-end-position)) 'invisible :dired-narrow)))))
+  "Make the files not matching the FILTER invisible."
+  (save-excursion
+    (goto-char (point-min))
+    (let ((inhibit-read-only t))
+      ;; TODO: we might want to call this only if the filter gets less
+      ;; specialized.
+      (dired-narrow--restore)
+      (while (dired-hacks-next-file)
+        (if (funcall dired-narrow-filter-function filter)
+            (when (fboundp 'dired-insert-set-properties)
+              (dired-insert-set-properties (line-beginning-position) (1+ (line-end-position))))
+          (put-text-property (line-beginning-position) (1+ (line-end-position)) :dired-narrow t)
+          (put-text-property (line-beginning-position) (1+ (line-end-position)) 'invisible :dired-narrow)))))
+  (unless (dired-hacks-next-file)
+    (dired-hacks-previous-file))
+  (unless (dired-utils-get-filename)
+    (dired-hacks-previous-file)))
 
 (defun dired-narrow--restore ()
   "Restore the invisible files of the current buffer."
@@ -106,6 +114,9 @@
 (defvar dired-narrow-buffer nil
   "Dired buffer we are currently filtering.")
 
+(defvar dired-narrow--minibuffer-content ""
+  "Content of the minibuffer during narrowing.")
+
 (defun dired-narrow--minibuffer-setup ()
   "Set up the minibuffer for live filtering."
   (when dired-narrow-buffer
@@ -118,7 +129,11 @@
   (when dired-narrow-buffer
     (let ((current-filter (minibuffer-contents-no-properties)))
       (with-current-buffer dired-narrow-buffer
-        (dired-narrow--update current-filter)))))
+        (unless (equal current-filter dired-narrow--minibuffer-content)
+          (dired-narrow--update current-filter))
+        (setq dired-narrow--minibuffer-content current-filter)
+        (setq dired-narrow--current-file (dired-utils-get-filename))
+        (set-window-point (get-buffer-window (current-buffer)) (point))))))
 
 (defun dired-narrow--internal (filter-function)
   "Narrow a dired buffer to the files matching a filter.
