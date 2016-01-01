@@ -64,6 +64,7 @@
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "<up>") 'dired-narrow-previous-file)
     (define-key map (kbd "<down>") 'dired-narrow-next-file)
+    (define-key map (kbd "<right>") 'dired-narrow-enter-directory)
     (define-key map (kbd "C-g") 'minibuffer-keyboard-quit)
     (define-key map (kbd "RET") 'exit-minibuffer)
     (define-key map (kbd "<return>") 'exit-minibuffer)
@@ -182,7 +183,10 @@ read from minibuffer."
       (when (and disable-narrow
                  dired-narrow--current-file
                  dired-narrow-exit-action)
-        (funcall dired-narrow-exit-action)))))
+        (funcall dired-narrow-exit-action))
+      (cond
+       ((equal disable-narrow "dired-narrow-enter-directory")
+        (dired-narrow--internal filter-function))))))
 
 
 ;; Interactive
@@ -218,6 +222,14 @@ read from minibuffer."
   (let ((function (or (command-remapping 'dired-find-file)
                       'dired-find-file)))
     (funcall function)))
+
+(defun dired-narrow-enter-directory ()
+  "Descend into directory under point and initiate narrowing."
+  (interactive)
+  (let ((inhibit-read-only t))
+    (erase-buffer)
+    (insert "dired-narrow-enter-directory"))
+  (exit-minibuffer))
 
 ;;;###autoload
 (defun dired-narrow ()
