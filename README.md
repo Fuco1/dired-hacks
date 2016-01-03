@@ -470,11 +470,23 @@ Bookmarks").
 This package provides live filtering of files in dired buffers.  In
 general, after calling the respective narrowing function you type a
 filter string into the minibuffer.  After each change the changes
-are automatically reflect in the buffer.  Typing C-g will cancel
-the narrowing and restore the original view, typing RET will exit
-the query mode and leave the filter in the narrowed state.  To
+automatically reflect in the buffer.  Typing C-g will cancel the
+narrowing and restore the original view, typing RET will exit the live
+filtering mode and leave the dired buffer in the narrowed state.  To
 bring it back to the original view, you can call `revert-buffer`
-(usually bound to `g`).
+(usually bound to <kbd>g</kbd>).
+
+During the filtering process, several special functions are available.
+You can customize the binding by changing `dired-narrow-map`.
+
+* `dired-narrow-next-file` (<kbd>\<down\></kbd>) - move the point to the next file
+* `dired-narrow-previous-file` (<kbd>\<up\></kbd>) - move the point to the previous
+  file
+* `dired-narrow-enter-directory` (<kbd>\<right\></kbd>) - descend into
+  the directory under point and immediately go back to narrowing mode
+
+You can customize what happens after exiting the live filtering mode
+by customizing `dired-narrow-exit-action`.
 
 These narrowing functions are provided:
 
