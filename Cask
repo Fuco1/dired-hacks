@@ -6,6 +6,7 @@
 (depends-on "f")
 (depends-on "dash")
 (depends-on "s")
+(depends-on "cl-lib")
 
 (development
  (depends-on "buttercup")
