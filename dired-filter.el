@@ -659,7 +659,7 @@ by default."
                 (goto-char (point-min))
                 (let ((next t))
                   (while next
-                    (let ((name-group-alst nil))
+                    (let ((name-group-alist nil))
                       (-when-let ((_ . filter-stacks) filter-group)
                         (dired-hacks-next-file)
                         (beginning-of-line)
@@ -669,8 +669,8 @@ by default."
                                   ;; filter group
                                   (group (dired-filter--extract-lines filter-stack)))
                             (when (/= (length group) 0)
-                              (push (cons name group) name-group-alst))))
-                        (--each name-group-alst
+                              (push (cons name group) name-group-alist))))
+                        (--each name-group-alist
                           (-let (((name . group) it))
                             (insert (dired-filter-group--make-header name) group)))
                         (when (and (text-property-any
