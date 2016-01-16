@@ -149,11 +149,13 @@ Here's a list of built-in filters:
 * `dired-filter-by-extension`
 * `dired-filter-by-dot-files`
 * `dired-filter-by-omit`
+* `dired-filter-by-garbage`
 * `dired-filter-by-predicate`
 * `dired-filter-by-file`
 * `dired-filter-by-directory`
 * `dired-filter-by-mode`
 * `dired-filter-by-symlink`
+* `dired-filter-by-executable`
 
 You can see their documentation by calling M-x `describe-function`.
 
