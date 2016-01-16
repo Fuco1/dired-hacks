@@ -656,21 +656,25 @@ by default."
                 (goto-char (point-min))
                 (let ((next t))
                   (while next
-                    (-when-let ((_ . filter-stacks) filter-group)
-                      (dired-hacks-next-file)
-                      (beginning-of-line)
-                      (--each filter-stacks
-                        (-let* (((name . filter-stack) it)
-                                ;; TODO: extract only from last line following the last
-                                ;; filter group
-                                (group (dired-filter--extract-lines filter-stack)))
-                          (when (/= (length group) 0)
-                            (insert (dired-filter-group--make-header name) group))))
-                      (when (and (text-property-any
-                                  (save-excursion (dired-next-subdir 0))
-                                  (point-max) 'font-lock-face 'dired-filter-group-header)
-                                 (save-excursion (backward-char 1) (dired-hacks-next-file)))
-                        (insert (dired-filter-group--make-header "Default"))))
+                    (let ((name-group-alst nil))
+                      (-when-let ((_ . filter-stacks) filter-group)
+                        (dired-hacks-next-file)
+                        (beginning-of-line)
+                        (--each (reverse filter-stacks)
+                          (-let* (((name . filter-stack) it)
+                                  ;; TODO: extract only from last line following the last
+                                  ;; filter group
+                                  (group (dired-filter--extract-lines filter-stack)))
+                            (when (/= (length group) 0)
+                              (push (cons name group) name-group-alst))))
+                        (--each name-group-alst
+                          (-let (((name . group) it))
+                            (insert (dired-filter-group--make-header name) group)))
+                        (when (and (text-property-any
+                                    (save-excursion (dired-next-subdir 0))
+                                    (point-max) 'font-lock-face 'dired-filter-group-header)
+                                   (save-excursion (backward-char 1) (dired-hacks-next-file)))
+                          (insert (dired-filter-group--make-header "Default")))))
                     (setq next (ignore-errors (dired-next-subdir 1))))))
             (read-only-mode 1))
           (when (featurep 'dired-details)
