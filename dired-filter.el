@@ -7,7 +7,7 @@
 ;; Keywords: files
 ;; Version: 0.0.2
 ;; Created: 14th February 2014
-;; Package-requires: ((dash "2.10.0") (dired-hacks-utils "0.0.1"))
+;; Package-requires: ((dash "2.10.0") (dired-hacks-utils "0.0.1") (f "0.17.0"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -228,6 +228,7 @@
 (require 'dash)
 (require 'thingatpt)
 (require 'cl)
+(require 'f)
 
 ;; silence the compiler warning
 (defvar dired-filter-mode nil)
