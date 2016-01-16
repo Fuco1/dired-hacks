@@ -446,13 +446,13 @@ See `dired-filter-stack' for the format of FILTER-STACK."
   (when varname
     (set-default varname value))
   (when value
-    (define-key dired-mode-map (kbd value) dired-filter-map)))
+    (define-key dired-mode-map (read-kbd-macro value) dired-filter-map)))
 
 (defun dired-filter--set-mark-prefix-key (varname value)
   (when varname
     (set-default varname value))
   (when value
-    (define-key dired-mode-map (kbd value) dired-filter-mark-map)))
+    (define-key dired-mode-map (read-kbd-macro value) dired-filter-mark-map)))
 
 (defcustom dired-filter-prefix "/"
   "Prefix key for `dired-filter-map'."
