@@ -51,23 +51,126 @@
         (cons t (format "Expected %S not to `equal' %S" a-sorted b-sorted))
       (cons nil (format "Expected %S to `equal' %S" a-sorted b-sorted)))))
 
-(describe "Dired dot-files filter"
+(describe "Dired Filter"
 
-  (it "should hide dotfiles we don't want to see"
-    (with-temp-fs '(".foo" "bar")
-      (with-dired '((dot-files))
-        (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("bar"))))))
+  (describe "Dired dot-files filter"
 
-(describe "Dired name filter"
+    (it "should hide dotfiles we don't want to see"
+      (with-temp-fs '(".foo" "bar")
+        (with-dired '((dot-files))
+          (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("bar"))))))
 
-  (it "should keep files matching the name"
-    (with-temp-fs '("foo.o" "bar.a" "bar.h" "quux.c")
-      (with-dired '((name . "bar"))
-        (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("bar.a" "bar.h"))))))
+  (describe "Dired name filter"
 
-(describe "Dired omit filter"
+    (it "should keep lines matching the name"
+      (with-temp-fs '("foo.o" "bar.a" "bar.h" "quux.c")
+        (with-dired '((name . "bar"))
+          (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("bar.a" "bar.h"))))))
 
-  (it "should hide ignored files"
-    (with-temp-fs '("bar.o" "bar.a" "bar.h" "bar.c")
-      (with-dired '((omit))
-        (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("bar.h" "bar.c"))))))
+  (describe "Dired regexp filter"
+
+    (it "should keep files matching the name as regexp"
+      (with-temp-fs '("foo.o" "bar.a" "bar.h" "quux.c")
+        (with-dired '((name . "b.r\\."))
+          (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("bar.a" "bar.h")))))
+
+    (it "should keep files or directories matching the name as regexp"
+      (with-temp-fs '("foo.o" "bar.a" "bar.h" "quux.c" (dir "bur.d"))
+        (with-dired '((name . "b.r\\."))
+          (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("bar.a" "bar.h" "bur.d")))))
+
+    (it "should be able to match extensions"
+      (with-temp-fs '("foo.o" "bar.a" "bar.h" "quux.c")
+        (with-dired '((name . "\\.a$"))
+          (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("bar.a"))))))
+
+  (describe "Dired omit filter"
+
+    (it "should hide ignored files"
+      (with-temp-fs '("bar.o" "bar.a" "bar.h" "bar.c")
+        (with-dired '((omit))
+          (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("bar.h" "bar.c"))))))
+
+  (describe "Dired and meta-filter"
+
+    (describe "Combining positive filters"
+
+      (it "should keep lines matching all the filters"
+        (with-temp-fs '("foo" "bar" (dir "bax") (dir "qux"))
+          (with-dired '((file) (name . "bar"))
+            (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("bar")))))
+
+      (it "should commute"
+        (with-temp-fs '("foo" "bar" (dir "bax") (dir "qux"))
+          (let ((this (with-dired '((name . "bax") (directory))
+                        (dired-utils-get-all-files :local)))
+                (other (with-dired '((directory) (name . "bax"))
+                         (dired-utils-get-all-files :local))))
+            (expect this :to-equal-as-string-set other))))
+
+      (it "should work with more than two filters"
+        (with-temp-fs '("foo" "bar" (dir "bax") (dir "qux") "bar.c" "bar.h" "barfux.c" (dir "barbara"))
+          (with-dired '((name . "bar") (file) (extension . "c"))
+            (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("bar.c" "barfux.c"))))))
+
+    (describe "Combining positive and negative filters"
+
+      (it "should keep lines matching positive filters after removing those matched by negative filters"
+        (with-temp-fs '(".bar" ".foo" "foo" "bar")
+          (with-dired '((dot-files) (name . "bar"))
+            (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("bar")))))
+
+      (it "should commute"
+        (with-temp-fs '("bar.o" "bar.a" "bar.h" "bar.c" "foo.h" "foo.c" "foo.o")
+          (let ((this (with-dired '((name . "bar") (omit))
+                        (dired-utils-get-all-files :local)))
+                (other (with-dired '((omit) (name . "bar"))
+                         (dired-utils-get-all-files :local))))
+            (expect this :to-equal-as-string-set other))))
+
+      (it "should work as two positive filters if we negate the negative one"
+        (with-temp-fs '(".bar" ".foo" "foo" "bar")
+          (with-dired '((not (dot-files)) (name . "bar"))
+            (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '(".bar"))))))
+
+    (describe "Combining negative filters"
+
+      (it "should remove lines matching any of the filters (deMorgan's law)"
+        (with-temp-fs '(".bar" ".foo" "foo.o" "bar")
+          (with-dired '((omit) (dot-files))
+            (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("bar")))))))
+
+  (describe "Dired or meta-filter"
+
+    (describe "Combining positive filters"
+
+      (it "should keep lines matching either of the filters"
+        (with-temp-fs '("bar.o" "bar.a" "bar.h" "bar.c" "foo.h" "foo.c" "foo.o")
+          (with-dired '((or (extension . "o") (name . "bar")))
+            (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("bar.a" "bar.o" "foo.o" "bar.h" "bar.c"))))))
+
+    (describe "Combining negative and positive filters"
+
+      (it "should create exceptions for negative filters"
+        (with-temp-fs '(".bar" ".foo" "foo" "bar")
+          ;; throw out all dotfiles except those having bar in the name
+          (with-dired '((or (dot-files) (name . "bar")))
+            (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("bar" "foo" ".bar")))))
+
+      (it "should commute"
+        (with-temp-fs '("bar.a" "foo.o" "foo" "bar")
+          ;; throw out all dotfiles except those having bar in the name
+          (let ((this (with-dired '((or (name . "bar") (omit)))
+                        (dired-utils-get-all-files :local)))
+                (other (with-dired '((or (omit) (name . "bar")))
+                         (dired-utils-get-all-files :local))))
+            (expect this :to-equal-as-string-set other)))))
+
+
+    (describe "Combining negative filters"
+
+      (it "should remove lines matching both filters (deMorgan's law)"
+        (with-temp-fs '(".bar.o" ".foo.txt" "foo" "bar")
+          ;; throw out all dotfiles with "omit" extension
+          (with-dired '((or (dot-files) (omit)))
+            (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("bar" "foo" ".foo.txt"))))))))
