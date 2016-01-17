@@ -19,7 +19,7 @@
      ((eq 'dir (car spec))
       (make-directory (f-join path (cadr spec)))
       (with-temp-fs--init (cddr spec) (f-join path (cadr spec))))
-     (t (mapcar (lambda (s) (with-temp-fs--init s path)) spec))))
+     (t (mapc (lambda (s) (with-temp-fs--init s path)) spec))))
    ((stringp spec)
     (f-touch (f-join path spec)))))
 
@@ -28,7 +28,7 @@
   `(let ((temp-root (make-temp-file "temp-fs-" t)))
      (with-temp-buffer
        (setq default-directory temp-root)
-       (mapcar (lambda (s) (with-temp-fs--init s "")) ,spec)
+       (mapc (lambda (s) (with-temp-fs--init s "")) ,spec)
        (unwind-protect
            (progn
              ,@forms)
