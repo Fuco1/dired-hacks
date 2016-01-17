@@ -1,6 +1,7 @@
 ;; -*- lexical-binding: t -*-
 
 (require 'f)
+(require 'dash)
 (require 'shut-up)
 (let ((project-dir (f-parent (f-dirname (f-this-file)))))
   (add-to-list 'load-path project-dir))
@@ -43,16 +44,23 @@
      (dired-filter-mode 1)
      ,@body))
 
+(buttercup-define-matcher :to-equal-as-string-set (a b)
+  (let ((a-sorted (-sort 'string< a))
+        (b-sorted (-sort 'string< b)))
+    (if (equal a-sorted b-sorted)
+        (cons t (format "Expected %S not to `equal' %S" a-sorted b-sorted))
+      (cons nil (format "Expected %S to `equal' %S" a-sorted b-sorted)))))
+
 (describe "Dired dot-files filter"
 
   (it "should hide dotfiles we don't want to see"
     (with-temp-fs '(".foo" "bar")
       (with-dired '((dot-files))
-        (expect (length (dired-utils-get-all-files)) :to-equal 1)))))
+        (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("bar"))))))
 
 (describe "Dired omit filter"
 
   (it "should hide ignored files"
     (with-temp-fs '("bar.o" "bar.a" "bar.h" "bar.c")
       (with-dired '((omit))
-        (expect (length (dired-utils-get-all-files)) :to-equal 2)))))
+        (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("bar.h" "bar.c"))))))
