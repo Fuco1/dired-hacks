@@ -58,6 +58,13 @@
       (with-dired '((dot-files))
         (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("bar"))))))
 
+(describe "Dired name filter"
+
+  (it "should keep files matching the name"
+    (with-temp-fs '("foo.o" "bar.a" "bar.h" "quux.c")
+      (with-dired '((name . "bar"))
+        (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("bar.a" "bar.h"))))))
+
 (describe "Dired omit filter"
 
   (it "should hide ignored files"
