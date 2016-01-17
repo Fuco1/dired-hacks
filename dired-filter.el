@@ -546,11 +546,12 @@ listing."
    (t (let* ((def (assoc (car stack) dired-filter-alist))
              (desc (cadr def))
              (desc-qual (cl-caddr def))
+             (remove (if (cl-cadddr def) "!" ""))
              (qualifier (cdr stack))
              (qual-formatted (eval desc-qual)))
         (if qual-formatted
-            (format "[%s: %s]" desc qual-formatted)
-          (format "[%s]" desc))))))
+            (format "[%s%s: %s]" remove desc qual-formatted)
+          (format "[%s%s]" remove desc))))))
 
 (defun dired-filter--describe-filters ()
   (mapconcat 'dired-filter--describe-filters-1 dired-filter-stack " "))
