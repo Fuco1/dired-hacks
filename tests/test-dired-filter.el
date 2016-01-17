@@ -35,23 +35,24 @@
 
 (put 'dir 'lisp-indent-function '1)
 
+(defmacro with-dired (filter-stack &rest body)
+  (declare (indent 1))
+  `(shut-up
+     (dired default-directory)
+     (setq dired-filter-stack ,filter-stack)
+     (dired-filter-mode 1)
+     ,@body))
+
 (describe "Dired dot-files filter"
 
   (it "should hide dotfiles we don't want to see"
     (with-temp-fs '(".foo" "bar")
-      (shut-up
-        (dired default-directory)
-        (setq dired-filter-stack '((dot-files)))
-        (dired-filter-mode 1)
+      (with-dired '((dot-files))
         (expect (length (dired-utils-get-all-files)) :to-equal 1)))))
-
 
 (describe "Dired omit filter"
 
   (it "should hide ignored files"
     (with-temp-fs '("bar.o" "bar.a" "bar.h" "bar.c")
-      (shut-up
-        (dired default-directory)
-        (setq dired-filter-stack '((omit)))
-        (dired-filter-mode 1)
+      (with-dired '((omit))
         (expect (length (dired-utils-get-all-files)) :to-equal 2)))))
