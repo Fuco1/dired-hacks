@@ -651,36 +651,33 @@ by default."
         (widen)
         (when (ignore-errors (dired-next-subdir 0))
           (goto-char (point-min))
-          (read-only-mode -1)
-          (unwind-protect
-              (progn
-                (while (--when-let (text-property-any (point-min) (point-max) 'font-lock-face 'dired-filter-group-header)
-                         (goto-char it))
-                  (delete-region (line-beginning-position) (1+ (line-end-position))))
-                (goto-char (point-min))
-                (let ((next t))
-                  (while next
-                    (let ((name-group-alist nil))
-                      (-when-let ((_ . filter-stacks) filter-group)
-                        (dired-hacks-next-file)
-                        (beginning-of-line)
-                        (--each (reverse filter-stacks)
-                          (-let* (((name . filter-stack) it)
-                                  ;; TODO: extract only from last line following the last
-                                  ;; filter group
-                                  (group (dired-filter--extract-lines filter-stack)))
-                            (when (/= (length group) 0)
-                              (push (cons name group) name-group-alist))))
-                        (--each name-group-alist
-                          (-let (((name . group) it))
-                            (insert (dired-filter-group--make-header name) group)))
-                        (when (and (text-property-any
-                                    (save-excursion (dired-next-subdir 0))
-                                    (point-max) 'font-lock-face 'dired-filter-group-header)
-                                   (save-excursion (backward-char 1) (dired-hacks-next-file)))
-                          (insert (dired-filter-group--make-header "Default")))))
-                    (setq next (ignore-errors (dired-next-subdir 1))))))
-            (read-only-mode 1))
+          (let ((inhibit-read-only t))
+            (while (--when-let (text-property-any (point-min) (point-max) 'font-lock-face 'dired-filter-group-header)
+                     (goto-char it))
+              (delete-region (line-beginning-position) (1+ (line-end-position))))
+            (goto-char (point-min))
+            (let ((next t))
+              (while next
+                (let ((name-group-alist nil))
+                  (-when-let ((_ . filter-stacks) filter-group)
+                    (dired-hacks-next-file)
+                    (beginning-of-line)
+                    (--each (reverse filter-stacks)
+                      (-let* (((name . filter-stack) it)
+                              ;; TODO: extract only from last line following the last
+                              ;; filter group
+                              (group (dired-filter--extract-lines filter-stack)))
+                        (when (/= (length group) 0)
+                          (push (cons name group) name-group-alist))))
+                    (--each name-group-alist
+                      (-let (((name . group) it))
+                        (insert (dired-filter-group--make-header name) group)))
+                    (when (and (text-property-any
+                                (save-excursion (dired-next-subdir 0))
+                                (point-max) 'font-lock-face 'dired-filter-group-header)
+                               (save-excursion (backward-char 1) (dired-hacks-next-file)))
+                      (insert (dired-filter-group--make-header "Default")))))
+                (setq next (ignore-errors (dired-next-subdir 1))))))
           (when (featurep 'dired-details)
             (dired-details-delete-overlays)
             (dired-details-activate)))))))
