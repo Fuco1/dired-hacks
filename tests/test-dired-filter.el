@@ -44,6 +44,14 @@
      (dired-filter-mode 1)
      ,@body))
 
+(defmacro with-dired-groups (filter-groups &rest body)
+  (declare (indent 1))
+  `(shut-up
+     (dired default-directory)
+     (setq dired-filter-group-saved-groups ,filter-groups)
+     (dired-filter-group-mode 1)
+     ,@body))
+
 (buttercup-define-matcher :to-equal-as-string-set (a b)
   (let ((a-sorted (-sort 'string< a))
         (b-sorted (-sort 'string< b)))
@@ -174,3 +182,30 @@
           ;; throw out all dotfiles with "omit" extension
           (with-dired '((or (dot-files) (omit)))
             (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("bar" "foo" ".foo.txt"))))))))
+
+(describe "Dired Filter Groups"
+
+  (it "should group lines according to filters"
+    (with-temp-fs '((dir "foo") (dir "bar") "baz.tex" "baz.bib" "normal-file.txt")
+      (with-dired-groups '(("default"
+                            ("Directories" (directory))
+                            ("LaTeX" (extension "tex" "bib"))))
+        (let ((groups (dired-filter-group-get-groups)))
+          (expect (gethash "Directories" groups) :to-equal-as-string-set '("." ".." "foo" "bar"))
+          (expect (gethash "LaTeX" groups) :to-equal-as-string-set '("baz.tex" "baz.bib"))))))
+
+  (it "should not create empty drawers when groups overlap [#57]"
+    (with-temp-fs '("a.py" "b.py" "regular" "another")
+      (with-dired-groups '(("default"
+                            ("Python" (extension "py"))
+                            ("B" (name . "b"))))
+        (let ((groups (dired-filter-group-get-groups)))
+          (expect (gethash "B" groups) :to-equal-as-string-set '("b.py"))
+          (expect (gethash "Python" groups) :to-equal-as-string-set '("a.py"))))
+
+      (with-dired-groups '(("default"
+                            ("B" (name . "b"))
+                            ("Python" (extension "py"))))
+        (let ((groups (dired-filter-group-get-groups)))
+          (expect (gethash "B" groups) :to-equal-as-string-set nil)
+          (expect (gethash "Python" groups) :to-equal-as-string-set '("a.py" "b.py")))))))
