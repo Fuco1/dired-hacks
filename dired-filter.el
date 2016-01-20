@@ -737,6 +737,20 @@ by default."
       (beginning-of-line)
       (forward-char 2))))
 
+(defun dired-filter-group-get-groups ()
+  "Return a hash table mapping drawer name to its files."
+  (save-excursion
+    (dired-next-subdir 0)
+    (let ((groups (make-hash-table :test 'equal)))
+      (while (dired-hacks-next-file)
+        (let ((file (dired-utils-get-filename :local))
+              (group (save-excursion
+                       (dired-filter-group-backward-drawer 1)
+                       (get-text-property (point) 'dired-filter-group-header))))
+          (puthash group (cons file (gethash group groups nil)) groups)))
+      (maphash (lambda (k v) (puthash k (nreverse (gethash k groups nil)) groups)) groups)
+      groups)))
+
 (defvar dired-filter--expanded-dirs nil
   "List of expanded subtrees.
 
