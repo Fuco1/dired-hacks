@@ -7,6 +7,13 @@
   (add-to-list 'load-path project-dir))
 (require 'dired-filter)
 
+(defun with-temp-fs--make-parent (spec path)
+  "If SPEC is a file name, create its parent directory rooted at PATH."
+  (save-match-data
+    (string-match "\\(.*\\)/" spec)
+    (when (match-string 1 spec)
+      (make-directory (concat path "/" (match-string 1 spec)) t))))
+
 (defun with-temp-fs--init (spec &optional path)
   (setq path (or path "."))
   (cond
@@ -15,6 +22,9 @@
      ;; non-empty file
      ((and (stringp (car spec))
            (stringp (cadr spec)))
+      (when (string-match-p "/\\'" (car spec))
+        (error "Invalid syntax: `%s' - cannot create a directory with text content" (car spec)))
+      (with-temp-fs--make-parent (car spec) path)
       (with-temp-file (concat path "/" (car spec))
         (insert (cadr spec))))
      ;; directory
@@ -30,8 +40,9 @@
     (make-directory (concat path "/" spec) t))
    ;; empty file
    ((stringp spec)
-    (f-touch (f-join path spec)))
-   (t (error "Invalid syntax: %s" spec))))
+    (with-temp-fs--make-parent spec path)
+    (f-touch (concat path "/" spec)))
+   (t (error "Invalid syntax: `%s'" spec))))
 
 (defmacro with-temp-fs (spec &rest forms)
   (declare (indent 1))
