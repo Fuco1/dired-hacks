@@ -8,27 +8,37 @@
 (require 'dired-filter)
 
 (defun with-temp-fs--init (spec &optional path)
-  (setq path (or path ""))
+  (setq path (or path "."))
   (cond
    ((listp spec)
     (cond
+     ;; non-empty file
      ((and (stringp (car spec))
            (stringp (cadr spec)))
-      (with-temp-file (f-join path (car spec))
+      (with-temp-file (concat path "/" (car spec))
         (insert (cadr spec))))
-     ((eq 'dir (car spec))
-      (make-directory (f-join path (cadr spec)))
-      (with-temp-fs--init (cddr spec) (f-join path (cadr spec))))
+     ;; directory
+     ((and (stringp (car spec))
+           (consp (cadr spec)))
+      (make-directory (concat path "/" (car spec)) t)
+      (mapc (lambda (s) (with-temp-fs--init s (concat path "/" (car spec)))) (cadr spec)))
+     ;; recursive spec, this should probably never happen
      (t (mapc (lambda (s) (with-temp-fs--init s path)) spec))))
+   ;; directory specified using a string
+   ((and (stringp spec)
+         (string-match-p "/\\'" spec))
+    (make-directory (concat path "/" spec) t))
+   ;; empty file
    ((stringp spec)
-    (f-touch (f-join path spec)))))
+    (f-touch (f-join path spec)))
+   (t (error "Invalid syntax: %s" spec))))
 
 (defmacro with-temp-fs (spec &rest forms)
   (declare (indent 1))
   `(let ((temp-root (make-temp-file "temp-fs-" t)))
      (with-temp-buffer
        (setq default-directory temp-root)
-       (mapc (lambda (s) (with-temp-fs--init s "")) ,spec)
+       (mapc (lambda (s) (with-temp-fs--init s ".")) ,spec)
        (unwind-protect
            (progn
              ,@forms)
@@ -83,7 +93,7 @@
           (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("bar.a" "bar.h")))))
 
     (it "should keep files or directories matching the name as regexp"
-      (with-temp-fs '("foo.o" "bar.a" "bar.h" "quux.c" (dir "bur.d"))
+      (with-temp-fs '("foo.o" "bar.a" "bar.h" "quux.c" "bur.d/")
         (with-dired '((name . "b.r\\."))
           (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("bar.a" "bar.h" "bur.d")))))
 
@@ -104,12 +114,12 @@
     (describe "Combining positive filters"
 
       (it "should keep lines matching all the filters"
-        (with-temp-fs '("foo" "bar" (dir "bax") (dir "qux"))
+        (with-temp-fs '("foo" "bar" "bax/" "qux/")
           (with-dired '((file) (name . "bar"))
             (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("bar")))))
 
       (it "should commute"
-        (with-temp-fs '("foo" "bar" (dir "bax") (dir "qux"))
+        (with-temp-fs '("foo" "bar" "bax/" "qux/")
           (let ((this (with-dired '((name . "bax") (directory))
                         (dired-utils-get-all-files :local)))
                 (other (with-dired '((directory) (name . "bax"))
@@ -117,7 +127,7 @@
             (expect this :to-equal-as-string-set other))))
 
       (it "should work with more than two filters"
-        (with-temp-fs '("foo" "bar" (dir "bax") (dir "qux") "bar.c" "bar.h" "barfux.c" (dir "barbara"))
+        (with-temp-fs '("foo" "bar" "bax/" "qux/" "bar.c" "bar.h" "barfux.c" "barbara/")
           (with-dired '((name . "bar") (file) (extension . "c"))
             (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("bar.c" "barfux.c"))))))
 
@@ -186,7 +196,7 @@
 (describe "Dired Filter Groups"
 
   (it "should group lines according to filters"
-    (with-temp-fs '((dir "foo") (dir "bar") "baz.tex" "baz.bib" "normal-file.txt")
+    (with-temp-fs '("foo/" "bar/" "baz.tex" "baz.bib" "normal-file.txt")
       (with-dired-groups '(("default"
                             ("Directories" (directory))
                             ("LaTeX" (extension "tex" "bib"))))
