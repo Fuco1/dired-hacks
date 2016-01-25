@@ -46,14 +46,15 @@
 
 (defmacro with-temp-fs (spec &rest forms)
   (declare (indent 1))
-  `(let ((temp-root (make-temp-file "temp-fs-" t)))
-     (with-temp-buffer
-       (setq default-directory temp-root)
-       (mapc (lambda (s) (with-temp-fs--init s ".")) ,spec)
-       (unwind-protect
-           (progn
-             ,@forms)
-         (delete-directory temp-root t)))))
+  (let ((temp-root (make-symbol "temp-root")))
+    `(let ((,temp-root (make-temp-file "temp-fs-" t)))
+       (with-temp-buffer
+         (setq default-directory ,temp-root)
+         (mapc (lambda (s) (with-temp-fs--init s ".")) ,spec)
+         (unwind-protect
+             (progn
+               ,@forms)
+           (delete-directory ,temp-root t))))))
 
 (put 'dir 'lisp-indent-function '1)
 
