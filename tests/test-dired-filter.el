@@ -83,6 +83,63 @@
         (cons t (format "Expected %S not to `equal' %S" a-sorted b-sorted))
       (cons nil (format "Expected %S to `equal' %S" a-sorted b-sorted)))))
 
+(buttercup-define-matcher :to-be-file (file)
+  (if (file-regular-p file)
+      (cons t (format "Expected %S not to be a file" file))
+    (cons nil (format "Expected %S to be a file" file))))
+
+(buttercup-define-matcher :to-be-directory (dir)
+  (if (file-directory-p dir)
+      (cons t (format "Expected %S not to be a directory" dir))
+    (cons nil (format "Expected %S to be a directory" dir))))
+
+(buttercup-define-matcher :to-contain (file content)
+  (if (with-temp-buffer
+        (insert-file-contents file)
+        (equal (buffer-string) content))
+      (cons t (format "Expected the content of %S not to `equal' %S" file content))
+    (cons nil (format "Expected the content of %S to `equal' %S" file content))))
+
+(describe "With temp fs"
+
+  (it "should create multiple files"
+    (with-temp-fs '("foo" "bar" "baz")
+      (expect "foo" :to-be-file)
+      (expect "bar" :to-be-file)
+      (expect "baz" :to-be-file)))
+
+  (it "should create multiple directories and files"
+    (with-temp-fs '("foo/" "bar/" "baz")
+      (expect "foo" :to-be-directory)
+      (expect "bar" :to-be-directory)
+      (expect "baz" :to-be-file)))
+
+  (it "should create nested directories"
+    (with-temp-fs '("foo/bar" "foo/baz/")
+      (expect "foo/bar" :to-be-file)
+      (expect "foo/baz" :to-be-directory)))
+
+  (it "should create non-empty file"
+    (with-temp-fs '(("foo" "amazing content"))
+      (expect "foo" :to-contain "amazing content")))
+
+  (it "should create non-empty nested file"
+    (with-temp-fs '(("foo/bar" "amazing content"))
+      (expect "foo/bar" :to-contain "amazing content")))
+
+  (it "should nest files recursively"
+    (with-temp-fs '(("foo" ("bar" "baz" "bam/"))
+                    ("a/b" ("c" "d/"))
+                    ("x" (("y" ("z"))
+                          "w")))
+      (expect "foo/bar" :to-be-file)
+      (expect "foo/baz" :to-be-file)
+      (expect "foo/bam" :to-be-directory)
+      (expect "a/b/c" :to-be-file)
+      (expect "a/b/d" :to-be-directory)
+      (expect "x/y/z" :to-be-file)
+      (expect "x/w" :to-be-file))))
+
 (describe "Dired Filter"
 
   (describe "Dired dot-files filter"
