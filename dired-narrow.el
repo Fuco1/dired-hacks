@@ -68,6 +68,8 @@
 (require 'dash)
 (require 'dired-hacks-utils)
 
+(require 'delsel)
+
 (defgroup dired-narrow ()
   "Live-narrowing of search results for dired."
   :group 'dired-hacks
