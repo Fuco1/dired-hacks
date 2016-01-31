@@ -925,6 +925,7 @@ filter."))
              dired-filter-alist))))
 
 ;;;###autoload (autoload 'dired-filter-by-dot-files "dired-filter")
+;;;###autoload (autoload 'dired-filter-mark-by-dot-files "dired-filter")
 (dired-filter-define dot-files
     "Toggle current view to dot-files."
   (:description "dot-files"
@@ -933,6 +934,7 @@ filter."))
   (string-match-p "^\\." file-name))
 
 ;;;###autoload (autoload 'dired-filter-by-name "dired-filter")
+;;;###autoload (autoload 'dired-filter-mark-by-name "dired-filter")
 (dired-filter-define name
     "Toggle current view to files matching QUALIFIER."
   (:description "name"
@@ -940,6 +942,7 @@ filter."))
   (string-match-p qualifier file-name))
 
 ;;;###autoload (autoload 'dired-filter-by-regexp "dired-filter")
+;;;###autoload (autoload 'dired-filter-mark-by-regexp "dired-filter")
 (dired-filter-define regexp
     "Toggle current view to files matching QUALIFIER as a regular expression."
   (:description "regexp"
@@ -947,6 +950,7 @@ filter."))
   (string-match-p qualifier file-name))
 
 ;;;###autoload (autoload 'dired-filter-by-extension "dired-filter")
+;;;###autoload (autoload 'dired-filter-mark-by-extension "dired-filter")
 (dired-filter-define extension
     "Toggle current view to files with extension matching QUALIFIER.
 
@@ -986,6 +990,7 @@ separately in turn and ORing the filters together."
   (string-match-p qualifier file-name))
 
 ;;;###autoload (autoload 'dired-filter-by-omit "dired-filter")
+;;;###autoload (autoload 'dired-filter-mark-by-omit "dired-filter")
 (dired-filter-define omit
     "Toggle current view to files matched by `dired-omit-regexp'."
   (:description "omit"
@@ -994,6 +999,7 @@ separately in turn and ORing the filters together."
   (string-match-p qualifier file-name))
 
 ;;;###autoload (autoload 'dired-filter-by-garbage "dired-filter")
+;;;###autoload (autoload 'dired-filter-mark-by-garbage "dired-filter")
 (dired-filter-define garbage
     "Toggle current view to files matched by `dired-garbage-files-regexp'."
   (:description "garbage"
@@ -1002,6 +1008,7 @@ separately in turn and ORing the filters together."
   (string-match-p dired-garbage-files-regexp file-name))
 
 ;;;###autoload (autoload 'dired-filter-by-executable "dired-filter")
+;;;###autoload (autoload 'dired-filter-mark-by-executable "dired-filter")
 (dired-filter-define executable
     "Toggle current view to executable files."
   (:description "executable"
@@ -1010,6 +1017,7 @@ separately in turn and ORing the filters together."
        (file-executable-p file-name)))
 
 ;;;###autoload (autoload 'dired-filter-by-predicate "dired-filter")
+;;;###autoload (autoload 'dired-filter-mark-by-predicate "dired-filter")
 (dired-filter-define predicate
     "Toggle current view to files for which QUALIFIER returns non-nil.
 
@@ -1046,18 +1054,21 @@ Examples:
   (eval qualifier))
 
 ;;;###autoload (autoload 'dired-filter-by-directory "dired-filter")
+;;;###autoload (autoload 'dired-filter-mark-by-directory "dired-filter")
 (dired-filter-define directory
     "Toggle current view to show only directories."
   (:description "directory")
   (looking-at dired-re-dir))
 
 ;;;###autoload (autoload 'dired-filter-by-file "dired-filter")
+;;;###autoload (autoload 'dired-filter-mark-by-file "dired-filter")
 (dired-filter-define file
     "Toggle current view to show only files."
   (:description "file")
   (looking-at "^[* ] -"))
 
 ;;;###autoload (autoload 'dired-filter-by-mode "dired-filter")
+;;;###autoload (autoload 'dired-filter-mark-by-mode "dired-filter")
 (dired-filter-define mode
     "Toggle current view to files which open in mode specified by QUALIFIER.
 
@@ -1081,6 +1092,7 @@ of `auto-mode-alist'."
     (eq mm qualifier)))
 
 ;;;###autoload (autoload 'dired-filter-by-symlink "dired-filter")
+;;;###autoload (autoload 'dired-filter-mark-by-symlink "dired-filter")
 (dired-filter-define symlink
     "Toggle current view to show only symbolic links."
   (:description "symlink")
