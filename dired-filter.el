@@ -943,7 +943,7 @@ filter."))
 (dired-filter-define regexp
     "Toggle current view to files matching QUALIFIER as a regular expression."
   (:description "regexp"
-   :reader (read-string "Regexp: " ))
+   :reader (read-regexp "Regexp: " ))
   (string-match-p qualifier file-name))
 
 ;;;###autoload (autoload 'dired-filter-by-extension "dired-filter")
