@@ -86,6 +86,12 @@ return non-nil value if it succeeded in opening the file."
   :type 'hook
   :group 'dired-open)
 
+(defcustom dired-open-find-file-function 'dired-find-file
+  "A function that will be used if none of the `dired-open-functions' succeeded."
+  :type 'function
+  :group 'dired-open)
+
+
 (defcustom dired-open-extensions nil
   "Alist of extensions mapping to a programs to run them in.
 
@@ -235,7 +241,7 @@ With \\[universal-argument], run `dired-find-file' normally."
   (interactive "P")
   (when (or arg
             (not (run-hook-with-args-until-success 'dired-open-functions)))
-    (dired-find-file)))
+    (funcall dired-open-find-file-function)))
 
 (define-key dired-mode-map [remap dired-find-file] 'dired-open-file)
 
