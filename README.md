@@ -353,7 +353,7 @@ Here are some example uses:
                            :italic t) ".*\\.log")
 
 ; highlight executable files, but not directories
-(dired-rainbow-define-chmod executable-unix "Green" "-.*x.*")
+(dired-rainbow-define-chmod executable-unix "Green" "-[rw-]+x.*")
 ```
 
 <a name="dired-subtree" />
