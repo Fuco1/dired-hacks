@@ -487,7 +487,7 @@ See `dired-filter-stack' for the format of FILTER-STACK."
    ((stringp stack)
     `(and ,@(mapcar 'dired-filter--make-filter-1
                     (or (cdr (assoc stack dired-filter-saved-filters))
-                        (error "saved filter %s does not exist" filter)))))
+                        (error "saved filter %s does not exist" stack)))))
    ((stringp (car stack))
     `(and ,@(mapcar 'dired-filter--make-filter-1 (cdr stack))))
    ((eq (car stack) 'or)
