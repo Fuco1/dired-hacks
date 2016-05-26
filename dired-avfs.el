@@ -79,16 +79,20 @@ The value is in megabytes."
   :group 'dired-avfs)
 
 (defun dired-avfs--archive-filename (filename)
+  "Transform FILENAME into corresponding avfs filename."
   (file-truename (concat dired-avfs-root (file-truename filename) "#")))
 
 (defun dired-avfs--archive-p (filename)
+  "Non-nil if FILENAME should be opened in avfs."
   (let ((extensions (concat "\\." (regexp-opt dired-avfs-archives) "\\'")))
     (string-match-p extensions filename)))
 
 (defun dired-avfs--open (filename)
+  "Open FILENAME as avfs filename."
   (find-file (dired-avfs--archive-filename filename)))
 
 (defun dired-avfs--hide-root ()
+  "Remove the avfs root prefix from the dired header."
   (save-excursion
     (when dired-avfs-hide-root
       (goto-char (point-min))
@@ -99,11 +103,14 @@ The value is in megabytes."
 (add-hook 'dired-after-readin-hook 'dired-avfs--hide-root)
 
 (defun dired-avfs-open ()
+  "Open file at point using avfs."
   (interactive)
   (dired-avfs--open (dired-file-name-at-point)))
 
 (defadvice find-file-noselect (before fix-avfs-arguments activate)
-  "If the target is archive that can be handled via avfs,
+  "Change target filename to avfs-compatible filename.
+
+If the target is archive that can be handled via avfs,
 automagically change the filename to the location of virtual
 directory representing this archive."
   (when (and (not (memq this-command dired-avfs-ignore-commands))
