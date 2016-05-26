@@ -585,11 +585,8 @@ Do you want to apply the filters without reverting (this might provide incorrect
     (when file-name
       (dired-utils-goto-line file-name))))
 
-(defun dired-filter--narow-to-subdir (&optional p)
-  "Narrow to subdir at POINT.
-
-POINT defaults to current point."
-  (setq p (or p (point)))
+(defun dired-filter--narow-to-subdir ()
+  "Narrow to subdir at point."
   (let ((beg (progn
                (dired-next-subdir 0)
                (line-beginning-position)))
