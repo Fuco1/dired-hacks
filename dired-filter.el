@@ -239,7 +239,7 @@
 (defvar dired-filter-alist nil
   "Definitions of filters.
 
-Entries are of type (name desc body) ")
+Entries are of type (name desc body)")
 
 (defgroup dired-filter ()
   "Ibuffer-like filtering for `dired'."
@@ -292,8 +292,7 @@ By default, `dired-filter-by-omit' is active."
 (make-variable-buffer-local 'dired-filter-stack)
 
 (defcustom dired-filter-inherit-filter-stack nil
-  "When non-nil, visited subdirectories should inherit the filter
-of the parent directory."
+  "When non-nil, subdirectories inherit the filter of the parent directory."
   :type 'boolean
   :group 'dired-filter)
 
@@ -315,8 +314,9 @@ Currently, this only applies to `dired-filter-saved-filters'."
   :group 'dired-filter)
 
 (defcustom dired-filter-show-filters t
-  "If non-nil, if `dired-filter-stack' is non-nil, show a
-description of active filters in header line.
+  "If non-nil, show a description of active filters in header line.
+
+If `dired-filter-stack' is nil, no header is shown.
 
 This modifies `header-line-format' by appending
 `dired-filter-header-line-format' to it."
@@ -443,12 +443,18 @@ See `dired-filter-stack' for the format of FILTER-STACK."
   "Keymap used for marking files.")
 
 (defun dired-filter--set-prefix-key (varname value)
+  "Set VARNAME to VALUE.
+
+Setter for `dired-filter-prefix' user variable."
   (when varname
     (set-default varname value))
   (when value
     (define-key dired-mode-map (read-kbd-macro value) dired-filter-map)))
 
 (defun dired-filter--set-mark-prefix-key (varname value)
+  "Set VARNAME to VALUE.
+
+Setter for `dired-filter-mark-prefix' user variable."
   (when varname
     (set-default varname value))
   (when value
@@ -483,6 +489,7 @@ See `dired-filter-stack' for the format of FILTER-STACK."
 
 ;; TODO: save the filters in better structure to avoid undescriptive `cadddr'
 (defun dired-filter--make-filter-1 (stack)
+  "Translate STACK to a filter form."
   (cond
    ((stringp stack)
     `(and ,@(mapcar 'dired-filter--make-filter-1
@@ -526,14 +533,16 @@ See `dired-filter-stack' for the format of FILTER-STACK."
             (car (cl-cddddr def))))))))
 
 (defun dired-filter--make-filter (filter-stack)
-  "Build the expression that filters the files.
+  "Build the expression that filters the files according to FILTER-STACK.
 
 When this expression evals to non-nil, file is kept in the
 listing."
   `(and ,@(mapcar 'dired-filter--make-filter-1 filter-stack)))
 
 (defun dired-filter--describe-filters-1 (stack)
-  "Return a string describing `dired-filter-stack'."
+  "Return a string describing STACK.
+
+STACK is a filter stack with the format of `dired-filter-stack'."
   (cond
    ((stringp stack)
     (format "[Saved filter: %s]" stack))
@@ -554,6 +563,7 @@ listing."
           (format "[%s%s]" remove desc))))))
 
 (defun dired-filter--describe-filters ()
+  "Return a string describing `dired-filter-stack'."
   (mapconcat 'dired-filter--describe-filters-1 dired-filter-stack " "))
 
 (defun dired-filter--apply ()
@@ -641,6 +651,7 @@ by default."
           "\n"))
 
 (defun dired-filter-group--apply (filter-group)
+  "Apply FILTER-GROUP."
   (when (and dired-filter-group-mode
              dired-filter-group)
     (save-excursion
@@ -751,8 +762,7 @@ by default."
 This adds support for `dired-subtree' package.")
 
 (defun dired-filter--expunge ()
-  "Remove the files specified by current `dired-filter-stack'
-from the listing."
+  "Remove the files specified by `dired-filter-stack' from the listing."
   (interactive)
   (when (and dired-filter-mode
              dired-filter-stack)
@@ -781,6 +791,16 @@ from the listing."
       count)))
 
 (defun dired-filter--mark-unmarked (filter)
+  "Mark originally unmarked files according to FILTER.
+
+If a file satisfies a filter, it is not marked.  Marked files are
+removed when filtering.
+
+Implementation note: when this function is called
+`dired-marker-char' is set to a special value so that the regular
+marks are preserved during filtering.  Files marked by user are
+preserved even in case they should have been removed by the
+filter"
   (if (and dired-filter-keep-expanded-subtrees
            (featurep 'dired-subtree))
       (progn
