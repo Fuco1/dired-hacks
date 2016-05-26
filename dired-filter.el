@@ -227,7 +227,7 @@
 (require 'dired-hacks-utils)
 (require 'dash)
 (require 'thingatpt)
-(require 'cl)
+(require 'cl-lib)
 (require 'f)
 
 ;; silence the compiler warning
