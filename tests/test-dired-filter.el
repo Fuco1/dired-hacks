@@ -1,10 +1,7 @@
 ;; -*- lexical-binding: t -*-
 
-(require 'f)
 (require 'dash)
 (require 'shut-up)
-(let ((project-dir (f-parent (f-dirname (f-this-file)))))
-  (add-to-list 'load-path project-dir))
 (require 'dired-filter)
 
 (defun with-temp-fs--make-parent (spec path)
