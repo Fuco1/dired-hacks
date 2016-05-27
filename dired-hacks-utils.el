@@ -125,7 +125,7 @@ Each car in ALIST is a string representing file extension
 *without* the delimiting dot."
   (let (done)
     (--each-while alist (not done)
-      (when (string-match-p (concat "\\." (regexp-quote (car it)) "\\'") file)
+      (when (string-match-p (concat "\\." (regexp-quote (car it)) "\\'") filename)
         (setq done it)))
     done))
 
