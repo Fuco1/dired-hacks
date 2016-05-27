@@ -45,7 +45,10 @@
   :prefix "dired-hacks-")
 
 (defun dired-utils-get-filename (&optional localp)
-  "Like `dired-get-filename' but never signal an error."
+  "Like `dired-get-filename' but never signal an error.
+
+Optional arg LOCALP with value `no-dir' means don't include
+directory name in result."
   (dired-get-filename localp t))
 
 (defun dired-utils-get-all-files (&optional localp)
@@ -69,6 +72,7 @@ LOCALP has same semantics as in `dired-get-filename'."
   "List of keywords available for `dired-utils-get-info'.")
 
 (defun dired-utils--get-keyword-info (keyword)
+  "Get file information about KEYWORD."
   (let ((filename (dired-utils-get-filename)))
     (cl-case keyword
       (:name filename)
@@ -82,10 +86,12 @@ LOCALP has same semantics as in `dired-get-filename'."
 (defun dired-utils-get-info (&rest keywords)
   "Query for info about the file at point.
 
+KEYWORDS is a list of attributes to query.
+
 When querying for one attribute, its value is returned.  When
 querying for more than one, a list of results is returned.
 
-The available attributes are listed in
+The available keywords are listed in
 `dired-utils-info-keywords'."
   (let ((attributes (mapcar 'dired-utils--get-keyword-info keywords)))
     (if (> (length attributes) 1)
