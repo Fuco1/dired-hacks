@@ -132,8 +132,15 @@ buffers for a single paste."
                          (length marked)
                          (if (> (length marked) 1) "s" "")))))))
 
-(defun dired-ranger--revert-target (char files)
-  "Revert the target buffer and mark the new files."
+(defun dired-ranger--revert-target (char target-directory files)
+  "Revert the target buffer and mark the new files.
+
+CHAR is the temporary value for `dired-marker-char'.
+
+TARGET-DIRECTORY is the current dired directory.
+
+FILES is the list of files (from the `dired-ranger-copy-ring') we
+operated on."
   (let ((current-file (dired-utils-get-filename)))
     (revert-buffer)
     (let ((dired-marker-char char))
@@ -162,7 +169,7 @@ copy ring."
                         (copy-directory it target-directory)
                       (copy-file it target-directory 0))
                     (cl-incf copied-files)))
-    (dired-ranger--revert-target ?P files)
+    (dired-ranger--revert-target ?P target-directory files)
     (unless arg (ring-remove dired-ranger-copy-ring 0))
     (message (format "Pasted %d/%d item%s from copy ring."
                      copied-files
@@ -185,7 +192,7 @@ instead of copying them."
     (--each files (when (file-exists-p it)
                     (rename-file it target-directory 0)
                     (cl-incf copied-files)))
-    (dired-ranger--revert-target ?M files)
+    (dired-ranger--revert-target ?M target-directory files)
     (--each buffers
       (when (buffer-live-p it)
         (with-current-buffer it (revert-buffer))))
