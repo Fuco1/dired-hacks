@@ -97,7 +97,25 @@ we should act on."
 
 (defcustom dired-narrow-exit-when-1-left nil
   "If there is only one file left while narrowing,
-exit minibuffer and call dired-narrow-exit-action")
+exit minibuffer and call dired-narrow-exit-action."
+  :group 'dired-narrow)
+
+(defcustom dired-narrow-enable-blinking t
+  "If set to true highlight the chosen file shortly.
+This feature works only when dired-narrow-exit-when-1-left is true."
+  :group 'dired-narrow)
+
+(defcustom dired-narrow-blink-time 0.2
+  "How long should be highlighted a chosen file.
+Units are seconds."
+  :group 'dired-narrow)
+
+(defface dired-narrow-blink
+  '((t :background "#eadc62"
+       :foreground "black"))
+  "Level 1."
+  :group 'dired-narrow)
+
 
 ;; Utils
 
@@ -151,6 +169,17 @@ exit minibuffer and call dired-narrow-exit-action")
     (when (fboundp 'dired-insert-set-properties)
       (dired-insert-set-properties (point-min) (point-max)))))
 
+
+(defun dired-narrow--blink-current-file ()
+  (let* ((beg (line-beginning-position))
+         (end (line-end-position))
+         (overlay (make-overlay beg end)))
+    (overlay-put overlay 'face 'dired-narrow-blink)
+    (redisplay)
+    (sleep-for dired-narrow-blink-time)
+    (discard-input)
+    (delete-overlay overlay)))
+
 
 ;; Live filtering
 
@@ -184,6 +213,8 @@ exit minibuffer and call dired-narrow-exit-action")
         (when (and dired-narrow-exit-when-1-left
                    visible-files-cnt
                    (= visible-files-cnt 1))
+          (if dired-narrow-enable-blinking
+              (dired-narrow--blink-current-file))
           (exit-minibuffer))))))
 
 (defun dired-narrow--internal (filter-function)

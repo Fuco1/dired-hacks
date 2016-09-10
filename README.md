@@ -489,11 +489,14 @@ You can customize the binding by changing `dired-narrow-map`.
 
 You can customize what happens after exiting the live filtering mode
 by customizing `dired-narrow-exit-action`.
-`dired-narrow-exit-action` may be executed automatically, 
+`dired-narrow-exit-action` may be executed automatically,
 when there is only one file left while narrowing.
 In order to enable this feature, add `(setq dired-narrow-exit-when-1-left t)` to your config.
 It makes sense when you use find-file as your exit action, e.g.
 `(setq dired-narrow-exit-action 'dired-narrow-find-file)`.
+A chosen file will be quickly highlighted before executing `dired-narrow-exit-action`.
+This behavior is controlled by variables `dired-narrow-enable-blinking`,
+`dired-narrow-blink-time` and by a face `dired-narrow-blink`.
 
 
 These narrowing functions are provided:
