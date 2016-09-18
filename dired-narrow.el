@@ -95,25 +95,29 @@ we should act on."
                  (function :tag "Use custom function."))
   :group 'dired-narrow)
 
-(defcustom dired-narrow-exit-when-1-left nil
+(defcustom dired-narrow-exit-when-one-left nil
   "If there is only one file left while narrowing,
-exit minibuffer and call dired-narrow-exit-action."
+exit minibuffer and call `dired-narrow-exit-action'."
+  :type '(boolean)
   :group 'dired-narrow)
 
 (defcustom dired-narrow-enable-blinking t
   "If set to true highlight the chosen file shortly.
-This feature works only when dired-narrow-exit-when-1-left is true."
+This feature works only when `dired-narrow-exit-when-one-left' is true."
+  :type '(boolean)
   :group 'dired-narrow)
 
 (defcustom dired-narrow-blink-time 0.2
   "How long should be highlighted a chosen file.
 Units are seconds."
+  :type '(float)
   :group 'dired-narrow)
 
 (defface dired-narrow-blink
   '((t :background "#eadc62"
        :foreground "black"))
-  "Level 1."
+  "The face used to highlight a chosen file 
+when `dired-narrow-exit-when-one-left' and `dired-narrow-enable-blinking' are true."
   :group 'dired-narrow)
 
 
@@ -139,7 +143,8 @@ Units are seconds."
   "Value of point just before exiting minibuffer.")
 
 (defun dired-narrow--update (filter)
-  "Make the files not matching the FILTER invisible."
+  "Make the files not matching the FILTER invisible.
+ Return the count of visible files that are left after update."
 
   (let ((inhibit-read-only t)
         (visible-files-cnt 0))
@@ -210,10 +215,10 @@ Units are seconds."
         (setq dired-narrow--current-file (dired-utils-get-filename))
         (set-window-point (get-buffer-window (current-buffer)) (point))
 
-        (when (and dired-narrow-exit-when-1-left
+        (when (and dired-narrow-exit-when-one-left
                    visible-files-cnt
                    (= visible-files-cnt 1))
-          (if dired-narrow-enable-blinking
+          (when dired-narrow-enable-blinking
               (dired-narrow--blink-current-file))
           (exit-minibuffer))))))
 
