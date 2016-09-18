@@ -98,19 +98,19 @@ we should act on."
 (defcustom dired-narrow-exit-when-one-left nil
   "If there is only one file left while narrowing,
 exit minibuffer and call `dired-narrow-exit-action'."
-  :type '(boolean)
+  :type 'boolean
   :group 'dired-narrow)
 
 (defcustom dired-narrow-enable-blinking t
   "If set to true highlight the chosen file shortly.
 This feature works only when `dired-narrow-exit-when-one-left' is true."
-  :type '(boolean)
+  :type 'boolean
   :group 'dired-narrow)
 
 (defcustom dired-narrow-blink-time 0.2
   "How long should be highlighted a chosen file.
 Units are seconds."
-  :type '(float)
+  :type 'float
   :group 'dired-narrow)
 
 (defface dired-narrow-blink
