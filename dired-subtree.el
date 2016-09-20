@@ -280,11 +280,11 @@ If no SUBTREES are specified, use `dired-subtree-overlays'."
   "Return non-nil if directory under point is expanded."
   (save-excursion
     (when (dired-utils-get-filename)
-      ;; TODO: this should work 99% of the time (what about links?).
       ;; We've replaced `file-directory-p' with the regexp test to
       ;; speed up filters over TRAMP.  So long as dired/ls format
       ;; doesn't change, we're good.
-      (and (save-excursion (beginning-of-line) (looking-at "..d"))
+      ;; 'd' for directories, 'l' for potential symlinks to directories.
+      (and (save-excursion (beginning-of-line) (looking-at "..[dl]"))
            (let ((depth (dired-subtree--get-depth (dired-subtree--get-ov))))
              (dired-next-line 1)
              (< depth (dired-subtree--get-depth (dired-subtree--get-ov))))))))
