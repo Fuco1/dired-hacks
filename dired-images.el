@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t -*-
 (require 'dired-hacks-utils)
 (require 'dash)
 (require 'eimp)
@@ -308,7 +309,11 @@ With prefix argument \\[universal-argument] \\[universal-argument] open a new th
     (setq di-active-view-buffer buf)
     (with-current-buffer di-active-view-buffer
       (di-view-mode)
-      (add-hook 'kill-buffer-hook `(lambda () (delete-file ,(di--temp-file (current-buffer)))) nil 'local))
+      (add-hook 'kill-buffer-hook
+                (let ((buffer (di--temp-file (current-buffer))))
+                  (lambda ()
+                    (ignore-errors
+                      (delete-file buffer)))) nil 'local))
     buf))
 
 (defun di--get-active-view-buffer ()
