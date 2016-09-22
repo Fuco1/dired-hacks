@@ -13,7 +13,7 @@
 ;;   - +/- given %
 
 ;; thumb customizes
-(defcustom di-thumbs-directory "~/.emacs.d/di/"
+(defcustom di-thumbs-directory (locate-user-emacs-file ".cache/di/")
   "Location where thumbnails are stored."
   :type 'directory)
 
