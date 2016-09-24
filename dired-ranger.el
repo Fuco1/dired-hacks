@@ -167,7 +167,9 @@ copy ring."
     (--each files (when (file-exists-p it)
                     (if (file-directory-p it)
                         (copy-directory it target-directory)
-                      (copy-file it target-directory 0))
+                      (condition-case err
+                          (copy-file it target-directory 0)
+                        (file-already-exists nil)))
                     (cl-incf copied-files)))
     (dired-ranger--revert-target ?P target-directory files)
     (unless arg (ring-remove dired-ranger-copy-ring 0))
@@ -190,7 +192,9 @@ instead of copying them."
          (target-directory (dired-current-directory))
          (copied-files 0))
     (--each files (when (file-exists-p it)
-                    (rename-file it target-directory 0)
+                    (condition-case err
+                        (rename-file it target-directory 0)
+                      (file-already-exists nil))
                     (cl-incf copied-files)))
     (dired-ranger--revert-target ?M target-directory files)
     (--each buffers
