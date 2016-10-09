@@ -1075,7 +1075,9 @@ Examples:
 (dired-filter-define directory
     "Toggle current view to show only directories."
   (:description "directory")
-  (looking-at dired-re-dir))
+  (or (looking-at dired-re-dir)
+      (and (looking-at dired-re-sym)
+           (file-directory-p (dired-utils-get-filename)))))
 
 ;;;###autoload (autoload 'dired-filter-by-file "dired-filter")
 ;;;###autoload (autoload 'dired-filter-mark-by-file "dired-filter")
