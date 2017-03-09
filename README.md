@@ -481,11 +481,11 @@ bring it back to the original view, you can call `revert-buffer`
 During the filtering process, several special functions are available.
 You can customize the binding by changing `dired-narrow-map`.
 
-* `dired-narrow-next-file` (<kbd>\<down\></kbd>) - move the point to the next file
-* `dired-narrow-previous-file` (<kbd>\<up\></kbd>) - move the point to the previous
-  file
-* `dired-narrow-enter-directory` (<kbd>\<right\></kbd>) - descend into
-  the directory under point and immediately go back to narrowing mode
+* `dired-narrow-next-file` (<kbd>\<down\></kbd> or <kbd>C-n</kbd>) - move the point to the next file
+* `dired-narrow-previous-file` (<kbd>\<up\></kbd> or <kbd>C-p</kbd>) - move the point to the previous
+file
+* `dired-narrow-enter-directory` (<kbd>\<right\></kbd> or <kbd>C-j</kbd>) - descend into
+the directory under point and immediately go back to narrowing mode
 
 You can customize what happens after exiting the live filtering mode
 by customizing `dired-narrow-exit-action`.
