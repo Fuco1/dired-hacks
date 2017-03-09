@@ -120,7 +120,7 @@ Units are seconds."
 (defface dired-narrow-blink
   '((t :background "#eadc62"
        :foreground "black"))
-  "The face used to highlight a chosen file 
+  "The face used to highlight a chosen file
 when `dired-narrow-exit-when-one-left' and `dired-narrow-enable-blinking' are true."
   :group 'dired-narrow)
 
