@@ -1,15 +1,23 @@
-1. [dired-hacks](#)
-2. [Contribute!](#contribute!)
-3. [Packages](#packages)
-    1. [dired-hacks-utils](#dired-hacks-utils)
-    2. [dired-filter](#dired-filter)
-    3. [dired-avfs](#dired-avfs)
-    4. [dired-open](#dired-open)
-    5. [dired-rainbow](#dired-rainbow)
-    6. [dired-subtree](#dired-subtree)
-    7. [dired-ranger](#dired-ranger)
-    8. [dired-narrow](#dired-narrow)
-    9. [dired-list](#dired-list)
+* [dired-hacks](#dired-hacks--)
+* [Contribute!](#contribute)
+* [Packages](#packages)
+   * [dired-hacks-utils](#dired-hacks-utils)
+   * [dired-filter](#dired-filter)
+      * [Stack operations](#stack-operations)
+      * [Built-in filters](#built-in-filters)
+      * [Saved filters](#saved-filters)
+      * [Filter groups](#filter-groups)
+      * [Other features](#other-features)
+   * [dired-avfs](#dired-avfs)
+   * [dired-open](#dired-open)
+   * [dired-rainbow](#dired-rainbow)
+   * [dired-subtree](#dired-subtree)
+      * [Interactive functions](#interactive-functions)
+   * [dired-ranger](#dired-ranger)
+      * [Multi-stage copy/pasting of files](#multi-stage-copypasting-of-files)
+      * [Bookmarks](#bookmarks)
+   * [dired-narrow](#dired-narrow)
+   * [dired-list](#dired-list)
 
 # dired-hacks [![Build Status](https://travis-ci.org/Fuco1/dired-hacks.svg?branch=master)](https://travis-ci.org/Fuco1/dired-hacks) [![Paypal logo](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CEYP5YVHDRX8C)
 
@@ -26,7 +34,6 @@ Please note that only the packages that are listed in this readme are
 the other files are work-in-progress packages you could probably use,
 but it would be a bit more painful.
 
-<a name="contribute!" />
 # Contribute!
 
 If you want to support this project, you can do it in the following ways:
@@ -55,10 +62,8 @@ If you want to support this project, you can do it in the following ways:
   Regardless of the donations, dired-hacks will always be free both as
   in beer and as in speech.
 
-<a name="packages" />
 # Packages
 
-<a name="dired-hacks-utils" />
 ## dired-hacks-utils
 
 Set of utility functions used in all the `dired-hacks` packages.
@@ -69,7 +74,6 @@ This package also provides these interactive functions:
 * `dired-hacks-previous-file` - go to previous file, skipping empty
   and non-file lines
 
-<a name="dired-filter" />
 ## dired-filter
 
 The filtering system is designed after ibuffer: every dired
@@ -261,7 +265,6 @@ criteria than just extensions ;)
 You can clone the currently visible dired buffer by calling
 `dired-filter-clone-filtered-buffer`.
 
-<a name="dired-avfs" />
 ## dired-avfs
 
 Adds [avfs](http://avf.sourceforge.net/) support for seamless archive
@@ -276,7 +279,6 @@ Windows, sorry.
 Once the daemon is installed, run it with `mountavfs` and everything
 "Should Just Work™".
 
-<a name="dired-open" />
 ## dired-open
 
 While emacs already has the `auto-mode-alist`, this is often
@@ -320,7 +322,6 @@ If you write your own handler, make sure they do *not* throw errors
 but instead return nil if they can't proceed.  Please, don't forget to
 submit interesting handlers!
 
-<a name="dired-rainbow" />
 ## dired-rainbow
 
 This package adds more customizable highlighting for files in dired
@@ -356,7 +357,6 @@ Here are some example uses:
 (dired-rainbow-define-chmod executable-unix "Green" "-[rw-]+x.*")
 ```
 
-<a name="dired-subtree" />
 ## dired-subtree
 
 The basic command to work with subdirectories in dired is `i`,
@@ -408,7 +408,6 @@ convenient prefix key map, for example `C-,`
 If you have package `dired-filter`, additional command
 `dired-subtree-apply-filter` is available.
 
-<a name="dired-ranger" />
 ## dired-ranger
 
 This package implements useful features present in the
@@ -466,7 +465,6 @@ These bookmarks are not persistent.  If you want persistent
 bookmarks use the bookmarks provided by emacs, see (info "(emacs)
 Bookmarks").
 
-<a name="dired-narrow" />
 ## dired-narrow
 
 This package provides live filtering of files in dired buffers.  In
@@ -514,7 +512,6 @@ the file name.  If the filter returns nil, the file is removed from
 the view.  As an inspiration, look at the built-in functions
 mentioned above.
 
-<a name="dired-list" />
 ## dired-list
 
 Produce a file listing with a shell incantation and make a dired
