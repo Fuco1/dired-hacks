@@ -1,11 +1,11 @@
 ;;; dired-rainbow.el --- Extended file highlighting according to its type
 
-;; Copyright (C) 2014 Matus Goljer
+;; Copyright (C) 2014-2017 Matus Goljer
 
 ;; Author: Matus Goljer <matus.goljer@gmail.com>
 ;; Maintainer: Matus Goljer <matus.goljer@gmail.com>
 ;; Keywords: files
-;; Version: 0.0.2
+;; Version: 0.0.3
 ;; Created: 16th February 2014
 ;; Package-requires: ((dash "2.5.0") (dired-hacks-utils "0.0.1"))
 
@@ -86,6 +86,17 @@ colored."
 This alist is constructed in `dired-rainbow-define' for the case
 when the user wants to reuse the associations outside of dired.")
 
+(defun dired-rainbow--get-face (face-props)
+  "Return face specification according to FACE-PROPS.
+
+See `dired-rainbow-define'."
+  (cond
+   ((stringp face-props)
+    `(:foreground ,face-props))
+   ((symbolp face-props)
+    `(:inherit ,face-props))
+   (t face-props)))
+
 (defmacro dired-rainbow-define (symbol face-props extensions)
   "Define a custom dired face highlighting files by extension.
 
@@ -122,9 +133,7 @@ the entire file name."
          (face-name (intern (concat "dired-rainbow-" (symbol-name symbol) "-face"))))
     `(progn
        (defface ,face-name
-         '((t ,(if (stringp face-props)
-                   `(:foreground ,face-props)
-                 face-props)))
+         '((t ,(dired-rainbow--get-face face-props)))
          ,(concat "dired-rainbow face matching " (symbol-name symbol) " files.")
          :group 'dired-rainbow)
        (font-lock-add-keywords 'dired-mode '((,regexp 1 ',face-name)))
@@ -160,9 +169,7 @@ matches any file with executable flag set for user, group or everyone."
          (face-name (intern (concat "dired-rainbow-" (symbol-name symbol) "-face"))))
     `(progn
        (defface ,face-name
-         '((t ,(if (stringp face-props)
-                   `(:foreground ,face-props)
-                 face-props)))
+         '((t ,(dired-rainbow--get-face face-props)))
          ,(concat "dired-rainbow face matching " (symbol-name symbol) " files.")
          :group 'dired-rainbow)
        (font-lock-add-keywords 'dired-mode '((,regexp 1 ',face-name))))))
