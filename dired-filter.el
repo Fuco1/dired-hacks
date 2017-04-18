@@ -990,7 +990,7 @@ separately in turn and ORing the filters together."
                  (let (extensions)
                    (while (condition-case nil
                               (progn
-                                (push (completing-read "Extensions (C-g when done): "
+                                (push (ido-completing-read "Extensions (C-g when done): "
                                                        exts
                                                        nil nil nil nil ext)
                                       extensions)
@@ -1000,7 +1000,7 @@ separately in turn and ORing the filters together."
                                 (setq exts (--remove (equal (car extensions) it) exts)))
                             (quit nil)))
                    extensions)
-               (completing-read
+               (ido-completing-read
                 "Extension: "
                 exts
                 nil nil nil nil ext))))
@@ -1098,7 +1098,7 @@ of `auto-mode-alist'."
   (:description "mode"
    :qualifier-description (symbol-name (cadr qualifier))
    :reader (let ((mm (intern
-                      (completing-read
+                      (ido-completing-read
                        "Major mode: "
                        (-map 'symbol-name (-uniq (-remove 'listp (-map 'cdr auto-mode-alist))))
                        nil nil nil nil
@@ -1240,7 +1240,7 @@ push all its constituents back on the stack."
   (list
    (if (not dired-filter-saved-filters)
        (error "No saved filters")
-     (completing-read (concat prompt " saved filters: ")
+     (ido-completing-read (concat prompt " saved filters: ")
                       dired-filter-saved-filters nil t nil nil
                       (caar dired-filter-saved-filters)))))
 
@@ -1279,7 +1279,7 @@ push all its constituents back on the stack."
   (interactive (list
                 (if (not dired-filter-group-saved-groups)
                     (error "No saved filter groups")
-                  (completing-read "Load filter group: "
+                  (ido-completing-read "Load filter group: "
                                    dired-filter-group-saved-groups nil t nil nil
                                    (caar dired-filter-group-saved-groups)))))
   (setq dired-filter-group name))
