@@ -485,7 +485,8 @@ Setter for `dired-filter-mark-prefix' user variable."
 ;; internals
 (defun dired-filter--push (filter)
   "Push FILTER onto the active filter stack."
-  (push filter dired-filter-stack))
+  (unless (member filter dired-filter-stack)
+    (push filter dired-filter-stack)))
 
 ;; TODO: save the filters in better structure to avoid undescriptive `cadddr'
 (defun dired-filter--make-filter-1 (stack)
