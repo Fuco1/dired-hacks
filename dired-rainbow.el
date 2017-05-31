@@ -104,11 +104,12 @@ SYMBOL is the identifier of the face.  The macro will define a face named
 
   dired-rainbow-SYMBOL-face.
 
-FACE-PROPS is either a string or a list.  If a string, it is
+FACE-PROPS is a string, a list or a symbol.  If a string, it is
 assumed to be either a color name or a hexadecimal code (#......)
 describing a color.  If a list, it is assumed to be a property
 list describing the face.  See `defface' for list of possible
-attributes.
+attributes.  If a symbol it is taken as the name of an existing
+face which is used.
 
 EXTENSIONS is either a list or a symbol evaluating to a list of
 extensions that should be highlighted with this face.  Note that
@@ -148,11 +149,12 @@ SYMBOL is the identifier of the face.  The macro will define a face named
 
   dired-rainbow-SYMBOL-face.
 
-FACE-PROPS is either a string or a list.  If a string, it is
+FACE-PROPS is a string, a list or a symbol.  If a string, it is
 assumed to be either a color name or a hexadecimal code (#......)
 describing a color.  If a list, it is assumed to be a property
 list describing the face.  See `defface' for list of possible
-attributes.
+attributes.  If a symbol it is taken as the name of an existing
+face which is used.
 
 CHMOD is a regexp matching \"ls -l\" style permissions string.
 For example, the pattern
