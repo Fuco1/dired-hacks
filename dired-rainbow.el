@@ -119,6 +119,7 @@ compilation and must be defined before this macro is processed.
 Additionally, EXTENSIONS can be a single string or a symbol
 evaluating to a string that is interpreted as a regexp matching
 the entire file name."
+  (declare (debug (symbolp [&or stringp listp symbolp] [&or symbolp listp stringp])))
   (let* ((matcher (if (or (listp extensions)
                           (stringp extensions))
                       extensions
@@ -162,6 +163,7 @@ For example, the pattern
   \"-.*x.*\"
 
 matches any file with executable flag set for user, group or everyone."
+  (declare (debug (symbolp [&or stringp listp symbolp] stringp)))
   (let* ((regexp (concat
                   "^[^!]."
                   chmod
