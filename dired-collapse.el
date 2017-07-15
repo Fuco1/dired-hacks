@@ -101,7 +101,10 @@
        (current-column)))))
 
 (defun dired-collapse--replace-file (file column-info)
-  "Replace file on the current line with FILE."
+  "Replace file on the current line with FILE.
+
+COLUMN-INFO is a data structure returned by
+`dired-collapse--get-column-info'."
   (-let (((has-link-count-p user-column group-column date-column) column-info))
     (delete-region (line-beginning-position) (1+ (line-end-position)))
     (insert "  ")
