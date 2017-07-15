@@ -34,15 +34,15 @@
 ;; drill-down through varying number of "uninteresting" directories
 ;; to get to the content.
 
-;; To enable or disable this functionality use `dired-collapse-mode'
-;; to toggle it for the current dired buffer.
-
 ;; This minor mode is in main inspired by how GitHub renders these
 ;; paths: if there is a chain of directories where each one only has
 ;; one child, they are concatenated together and shown on the first
 ;; level in this collapsed form.  When the user clicks this
 ;; collapsed directory they are immediately brought to the deepest
 ;; directory with some actual content.
+
+;; To enable or disable this functionality use `dired-collapse-mode'
+;; to toggle it for the current dired buffer.
 
 ;; If the deepest directory contains only a single file this file is
 ;; displayed instead of the last directory.  This way we can get
