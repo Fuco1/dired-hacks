@@ -127,7 +127,7 @@ COLUMN-INFO is a data structure returned by
         (save-excursion
           (skip-syntax-forward " ")
           (search-forward " ")
-          (- date-column (current-column))))
+          (max 0 (- date-column (current-column)))))
       32))))
 
 (defun dired-collapse ()
