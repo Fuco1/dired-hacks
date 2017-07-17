@@ -65,6 +65,7 @@
 
 (require 'dash)
 (require 'dired)
+(require 'f)
 
 (defgroup dired-collapse ()
   "Collapse unique nested paths in dired listing."
