@@ -158,7 +158,12 @@
     (it "should keep files matching the name as regexp"
       (with-temp-fs '("foo.o" "bar.a" "bar.h" "quux.c")
         (with-dired '((name . "b.r\\."))
-          (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("bar.a" "bar.h")))))
+                    (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("bar.a" "bar.h")))))
+
+    (it "should use case-sensitive match if qualifier contains upper-case letters"
+      (with-temp-fs '("foo.o" "FOO.o")
+        (with-dired '((name . "F"))
+          (expect (dired-utils-get-all-files :local) :to-equal-as-string-set '("FOO.o")))))
 
     (it "should keep files or directories matching the name as regexp"
       (with-temp-fs '("foo.o" "bar.a" "bar.h" "quux.c" "bur.d/")

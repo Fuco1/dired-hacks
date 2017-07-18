@@ -953,18 +953,34 @@ filter."))
 ;;;###autoload (autoload 'dired-filter-by-name "dired-filter")
 ;;;###autoload (autoload 'dired-filter-mark-by-name "dired-filter")
 (dired-filter-define name
-    "Toggle current view to files matching QUALIFIER."
+    "Toggle current view to files matching QUALIFIER.
+
+The matching uses smart-case convention: match is
+case-insensitive if the QUALIFIER does not contain upper-case
+letter, otherwise it is case-sensitive."
   (:description "name"
    :reader (regexp-quote (read-string "Pattern: ")))
-  (string-match-p qualifier file-name))
+  (let ((case-fold-search nil))
+    (if (string-match-p "[A-Z]" qualifier)
+        (string-match-p qualifier file-name)
+      (let ((case-fold-search t))
+        (string-match-p qualifier file-name)))))
 
 ;;;###autoload (autoload 'dired-filter-by-regexp "dired-filter")
 ;;;###autoload (autoload 'dired-filter-mark-by-regexp "dired-filter")
 (dired-filter-define regexp
-    "Toggle current view to files matching QUALIFIER as a regular expression."
+    "Toggle current view to files matching QUALIFIER as a regular expression.
+
+The matching uses smart-case convention: match is
+case-insensitive if the QUALIFIER does not contain upper-case
+letter, otherwise it is case-sensitive."
   (:description "regexp"
    :reader (read-regexp "Regexp: " ))
-  (string-match-p qualifier file-name))
+  (let ((case-fold-search nil))
+    (if (string-match-p "[A-Z]" qualifier)
+        (string-match-p qualifier file-name)
+      (let ((case-fold-search t))
+        (string-match-p qualifier file-name)))))
 
 ;;;###autoload (autoload 'dired-filter-by-extension "dired-filter")
 ;;;###autoload (autoload 'dired-filter-mark-by-extension "dired-filter")
