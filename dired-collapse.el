@@ -72,6 +72,7 @@
   :group 'dired-hacks
   :prefix "dired-collapse-")
 
+;;;###autoload
 (define-minor-mode dired-collapse-mode
   "Toggle collapsing of unique nested paths in Dired."
   :group 'dired-collapse
