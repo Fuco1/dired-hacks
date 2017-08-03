@@ -91,21 +91,21 @@
   "Get information about where the ls columns start."
   (save-excursion
     (goto-char (point-min))
-    (re-search-forward dired-permission-flags-regexp)
-    ;; link count is present
-    (list
-     (when (looking-at-p "[[:blank:]]*[0-9]+")
-       (forward-word)
-       t)
-     (current-column)
-     (progn
-       (forward-word)
-       (current-column))
-     (progn
-       (forward-word)
-       (skip-syntax-forward " ")
-       (search-forward " ")
-       (current-column)))))
+    (when (re-search-forward dired-permission-flags-regexp nil t)
+      ;; link count is present
+      (list
+       (when (looking-at-p "[[:blank:]]*[0-9]+")
+         (forward-word)
+         t)
+       (current-column)
+       (progn
+         (forward-word)
+         (current-column))
+       (progn
+         (forward-word)
+         (skip-syntax-forward " ")
+         (search-forward " ")
+         (current-column))))))
 
 (defun dired-collapse--replace-file (file column-info)
   "Replace file on the current line with FILE.
@@ -147,31 +147,32 @@ COLUMN-INFO is a data structure returned by
           ;; We need to figure out where the columns start so we can pad the
           ;; data re-inserted individually
           (column-info (dired-collapse--get-column-info)))
-    (save-excursion
-      (goto-char (point-min))
-      (while (not (eobp))
-        (when (and (looking-at-p dired-re-dir)
-                   (not (member (dired-get-filename 'no-dir t) (list "." "..")))
-                   (not (eolp)))
-          (let ((path (dired-get-filename nil t))
-                files)
-            (while (and (file-directory-p path)
-                        (setq files (f-entries path))
-                        (= 1 (length files)))
-              (setq path (car files)))
-            (setq path (s-chop-prefix (dired-current-directory) path))
-            (when (string-match-p "/" path)
-              (let ((default-directory (dired-current-directory)))
-                (dired-collapse--replace-file path column-info))
-              (dired-insert-set-properties (line-beginning-position) (line-end-position))
-              (dired-move-to-filename)
-              (let* ((beg (point))
-                     (end (save-excursion
-                            (dired-move-to-end-of-filename)
-                            (1+ (search-backward "/"))))
-                     (ov (make-overlay beg end)))
-                (overlay-put ov 'face 'shadow)))))
-        (forward-line 1)))))
+    (when column-info
+      (save-excursion
+        (goto-char (point-min))
+        (while (not (eobp))
+          (when (and (looking-at-p dired-re-dir)
+                     (not (member (dired-get-filename 'no-dir t) (list "." "..")))
+                     (not (eolp)))
+            (let ((path (dired-get-filename nil t))
+                  files)
+              (while (and (file-directory-p path)
+                          (setq files (f-entries path))
+                          (= 1 (length files)))
+                (setq path (car files)))
+              (setq path (s-chop-prefix (dired-current-directory) path))
+              (when (string-match-p "/" path)
+                (let ((default-directory (dired-current-directory)))
+                  (dired-collapse--replace-file path column-info))
+                (dired-insert-set-properties (line-beginning-position) (line-end-position))
+                (dired-move-to-filename)
+                (let* ((beg (point))
+                       (end (save-excursion
+                              (dired-move-to-end-of-filename)
+                              (1+ (search-backward "/"))))
+                       (ov (make-overlay beg end)))
+                  (overlay-put ov 'face 'shadow)))))
+          (forward-line 1))))))
 
 (provide 'dired-collapse)
 ;;; dired-collapse.el ends here
