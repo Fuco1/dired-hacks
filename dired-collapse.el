@@ -122,11 +122,11 @@ COLUMN-INFO is a data structure returned by
      (make-string
       (save-excursion
         (when has-link-count-p (forward-word))
-        (- user-column (current-column)))
+	(max 0 (- user-column (current-column))))
       32))
     (when has-link-count-p (forward-word))
     (forward-word)
-    (insert (make-string (- group-column (current-column)) 32))
+    (insert (make-string (max 0 (- group-column (current-column))) 32))
     (insert
      (make-string
       (progn
