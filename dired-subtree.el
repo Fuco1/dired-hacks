@@ -276,7 +276,7 @@ If no SUBTREES are specified, use `dired-subtree-overlays'."
   "Unmark a file without moving point."
   (save-excursion (dired-unmark 1)))
 
-(defun dired-line-is-directory-or-link-p ()
+(defun dired-subtree--dired-line-is-directory-or-link-p ()
   "Return non-nil if line under point is a directory or symlink"
   ;; We've replaced `file-directory-p' with the regexp test to
   ;; speed up filters over TRAMP.  So long as dired/ls format
@@ -489,7 +489,7 @@ Return a string suitable for insertion in `dired' buffer."
 (defun dired-subtree-insert ()
   "Insert subtree under this directory."
   (interactive)
-  (when (dired-line-is-directory-or-link-p)
+  (when (dired-subtree--dired-line-is-directory-or-link-p)
     (let* ((dir-name (dired-get-filename nil))
            (listing (dired-subtree--readin dir-name))
            beg end)
