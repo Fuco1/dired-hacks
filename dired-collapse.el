@@ -86,6 +86,7 @@
         (unless (= (buffer-size) 0)
           (revert-buffer)))
     (remove-hook 'dired-after-readin-hook 'dired-collapse 'local)
+    (remove-hook 'dired-subtree-after-insert-hook 'dired-collapse 'local)
     (revert-buffer)))
 
 (defun dired-collapse--get-column-info ()
