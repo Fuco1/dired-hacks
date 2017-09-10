@@ -489,7 +489,8 @@ Return a string suitable for insertion in `dired' buffer."
 (defun dired-subtree-insert ()
   "Insert subtree under this directory."
   (interactive)
-  (when (dired-subtree--dired-line-is-directory-or-link-p)
+  (when (and (dired-subtree--dired-line-is-directory-or-link-p)
+             (not (dired-subtree--is-expanded-p)))
     (let* ((dir-name (dired-get-filename nil))
            (listing (dired-subtree--readin dir-name))
            beg end)
