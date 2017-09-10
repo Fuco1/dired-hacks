@@ -80,6 +80,7 @@
   (if dired-collapse-mode
       (progn
         (add-hook 'dired-after-readin-hook 'dired-collapse 'append 'local)
+        (add-hook 'dired-subtree-after-insert-hook 'dired-collapse 'append 'local)
         ;; revert the buffer only if it is not empty (= we haven't yet
         ;; read in the current directory)
         (unless (= (buffer-size) 0)
