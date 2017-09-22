@@ -20,7 +20,7 @@
    * [dired-list](#dired-list)
    * [dired-collapse](#dired-collapse)
 
-# dired-hacks [![Build Status](https://travis-ci.org/Fuco1/dired-hacks.svg?branch=master)](https://travis-ci.org/Fuco1/dired-hacks) [![Paypal logo](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CEYP5YVHDRX8C) [![Patreon](https://c5.patreon.com/external/logo/logomarkOrange.svg)](https://www.patreon.com/user?u=3282358&ty=h)
+# dired-hacks [![Build Status](https://travis-ci.org/Fuco1/dired-hacks.svg?branch=master)](https://travis-ci.org/Fuco1/dired-hacks) [![Paypal logo](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=A5PMGVKCQBT88) [![Patreon](https://c5.patreon.com/external/logo/logomarkOrange.svg)](https://www.patreon.com/user?u=3282358&ty=h)
 
 Collection of useful dired additions.  I don't want this become
 another `dired+`, so I'm splitting all the functionality into separate
@@ -52,7 +52,7 @@ If you want to support this project, you can do it in the following ways:
   [start new issue](https://github.com/Fuco1/dired-hacks/issues/new)
   on the tracker and submit your suggestion.
 * You can make a financial donation through
-  [PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CEYP5YVHDRX8C)
+  [PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=A5PMGVKCQBT88)
   or [Patreon](https://www.patreon.com/user?u=3282358&ty=h).  If you like dired-hacks and can spare a modest
   amount on a donation, feel free to do so.  These donations are
   expressions of your gratitude and are used for my personal "rewards"
