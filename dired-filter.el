@@ -1,4 +1,4 @@
-;;; dired-filter.el --- Ibuffer-like filtering for dired
+;;; dired-filter.el --- Ibuffer-like filtering for dired -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2014-2015 Matúš Goljer
 
