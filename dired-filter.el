@@ -408,6 +408,7 @@ See `dired-filter-stack' for the format of FILTER-STACK."
     (define-key map "m" 'dired-filter-by-mode)
     (define-key map "s" 'dired-filter-by-symlink)
     (define-key map "x" 'dired-filter-by-executable)
+    (define-key map "ig" 'dired-filter-by-git-ignored)
 
     (define-key map "|" 'dired-filter-or)
     (define-key map "!" 'dired-filter-negate)
@@ -438,6 +439,7 @@ See `dired-filter-stack' for the format of FILTER-STACK."
     (define-key map "m" 'dired-filter-mark-by-mode)
     (define-key map "s" 'dired-filter-mark-by-symlink)
     (define-key map "x" 'dired-filter-mark-by-executable)
+    (define-key map "ig" 'dired-filter-mark-by-git-ignored)
     (define-key map "L" 'dired-filter-mark-by-saved-filters)
     map)
   "Keymap used for marking files.")
@@ -518,6 +520,11 @@ Setter for `dired-filter-mark-prefix' user variable."
                           ;; special hack for omit filter, to
                           ;; recompute the filter regexp
                           (dired-omit-regexp))
+                         ((eq (car stack) 'git-ignored)
+                          `',(with-temp-buffer
+                               (insert (mapconcat 'f-slash (f-entries ".") "\0"))
+                               (call-process-region (point-min) (point-max) "git" t t nil "check-ignore" "-z" "--stdin")
+                               (split-string (buffer-string) "\0" t)))
                          ((eq (car stack) 'extension)
                           (if (listp (cdr stack))
                               (concat "\\." (regexp-opt (-uniq (cdr stack))) "\\'")
@@ -1030,6 +1037,19 @@ separately in turn and ORing the filters together."
    :qualifier-description nil
    :remove t)
   (string-match-p qualifier file-name))
+
+;;;###autoload (autoload 'dired-filter-by-git-ignored "dired-filter")
+;;;###autoload (autoload 'dired-filter-mark-by-git-ignored "dired-filter")
+(dired-filter-define git-ignored
+    "Toggle current view to files ignored by git.
+
+The ignored files are computed according to the results of
+
+  $ git check-ignore"
+  (:description "git-ignored"
+   :qualifier-description nil
+   :remove t)
+  (--any? (f-same? file-name it) qualifier))
 
 ;;;###autoload (autoload 'dired-filter-by-garbage "dired-filter")
 ;;;###autoload (autoload 'dired-filter-mark-by-garbage "dired-filter")
