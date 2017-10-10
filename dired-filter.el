@@ -564,7 +564,7 @@ STACK is a filter stack with the format of `dired-filter-stack'."
              (desc-qual (cl-caddr def))
              (remove (if (cl-cadddr def) "!" ""))
              (qualifier (cdr stack))
-             (qual-formatted (eval desc-qual)))
+             (qual-formatted (funcall `(lambda (qualifier) ,desc-qual) qualifier)))
         (if qual-formatted
             (format "[%s%s: %s]" remove desc qual-formatted)
           (format "[%s%s]" remove desc))))))
@@ -623,12 +623,12 @@ The matched lines are returned as a string."
       (dired-filter--narow-to-subdir)
       (goto-char (point-min))
       (let* ((buffer-read-only nil)
-             (filter (dired-filter--make-filter filter))
+             (filter `(lambda (file-name) ,(dired-filter--make-filter filter)))
              (re nil))
         (while (not (eobp))
           (let ((file-name (dired-utils-get-filename 'no-dir)))
             (if (and file-name
-                     (eval filter))
+                     (funcall filter file-name))
                 (push (delete-and-extract-region
                        (line-beginning-position)
                        (progn (forward-line 1) (point)))
@@ -1233,7 +1233,9 @@ push all its constituents back on the stack."
             (if (stringp top)
                 (message "Popped saved filter %s" top)
               (--if-let (let ((qualifier (cdr top)))
-                          (eval (cl-caddr (assoc (car top) dired-filter-alist))))
+                          (funcall
+                           `(lambda (qualifier) ,(cl-caddr (assoc (car top) dired-filter-alist)))
+                           qualifier))
                   (message "Popped filter %s: %s" (car top) it)
                 (message "Popped filter %s" (car top))))
           (message "Filter stack was empty."))))
