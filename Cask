@@ -9,5 +9,6 @@
 (depends-on "cl-lib")
 
 (development
+ (depends-on "assess")
  (depends-on "buttercup")
  (depends-on "shut-up"))
