@@ -358,6 +358,10 @@ Here are some example uses:
 (dired-rainbow-define-chmod executable-unix "Green" "-[rw-]+x.*")
 ```
 
+### Related packages
+
+There is a related package called [diredfl](https://github.com/purcell/diredfl/) which extracts the extra fontification rules from Dired+ and packages them in a modern Emacsy way.  They enhance things like the date face, permissions face and similar.  Check it out!
+
 ## dired-subtree
 
 The basic command to work with subdirectories in dired is `i`,
