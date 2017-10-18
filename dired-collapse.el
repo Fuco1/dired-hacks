@@ -109,6 +109,7 @@
       (while (not (eobp))
         (when (and (looking-at-p dired-re-dir)
                    (not (member (dired-get-filename 'no-dir t) (list "." "..")))
+                   (file-readable-p (dired-get-filename nil t))
                    (not (eolp)))
           (let ((path (dired-get-filename nil t))
                 files)
