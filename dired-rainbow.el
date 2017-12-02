@@ -5,6 +5,7 @@
 ;; Author: Matus Goljer <matus.goljer@gmail.com>
 ;; Maintainer: Matus Goljer <matus.goljer@gmail.com>
 ;; Keywords: files
+;; Package-Version: 20170922.817
 ;; Version: 0.0.3
 ;; Created: 16th February 2014
 ;; Package-requires: ((dash "2.5.0") (dired-hacks-utils "0.0.1"))
@@ -97,7 +98,7 @@ See `dired-rainbow-define'."
     `(:inherit ,face-props))
    (t face-props)))
 
-(defmacro dired-rainbow-define (symbol face-props extensions)
+(defmacro dired-rainbow-define (symbol face-props extensions &optional how)
   "Define a custom dired face highlighting files by extension.
 
 SYMBOL is the identifier of the face.  The macro will define a face named
@@ -118,7 +119,10 @@ compilation and must be defined before this macro is processed.
 
 Additionally, EXTENSIONS can be a single string or a symbol
 evaluating to a string that is interpreted as a regexp matching
-the entire file name."
+the entire file name.
+
+HOW is a parameter that is passed directly to `font-lock-add-keywords'
+to control the order."
   (declare (debug (symbolp [&or stringp listp symbolp] [&or symbolp listp stringp])))
   (let* ((matcher (if (or (listp extensions)
                           (stringp extensions))
@@ -138,13 +142,13 @@ the entire file name."
          '((t ,(dired-rainbow--get-face face-props)))
          ,(concat "dired-rainbow face matching " (symbol-name symbol) " files.")
          :group 'dired-rainbow)
-       (font-lock-add-keywords 'dired-mode '((,regexp 1 ',face-name)))
-       (font-lock-add-keywords 'wdired-mode '((,regexp 1 ',face-name)))
+       (font-lock-add-keywords 'dired-mode '((,regexp 1 ',face-name)) ,how)
+       (font-lock-add-keywords 'wdired-mode '((,regexp 1 ',face-name)) ,how)
        ,(if (listp matcher) `(push
                               '(,matcher ,face-name ,(concat "\\." (regexp-opt matcher)))
                               dired-rainbow-ext-to-face)))))
 
-(defmacro dired-rainbow-define-chmod (symbol face-props chmod)
+(defmacro dired-rainbow-define-chmod (symbol face-props chmod &optional how)
   "Define a custom dired face highlighting files by chmod permissions.
 
 SYMBOL is the identifier of the face.  The macro will define a face named
@@ -163,7 +167,10 @@ For example, the pattern
 
   \"-.*x.*\"
 
-matches any file with executable flag set for user, group or everyone."
+matches any file with executable flag set for user, group or everyone.
+
+HOW is a parameter that is passed directly to `font-lock-add-keywords'
+to control the order."
   (declare (debug (symbolp [&or stringp listp symbolp] stringp)))
   (let* ((regexp (concat
                   "^[^!]."
@@ -177,8 +184,8 @@ matches any file with executable flag set for user, group or everyone."
          '((t ,(dired-rainbow--get-face face-props)))
          ,(concat "dired-rainbow face matching " (symbol-name symbol) " files.")
          :group 'dired-rainbow)
-       (font-lock-add-keywords 'dired-mode '((,regexp 1 ',face-name)))
-       (font-lock-add-keywords 'wdired-mode '((,regexp 1 ',face-name))))))
+       (font-lock-add-keywords 'dired-mode '((,regexp 1 ',face-name)) ,how)
+       (font-lock-add-keywords 'wdired-mode '((,regexp 1 ',face-name)) ,how))))
 
 (provide 'dired-rainbow)
 
