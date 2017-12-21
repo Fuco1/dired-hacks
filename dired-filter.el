@@ -393,6 +393,21 @@ See `dired-filter-stack' for the format of FILTER-STACK."
   "The face used to highlight pair overlays."
   :group 'dired-filter-group)
 
+(defvar dired-filter-group-imenu-generic-expression '("Group" "^ *\\[\\(.*\\)\\]" 1)
+  "An alist of menus for accessing locations in documents with imenu
+
+It is a list of lists of the form
+(MENU-TITLE REGEXP INDEX [FUNCTION] [ARGUMENTS...])
+See `imenu-generic-expression' for more information.
+")
+
+(defun dired-filter-add-group-imenu-generic-expression ()
+  (add-to-list 'imenu-generic-expression dired-filter-group-imenu-generic-expression))
+
+(defun dired-filter-remove-group-imenu-generic-expression ()
+  (setq imenu-generic-expression (delete  dired-filter-group-imenu-generic-expression imenu-generic-expression)))
+
+
 ;;;###autoload
 (defvar dired-filter-map
   (let ((map (make-sparse-keymap)))
@@ -1329,8 +1344,13 @@ push all its constituents back on the stack."
   :lighter ""
   :keymap dired-filter-group-mode-map
   (if dired-filter-group-mode
-      (dired-filter--apply)
-    (revert-buffer)))
+      (progn
+        (dired-filter--apply)
+        (add-hook 'dired-filter-group-mode-hook 'dired-filter-add-group-imenu-generic-expression))
+    (progn
+      (remove-hook 'dired-filter-group-mode-hook 'dired-filter-add-group-imenu-generic-expression)
+      (dired-filter-remove-group-imenu-generic-expression)
+      (revert-buffer))))
 
 
 ;; other interactive functions
