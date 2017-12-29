@@ -126,8 +126,8 @@ buffers for a single paste."
       (let ((current (ring-remove dired-ranger-copy-ring 0)))
         (ring-insert
          dired-ranger-copy-ring
-         (cons (cons (current-buffer) (car current))
-               (-concat (dired-get-marked-files) (cdr current))))
+         (cons (-distinct (cons (current-buffer) (car current)))
+               (-distinct (-concat (dired-get-marked-files) (cdr current)))))
         (message (format "Added %d item%s into copy ring."
                          (length marked)
                          (if (> (length marked) 1) "s" "")))))))
