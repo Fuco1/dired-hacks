@@ -95,7 +95,10 @@
   (insert "  ")
   (insert-directory file dired-listing-switches nil nil)
   (forward-line -1)
-  (dired-align-file (line-beginning-position) (1+ (line-end-position))))
+  (dired-align-file (line-beginning-position) (1+ (line-end-position)))
+  (when (file-remote-p (dired-get-filename nil t))
+    (while (search-forward (dired-current-directory) (line-end-position) t)
+      (replace-match ""))))
 
 (defun dired-collapse ()
   "Collapse unique nested paths in dired listing."
