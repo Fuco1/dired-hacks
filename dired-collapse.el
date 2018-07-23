@@ -4,7 +4,7 @@
 
 ;; Author: Matúš Goljer <matus.goljer@gmail.com>
 ;; Maintainer: Matúš Goljer <matus.goljer@gmail.com>
-;; Version: 0.0.1
+;; Version: 1.1.0
 ;; Created: 15th July 2017
 ;; Package-requires: ((dash "2.10.0") (f "0.19.0"))
 ;; Keywords: files
@@ -66,6 +66,7 @@
 (require 'dash)
 (require 'dired)
 (require 'f)
+(require 'dired-hacks-utils)
 
 (defgroup dired-collapse ()
   "Collapse unique nested paths in dired listing."
@@ -96,9 +97,26 @@
   (insert-directory file dired-listing-switches nil nil)
   (forward-line -1)
   (dired-align-file (line-beginning-position) (1+ (line-end-position)))
-  (when (file-remote-p (dired-get-filename nil t))
+  (when (file-remote-p (dired-utils-get-filename))
     (while (search-forward (dired-current-directory) (line-end-position) t)
       (replace-match ""))))
+
+(defun dired-collapse--create-ov (&optional to-eol)
+  "Create the shadow overlay which marks the collapsed path.
+
+If TO-EOL is non-nil, extend the overlay over the whole
+filename (for example when the final directory is empty)."
+  (save-excursion
+    (dired-move-to-filename)
+    (let* ((beg (point))
+           (end (save-excursion
+                  (dired-move-to-end-of-filename)
+                  (if to-eol
+                      (point)
+                    (1+ (search-backward "/")))))
+           (ov (make-overlay beg end)))
+      (overlay-put ov 'face 'shadow)
+      ov)))
 
 (defun dired-collapse ()
   "Collapse unique nested paths in dired listing."
@@ -111,27 +129,24 @@
       (goto-char (point-min))
       (while (not (eobp))
         (when (and (looking-at-p dired-re-dir)
-                   (not (member (dired-get-filename 'no-dir t) (list "." "..")))
+                   (not (member (dired-utils-get-filename 'no-dir) (list "." "..")))
                    (not (eolp)))
-          (let ((path (dired-get-filename nil t))
+          (let ((path (dired-utils-get-filename))
                 files)
             (while (and (file-directory-p path)
                         (file-readable-p path)
                         (setq files (f-entries path))
                         (= 1 (length files)))
               (setq path (car files)))
-            (setq path (s-chop-prefix (dired-current-directory) path))
-            (when (string-match-p "/" path)
-              (let ((default-directory (dired-current-directory)))
-                (dired-collapse--replace-file path))
-              (dired-insert-set-properties (line-beginning-position) (line-end-position))
-              (dired-move-to-filename)
-              (let* ((beg (point))
-                     (end (save-excursion
-                            (dired-move-to-end-of-filename)
-                            (1+ (search-backward "/"))))
-                     (ov (make-overlay beg end)))
-                (overlay-put ov 'face 'shadow)))))
+            (if (and (not files)
+                     (equal path (dired-utils-get-filename)))
+                (dired-collapse--create-ov 'to-eol)
+              (setq path (s-chop-prefix (dired-current-directory) path))
+              (when (string-match-p "/" path)
+                (let ((default-directory (dired-current-directory)))
+                  (dired-collapse--replace-file path))
+                (dired-insert-set-properties (line-beginning-position) (line-end-position))
+                (dired-collapse--create-ov (= 0 (length files)))))))
         (forward-line 1)))))
 
 (provide 'dired-collapse)
