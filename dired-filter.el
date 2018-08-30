@@ -1164,7 +1164,8 @@ of `auto-mode-alist'."
     (pop dired-filter-stack)
     (pop dired-filter-stack)
     (dired-filter--push top)
-    (dired-filter--push top2)))
+    (dired-filter--push top2)
+    (force-mode-line-update)))
 
 ;;;###autoload
 (defun dired-filter-or ()
