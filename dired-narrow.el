@@ -161,10 +161,11 @@ when `dired-narrow-exit-when-one-left' and `dired-narrow-enable-blinking' are tr
         (if (funcall dired-narrow-filter-function filter)
             (progn
               (setq visible-files-cnt (1+ visible-files-cnt))
-              (when (fboundp 'dired-insert-set-properties)
-                (dired-insert-set-properties (line-beginning-position) (1+ (line-end-position)))))
+              (dired-utils-remove-invisible-property
+               (line-beginning-position) (1+ (line-end-position)) :dired-narrow))
           (put-text-property (line-beginning-position) (1+ (line-end-position)) :dired-narrow t)
-          (put-text-property (line-beginning-position) (1+ (line-end-position)) 'invisible :dired-narrow))))
+          (dired-utils-fillin-invisible-property
+           (line-beginning-position) (1+ (line-end-position)) :dired-narrow))))
     (unless (dired-hacks-next-file)
       (dired-hacks-previous-file))
     (unless (dired-utils-get-filename)
@@ -174,11 +175,8 @@ when `dired-narrow-exit-when-one-left' and `dired-narrow-enable-blinking' are tr
 (defun dired-narrow--restore ()
   "Restore the invisible files of the current buffer."
   (let ((inhibit-read-only t))
-    (remove-list-of-text-properties (point-min) (point-max)
-                                    '(invisible :dired-narrow))
-    (when (fboundp 'dired-insert-set-properties)
-      (dired-insert-set-properties (point-min) (point-max)))))
-
+    (dired-utils-remove-invisible-property
+     (point-min) (point-max) :dired-narrow)))
 
 (defun dired-narrow--blink-current-file ()
   (let* ((beg (line-beginning-position))
