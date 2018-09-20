@@ -463,12 +463,7 @@ children."
 
 Return a string suitable for insertion in `dired' buffer."
   (with-temp-buffer
-    (let ((insert-dir-fun  (if (and (featurep 'tramp)
-                                    (tramp-tramp-file-p dir-name)
-                                    (tramp-sh-handle-file-directory-p dir-name))
-                               #'tramp-handle-insert-directory
-                             #'insert-directory)))
-      (funcall insert-dir-fun dir-name dired-listing-switches nil t))
+    (insert-directory dir-name dired-listing-switches nil t)
     (delete-char -1)
     (goto-char (point-min))
     (delete-region
@@ -491,7 +486,7 @@ Return a string suitable for insertion in `dired' buffer."
   (interactive)
   (when (and (dired-subtree--dired-line-is-directory-or-link-p)
              (not (dired-subtree--is-expanded-p)))
-    (let* ((dir-name (dired-get-filename nil))
+    (let* ((dir-name (file-name-as-directory (dired-get-filename nil)))
            (listing (dired-subtree--readin dir-name))
            beg end)
       (read-only-mode -1)
