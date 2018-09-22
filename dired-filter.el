@@ -397,9 +397,8 @@ See `dired-filter-stack' for the format of FILTER-STACK."
   "An alist of menus for accessing locations in documents with imenu
 
 It is a list of lists of the form
-(MENU-TITLE REGEXP INDEX [FUNCTION] [ARGUMENTS...])
-See `imenu-generic-expression' for more information.
-")
+\(MENU-TITLE REGEXP INDEX [FUNCTION] [ARGUMENTS...])
+See `imenu-generic-expression' for more information.")
 
 (defun dired-filter-add-group-imenu-generic-expression ()
   (add-to-list 'imenu-generic-expression dired-filter-group-imenu-generic-expression))
