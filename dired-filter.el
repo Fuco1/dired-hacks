@@ -393,7 +393,7 @@ See `dired-filter-stack' for the format of FILTER-STACK."
   "The face used to highlight pair overlays."
   :group 'dired-filter-group)
 
-(defvar dired-filter-group-imenu-generic-expression '("Group" "^ *\\[\\(.*\\)\\]" 1)
+(defconst dired-filter-group-imenu-generic-expression '("Group" "^ *\\[\\(.*\\)\\]" 1)
   "An alist of menus for accessing locations in documents with imenu
 
 It is a list of lists of the form
