@@ -219,12 +219,14 @@ For example, if the point is on line
 
 the directory /home/user is opened in new buffer."
   (interactive)
-  (when (dired-get-subdir)
-    (-when-let (end (save-excursion (re-search-forward "[/:]" (line-end-position) t)))
-      (let ((path (buffer-substring-no-properties
-                   (+ 2 (line-beginning-position))
-                   (1- end))))
-        (find-file path)))))
+  (-when-let (subdir (dired-get-subdir))
+    (if (or (bolp) (eolp))
+        (find-file subdir)
+      (-when-let (end (save-excursion (re-search-forward "[/:]" (line-end-position) t)))
+        (let ((path (buffer-substring-no-properties
+                     (+ 2 (line-beginning-position))
+                     (1- end))))
+          (find-file path))))))
 
 
 ;;; main
