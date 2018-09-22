@@ -404,7 +404,7 @@ See `imenu-generic-expression' for more information.")
   (add-to-list 'imenu-generic-expression dired-filter-group-imenu-generic-expression))
 
 (defun dired-filter-remove-group-imenu-generic-expression ()
-  (setq imenu-generic-expression (delete  dired-filter-group-imenu-generic-expression imenu-generic-expression)))
+  (setq imenu-generic-expression (delete dired-filter-group-imenu-generic-expression imenu-generic-expression)))
 
 
 ;;;###autoload
@@ -1346,10 +1346,9 @@ push all its constituents back on the stack."
       (progn
         (dired-filter--apply)
         (add-hook 'dired-filter-group-mode-hook 'dired-filter-add-group-imenu-generic-expression))
-    (progn
-      (remove-hook 'dired-filter-group-mode-hook 'dired-filter-add-group-imenu-generic-expression)
-      (dired-filter-remove-group-imenu-generic-expression)
-      (revert-buffer))))
+    (remove-hook 'dired-filter-group-mode-hook 'dired-filter-add-group-imenu-generic-expression)
+    (dired-filter-remove-group-imenu-generic-expression)
+    (revert-buffer)))
 
 
 ;; other interactive functions
