@@ -656,35 +656,23 @@ The matched lines are returned as a string."
     map)
   "Keymap used when over a group header.")
 
-(defun dired-filter-group--insert-header (name &optional collapsed)
-  "Insert a group header named by NAME.
+(defun dired-filter-group--make-header (name symbol &optional collapsed)
+  "Make a group header named by NAME.
 
-Optional argument COLLAPSED specifies if the header is collapsed
-by default."
-  (insert
-   (concat (propertize
-            (concat
-             "  "
-             (propertize (format "[ %s%s ]" name (if collapsed " ..." ""))
-                         'font-lock-face 'dired-filter-group-header))
-            'keymap dired-filter-group-header-map
-            'dired-filter-group-collapsed collapsed
-            'dired-filter-group-header name
-            'dired-filter-group-invisible-property
-            (intern (format "%s-%d" name (point))))
-           "\n")))
-
-(defun dired-filter-group--fillin-invisible-property (beg end)
-  "Fillin the invisible property for the group between BEG and END.
-BEG and END are the region in which to update the invisible text
-property. The line before BEG is assumed to be the group header
-line."
-  (let ((invis (save-excursion
-                 (goto-char beg)
-                 (forward-line -1)
-                 (get-text-property
-                  (point-at-bol) 'dired-filter-group-invisible-property))))
-    (dired-utils-fillin-invisible-property beg end invis)))
+SYMBOL is the symbol that will be added/removed to the
+`buffer-invisibility-spec' to collapse the header. Optional
+argument COLLAPSED specifies if the header is collapsed by
+default."
+  (concat (propertize
+           (concat
+            "  "
+            (propertize (format "[ %s%s ]" name (if collapsed " ..." ""))
+                        'font-lock-face 'dired-filter-group-header))
+           'keymap dired-filter-group-header-map
+           'dired-filter-group-collapsed collapsed
+           'dired-filter-group-header name
+           'dired-filter-group-invisible-property symbol)
+          "\n"))
 
 (defun dired-filter-group--apply (filter-group)
   "Apply FILTER-GROUP."
@@ -714,20 +702,22 @@ line."
                         (when (/= (length group) 0)
                           (push (cons name group) name-group-alist))))
                     (--each name-group-alist
-                      (-let (((name . group) it))
-                        (dired-filter-group--insert-header name)
+                      (-let* (((name . group) it)
+                              (invis (intern (format "%s-%s" name (point)))))
+                        (insert (dired-filter-group--make-header name invis))
                         (let ((beg (point)))
                           (insert group)
-                          (dired-filter-group--fillin-invisible-property beg (point)))))
+                          (dired-utils-fillin-invisible-property beg (point) invis))))
                     (when (and (text-property-any
                                 (save-excursion (dired-next-subdir 0))
                                 (point-max) 'font-lock-face 'dired-filter-group-header)
                                (save-excursion (backward-char 1) (dired-hacks-next-file)))
-                      (dired-filter-group--insert-header "Default")
-                      (let ((beg (point)))
-                        (while (dired-utils-get-filename)
-                          (forward-line))
-                        (dired-filter-group--fillin-invisible-property beg (point))))))
+                      (let ((invis (intern (format "Default-%s" (point)))))
+                        (insert (dired-filter-group--make-header "Default" invis))
+                        (let ((beg (point)))
+                          (while (dired-utils-get-filename)
+                            (forward-line))
+                          (dired-utils-fillin-invisible-property beg (point) invis))))))
                 (setq next (ignore-errors (dired-next-subdir 1))))))
           (when (featurep 'dired-details)
             (dired-details-delete-overlays)
@@ -736,16 +726,17 @@ line."
 (defun dired-filter-group-toggle-header ()
   "Collapse or expand a filter group."
   (interactive)
-  (let ((inhibit-read-only t)
-        (name (get-text-property (point-at-bol) 'dired-filter-group-header))
-        (collapsed (get-text-property (point-at-bol) 'dired-filter-group-collapsed))
-        (invis-prop (get-text-property (point-at-bol) 'dired-filter-group-invisible-property)))
+  (let* ((inhibit-read-only t)
+         (pos (line-beginning-position))
+         (name (get-text-property pos 'dired-filter-group-header))
+         (collapsed (get-text-property pos 'dired-filter-group-collapsed))
+         (invis (get-text-property pos 'dired-filter-group-invisible-property)))
     (if collapsed
-        (remove-from-invisibility-spec invis-prop)
-      (add-to-invisibility-spec invis-prop))
+        (remove-from-invisibility-spec invis)
+      (add-to-invisibility-spec invis))
     (save-excursion
       (-let [(beg . end) (bounds-of-thing-at-point 'line)] (delete-region beg end))
-      (dired-filter-group--insert-header name (not collapsed)))))
+      (insert (dired-filter-group--make-header name (not collapsed))))))
 
 (defun dired-filter-group-forward-drawer (&optional count)
   "Move point forward by COUNT drawers."
