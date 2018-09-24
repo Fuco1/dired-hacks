@@ -262,8 +262,13 @@ If no SUBTREES are specified, use `dired-subtree-overlays'."
   "After inserting the subtree, setup dired-details/dired-hide-details-mode."
   (if (fboundp 'dired-insert-set-properties)
       (let ((inhibit-read-only t)
-            (ov (dired-subtree--get-ov)))
-        (dired-insert-set-properties (overlay-start ov) (overlay-end ov)))
+            (ov (dired-subtree--get-ov))
+            (invis (when (bound-and-true-p dired-filter-group-mode)
+                     (save-excursion
+                       (dired-filter-group-backward-drawer 1)
+                       (get-text-property (point) 'dired-filter-group-invisible-property)))))
+        (dired-insert-set-properties (overlay-start ov) (overlay-end ov))
+        (dired-utils-fillin-invisible-property (1- (overlay-start ov)) (overlay-end ov) invis))
     (when (featurep 'dired-details)
       (dired-details-delete-overlays)
       (dired-details-activate))))
