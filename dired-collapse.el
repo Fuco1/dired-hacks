@@ -92,14 +92,17 @@
 
 (defun dired-collapse--replace-file (file)
   "Replace file on the current line with FILE."
-  (delete-region (line-beginning-position) (1+ (line-end-position)))
-  (insert "  ")
-  (insert-directory file dired-listing-switches nil nil)
-  (forward-line -1)
-  (dired-align-file (line-beginning-position) (1+ (line-end-position)))
-  (when (file-remote-p (dired-utils-get-filename))
-    (while (search-forward (dired-current-directory) (line-end-position) t)
-      (replace-match ""))))
+  (let ((invis (get-text-property (save-excursion (dired-move-to-filename)) 'invisible)))
+    (delete-region (line-beginning-position) (1+ (line-end-position)))
+    (insert "  ")
+    (insert-directory file dired-listing-switches nil nil)
+    (forward-line -1)
+    (dired-align-file (line-beginning-position) (1+ (line-end-position)))
+    (dired-insert-set-properties (line-beginning-position) (line-end-position))
+    (dired-utils-fillin-invisible-property (line-beginning-position) (1+ (line-end-position)) invis)
+    (when (file-remote-p (dired-utils-get-filename))
+      (while (search-forward (dired-current-directory) (line-end-position) t)
+        (replace-match "")))))
 
 (defun dired-collapse--create-ov (&optional to-eol)
   "Create the shadow overlay which marks the collapsed path.
@@ -145,7 +148,6 @@ filename (for example when the final directory is empty)."
               (when (string-match-p "/" path)
                 (let ((default-directory (dired-current-directory)))
                   (dired-collapse--replace-file path))
-                (dired-insert-set-properties (line-beginning-position) (line-end-position))
                 (dired-collapse--create-ov (= 0 (length files)))))))
         (forward-line 1)))))
 
