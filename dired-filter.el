@@ -674,6 +674,12 @@ default."
            'dired-filter-group-invisible-property symbol)
           "\n"))
 
+(defun dired-filter-group--invisible-symbol (name id)
+  "Return a symbol for the invisible property of filter group named NAME.
+ID is a unique identifier for the group to distinguish multiple
+groups with the same NAME in the buffer."
+  (intern (format "%s-%s" name id)))
+
 (defun dired-filter-group--apply (filter-group)
   "Apply FILTER-GROUP."
   (when (and dired-filter-group-mode
@@ -703,7 +709,7 @@ default."
                           (push (cons name group) name-group-alist))))
                     (--each name-group-alist
                       (-let* (((name . group) it)
-                              (invis (intern (format "%s-%s" name (point)))))
+                              (invis (dired-filter-group--invisible-symbol name (point))))
                         (insert (dired-filter-group--make-header name invis))
                         (let ((beg (point)))
                           (insert group)
@@ -712,7 +718,7 @@ default."
                                 (save-excursion (dired-next-subdir 0))
                                 (point-max) 'font-lock-face 'dired-filter-group-header)
                                (save-excursion (backward-char 1) (dired-hacks-next-file)))
-                      (let ((invis (intern (format "Default-%s" (point)))))
+                      (let ((invis (dired-filter-group--invisible-symbol "Default" (point))))
                         (insert (dired-filter-group--make-header "Default" invis))
                         (let ((beg (point)))
                           (while (dired-utils-get-filename)
