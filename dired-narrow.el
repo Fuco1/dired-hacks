@@ -263,7 +263,11 @@ read from minibuffer."
 ;; Interactive
 
 (defun dired-narrow--regexp-filter (filter)
-  (re-search-forward filter (line-end-position) t))
+  (condition-case nil
+      (re-search-forward filter (line-end-position) t)
+    ;; Return t if your regexp is incomplete/has errors, thus
+    ;; filtering nothing until you fix the regexp.
+    (invalid-regexp t)))
 
 ;;;###autoload
 (defun dired-narrow-regexp ()
