@@ -264,7 +264,7 @@ read from minibuffer."
 
 (defun dired-narrow--regexp-filter (filter)
   (condition-case nil
-      (re-search-forward filter (line-end-position) t)
+      (string-match-p filter (dired-utils-get-filename 'no-dir))
     ;; Return t if your regexp is incomplete/has errors, thus
     ;; filtering nothing until you fix the regexp.
     (invalid-regexp t)))
