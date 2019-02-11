@@ -230,8 +230,6 @@
 (require 'cl-lib)
 (require 'f)
 
-(require 'indent) ;; for alter-text-property
-
 ;; silence the compiler warning
 (defvar dired-filter-mode nil)
 
