@@ -230,6 +230,8 @@
 (require 'cl-lib)
 (require 'f)
 
+(require 'indent) ;; for alter-text-property
+
 ;; silence the compiler warning
 (defvar dired-filter-mode nil)
 
@@ -730,8 +732,14 @@ by default."
                         (point-max))
                     (dired-subdir-max)))))
     (if collapsed
-        (remove-text-properties beg end '(invisible))
-      (put-text-property beg end 'invisible t))
+        (alter-text-property
+         beg end 'invisible
+         (lambda (prop)
+           (delete 'dired-filter-group-toggle-header (-list prop))))
+      (alter-text-property
+       beg end 'invisible
+       (lambda (prop)
+         (cons 'dired-filter-group-toggle-header (-list prop)))))
     (save-excursion
       (-let [(beg . end) (bounds-of-thing-at-point 'line)] (delete-region beg end))
       (insert (dired-filter-group--make-header name (not collapsed))))))
@@ -1345,8 +1353,10 @@ push all its constituents back on the stack."
   (if dired-filter-group-mode
       (progn
         (dired-filter--apply)
-        (add-hook 'dired-filter-group-mode-hook 'dired-filter-add-group-imenu-generic-expression))
+        (add-hook 'dired-filter-group-mode-hook 'dired-filter-add-group-imenu-generic-expression)
+        (add-to-invisibility-spec 'dired-filter-group-toggle-header))
     (remove-hook 'dired-filter-group-mode-hook 'dired-filter-add-group-imenu-generic-expression)
+    (remove-from-invisibility-spec 'dired-filter-group-toggle-header)
     (dired-filter-remove-group-imenu-generic-expression)
     (revert-buffer)))
 
