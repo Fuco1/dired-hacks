@@ -656,10 +656,10 @@ The matched lines are returned as a string."
     map)
   "Keymap used when over a group header.")
 
-(defun dired-filter-group--make-header (name symbol &optional collapsed)
+(defun dired-filter-group--make-header (name invis &optional collapsed)
   "Make a group header named by NAME.
 
-SYMBOL is the symbol that will be added/removed to the
+INVIS is the symbol that will be added/removed to the
 `buffer-invisibility-spec' to collapse the header. Optional
 argument COLLAPSED specifies if the header is collapsed by
 default."
@@ -671,7 +671,7 @@ default."
            'keymap dired-filter-group-header-map
            'dired-filter-group-collapsed collapsed
            'dired-filter-group-header name
-           'dired-filter-group-invisible-property symbol)
+           'dired-filter-group-invisible-property invis)
           "\n"))
 
 (defun dired-filter-group--invisible-symbol (name id)
