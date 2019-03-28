@@ -44,6 +44,43 @@
   :group 'dired
   :prefix "dired-hacks-")
 
+(defun dired-utils-fillin-invisible-property (beg end symbol)
+  "Put SYMBOL as the invisible text property for the region between BEG and END.
+
+Respect the current value of the invisible property for text in
+the region."
+  (let ((next (next-single-property-change beg 'invisible nil end))
+        (invis nil))
+    (while (/= beg end)
+      (setq invis (get-text-property beg 'invisible))
+      (cond
+       ((null invis)
+        (put-text-property beg next 'invisible symbol))
+       ((and (symbolp invis) (not (eq invis symbol)))
+        (put-text-property beg next 'invisible (list invis symbol)))
+       ((and (listp invis) (not (memq symbol invis)))
+        (put-text-property beg next 'invisible (cons symbol invis))))
+      (setq beg next
+            next (next-single-property-change beg 'invisible nil end)))))
+
+(defun dired-utils-remove-invisible-property (beg end symbol)
+  "Remove SYMBOL from the invisible property for the region between BEG and END.
+
+Respect the value of the invisible property for text in the
+region."
+  (let ((next (next-single-property-change beg 'invisible nil end))
+        (invis nil))
+    (while (/= beg end)
+      (setq invis (get-text-property beg 'invisible))
+      (cond
+       ((null invis))
+       ((and (symbolp invis) (eq invis symbol))
+        (put-text-property beg next 'invisible nil))
+       ((listp invis)
+        (put-text-property beg next 'invisible (delq symbol invis))))
+      (setq beg next
+            next (next-single-property-change beg 'invisible nil end)))))
+
 (defun dired-utils-get-filename (&optional localp)
   "Like `dired-get-filename' but never signal an error.
 
@@ -161,7 +198,7 @@ line."
     (--dotimes arg
       (forward-line)
       (while (and (or (not (dired-utils-is-file-p))
-                      (get-text-property (point) 'invisible))
+                      (invisible-p (point)))
                   (= (forward-line) 0))))
     (if (not (= (point) (point-max)))
         (dired-move-to-filename)
@@ -181,7 +218,7 @@ line."
     (--dotimes arg
       (forward-line -1)
       (while (and (or (not (dired-utils-is-file-p))
-                      (get-text-property (point) 'invisible))
+                      (invisible-p (point)))
                   (= (forward-line -1) 0))))
     (if (not (= (point) (point-min)))
         (dired-move-to-filename)
