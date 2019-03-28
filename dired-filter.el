@@ -742,7 +742,7 @@ groups with the same NAME in the buffer."
       (add-to-invisibility-spec invis))
     (save-excursion
       (-let [(beg . end) (bounds-of-thing-at-point 'line)] (delete-region beg end))
-      (insert (dired-filter-group--make-header name (not collapsed))))))
+      (insert (dired-filter-group--make-header name invis (not collapsed))))))
 
 (defun dired-filter-group-forward-drawer (&optional count)
   "Move point forward by COUNT drawers."
