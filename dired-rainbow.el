@@ -81,6 +81,18 @@ colored."
   :type 'string
   :group 'dired-rainbow)
 
+(defcustom dired-rainbow-file-regexp-group 0
+  "The group number to use for font locking the file name.
+
+It is used to determine which parts of the file name to font
+lock. The number is the regexp group.
+
+0: The entire file name.
+1: The file name sans extension.
+2: Only the file extension."
+  :type 'number
+  :group 'dired-rainbow)
+
 (defvar dired-rainbow-ext-to-face nil
   "An alist mapping extension groups to face and compiled regexp.
 
@@ -133,7 +145,7 @@ to control the order."
                   dired-rainbow-date-regexp
                   "[ ]\\("
                   (if (listp matcher)
-                      (concat ".*\\." (regexp-opt matcher))
+                      (concat ".*\\)\\(\\." (regexp-opt matcher))
                     matcher)
                   "\\)$"))
          (face-name (intern (concat "dired-rainbow-" (symbol-name symbol) "-face"))))
@@ -142,8 +154,12 @@ to control the order."
          '((t ,(dired-rainbow--get-face face-props)))
          ,(concat "dired-rainbow face matching " (symbol-name symbol) " files.")
          :group 'dired-rainbow)
-       (font-lock-add-keywords 'dired-mode '((,regexp 1 ',face-name)) ,how)
-       (font-lock-add-keywords 'wdired-mode '((,regexp 1 ',face-name)) ,how)
+       (font-lock-add-keywords 'dired-mode
+                               '((,regexp ,dired-rainbow-file-regexp-group
+                                          ',face-name nil prepend)) ,how)
+       (font-lock-add-keywords 'wdired-mode
+                               '((,regexp ,dired-rainbow-file-regexp-group
+                                          ',face-name nil prepend)) ,how)
        ,(if (listp matcher) `(push
                               '(,matcher ,face-name ,(concat "\\." (regexp-opt matcher)))
                               dired-rainbow-ext-to-face)))))
