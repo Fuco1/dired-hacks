@@ -73,6 +73,11 @@
   :group 'dired-hacks
   :prefix "dired-collapse-")
 
+(defcustom dired-collapse-remote nil
+  "If non-nil, enable `dired-collapse' in remote (TRAMP) buffers."
+  :type 'boolean
+  :group 'dired-collapse)
+
 ;;;###autoload
 (define-minor-mode dired-collapse-mode
   "Toggle collapsing of unique nested paths in Dired."
@@ -120,34 +125,35 @@ filename (for example when the final directory is empty)."
 
 (defun dired-collapse ()
   "Collapse unique nested paths in dired listing."
-  (-let* (;; dired-hide-details-mode hides details by assigning a special invisibility text property
-          ;; to them, while dired-collapse requires all the details. So we disable invisibility here
-          ;; temporarily.
-          (buffer-invisibility-spec nil)
-          (inhibit-read-only t))
-    (save-excursion
-      (goto-char (point-min))
-      (while (not (eobp))
-        (when (and (looking-at-p dired-re-dir)
-                   (not (member (dired-utils-get-filename 'no-dir) (list "." "..")))
-                   (not (eolp)))
-          (let ((path (dired-utils-get-filename))
-                files)
-            (while (and (file-directory-p path)
-                        (file-readable-p path)
-                        (setq files (f-entries path))
-                        (= 1 (length files)))
-              (setq path (car files)))
-            (if (and (not files)
-                     (equal path (dired-utils-get-filename)))
-                (dired-collapse--create-ov 'to-eol)
-              (setq path (s-chop-prefix (dired-current-directory) path))
-              (when (string-match-p "/" path)
-                (let ((default-directory (dired-current-directory)))
-                  (dired-collapse--replace-file path))
-                (dired-insert-set-properties (line-beginning-position) (line-end-position))
-                (dired-collapse--create-ov (= 0 (length files)))))))
-        (forward-line 1)))))
+  (when (or (not (file-remote-p default-directory)) dired-collapse-remote)
+    (-let* (;; dired-hide-details-mode hides details by assigning a special invisibility text property
+            ;; to them, while dired-collapse requires all the details. So we disable invisibility here
+            ;; temporarily.
+            (buffer-invisibility-spec nil)
+            (inhibit-read-only t))
+      (save-excursion
+        (goto-char (point-min))
+        (while (not (eobp))
+          (when (and (looking-at-p dired-re-dir)
+                     (not (member (dired-utils-get-filename 'no-dir) (list "." "..")))
+                     (not (eolp)))
+            (let ((path (dired-utils-get-filename))
+                  files)
+              (while (and (file-directory-p path)
+                          (file-readable-p path)
+                          (setq files (f-entries path))
+                          (= 1 (length files)))
+                (setq path (car files)))
+              (if (and (not files)
+                       (equal path (dired-utils-get-filename)))
+                  (dired-collapse--create-ov 'to-eol)
+                (setq path (s-chop-prefix (dired-current-directory) path))
+                (when (string-match-p "/" path)
+                  (let ((default-directory (dired-current-directory)))
+                    (dired-collapse--replace-file path))
+                  (dired-insert-set-properties (line-beginning-position) (line-end-position))
+                  (dired-collapse--create-ov (= 0 (length files)))))))
+          (forward-line 1))))))
 
 (provide 'dired-collapse)
 ;;; dired-collapse.el ends here
