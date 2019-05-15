@@ -74,7 +74,7 @@
   :prefix "dired-collapse-")
 
 (defcustom dired-collapse-remote nil
-  "If non-nil, use `dired-collapse' in even over TRAMP."
+  "If non-nil, enable `dired-collapse' in remote (TRAMP) buffers."
   :type 'boolean
   :group 'dired-collapse)
 
