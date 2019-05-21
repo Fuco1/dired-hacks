@@ -68,19 +68,6 @@
   :group 'dired-hacks
   :prefix "dired-rainbow-")
 
-(defcustom dired-rainbow-date-regexp "\\sw\\sw\\sw....\\(?:[0-9][0-9]:[0-9][0-9]\\|.[0-9]\\{4\\}\\)"
-  "A regexp matching the date/time in the dired listing.
-
-It is used to determine where the filename starts.  It should
-*not* match any characters after the last character of the
-timestamp.  It is assumed that the timestamp is preceded and
-followed by at least one space character.  You should only use
-shy groups (prefixed with ?:) because the first group is used by
-the font-lock to determine what portion of the name should be
-colored."
-  :type 'string
-  :group 'dired-rainbow)
-
 (defvar dired-rainbow-ext-to-face nil
   "An alist mapping extension groups to face and compiled regexp.
 
@@ -130,7 +117,7 @@ to control the order."
                     (symbol-value extensions)))
          (regexp (concat
                   "^[^!].[^d].*[ ]"
-                  dired-rainbow-date-regexp
+                  dired-hacks-datetime-regexp
                   "[ ]\\("
                   (if (listp matcher)
                       (concat ".*\\." (regexp-opt matcher))
@@ -176,7 +163,7 @@ to control the order."
                   "^[^!]."
                   chmod
                   ".*[ ]"
-                  dired-rainbow-date-regexp
+                  dired-hacks-datetime-regexp
                   "[ ]\\(.*?\\)$"))
          (face-name (intern (concat "dired-rainbow-" (symbol-name symbol) "-face"))))
     `(progn
