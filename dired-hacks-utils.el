@@ -31,6 +31,9 @@
 ;; * `dired-hacks-next-file' - go to next file, skipping empty and non-file lines
 ;; * `dired-hacks-previous-file' - go to previous file, skipping empty
 ;;   and non-file lines
+;; * `dired-utils-format-information-line-mode' - Format the information
+;; (summary) line file sizes to be human readable (e.g. 1GB instead of 1048576).
+
 
 ;; See https://github.com/Fuco1/dired-hacks for the entire collection
 
@@ -43,6 +46,42 @@
   "Collection of useful dired additions."
   :group 'dired
   :prefix "dired-hacks-")
+
+(defcustom dired-hacks-file-size-formatter 'file-size-human-readable
+  "The function used to format file sizes.
+
+See `dired-utils-format-file-sizes'."
+  :type 'symbol
+  :group 'dired-hacks)
+
+(defcustom dired-hacks-datetime-regexp
+  "\\sw\\sw\\sw....\\(?:[0-9][0-9]:[0-9][0-9]\\|.[0-9]\\{4\\}\\)"
+  "A regexp matching the date/time in the dired listing.
+
+It is used to determine where the filename starts.  It should
+*not* match any characters after the last character of the
+timestamp.  It is assumed that the timestamp is preceded and
+followed by at least one space character.  You should only use
+shy groups (prefixed with ?:) because the first group is used by
+the font-lock to determine what portion of the name should be
+colored."
+  :type 'string
+  :group 'dired-hacks)
+
+(defalias 'dired-utils--string-trim
+  (if (and (require 'subr-x nil t)
+           (fboundp 'string-trim))
+      #'string-trim
+    (lambda (string)
+      (let ((s string))
+        (when (string-match "\\`[ \t\n\r]+" s)
+          (setq s (replace-match "" t t s)))
+        (when (string-match "[ \t\n\r]+\\'" s)
+          (setq s (replace-match "" t t s)))
+        s)))
+  "Trim STRING of trailing whitespace.
+
+\(fn STRING)")
 
 (defun dired-utils-get-filename (&optional localp)
   "Like `dired-get-filename' but never signal an error.
@@ -135,6 +174,22 @@ Each car in ALIST is a string representing file extension
         (setq done it)))
     done))
 
+(defun dired-utils-format-information-line ()
+  "Format the disk space on the Dired information line."
+  (save-excursion
+    (goto-char (point-min))
+    (forward-line)
+    (let ((inhibit-read-only t)
+          (limit (line-end-position)))
+      (while (re-search-forward "\\(?:directory\\|available\\) \\(\\<[0-9]+\\>\\)" nil t)
+        (replace-match
+         (save-match-data
+           (propertize (dired-utils--string-trim
+                        (funcall dired-hacks-file-size-formatter
+                                 (* 1024 (string-to-number (match-string 1))) t))
+                       'invisible 'dired-hide-details-information))
+         t nil nil 1)))))
+
 
 ;;; Predicates
 (defun dired-utils-is-file-p ()
@@ -204,6 +259,14 @@ line."
              (if (equal (car (split-string md5-a))
                         (car (split-string md5-b)))
                  "probably the same" "different"))))
+
+(define-minor-mode dired-utils-format-information-line-mode
+  "Toggle formatting of disk space in the Dired information line."
+  :group 'dired-utils
+  :lighter ""
+  (if dired-utils-format-information-line-mode
+      (add-hook 'dired-after-readin-hook #'dired-utils-format-information-line)
+    (remove-hook 'dired-after-readin-hook #'dired-utils-format-information-line)))
 
 (provide 'dired-hacks-utils)
 
