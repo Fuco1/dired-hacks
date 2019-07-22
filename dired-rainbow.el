@@ -129,8 +129,8 @@ to control the order."
          '((t ,(dired-rainbow--get-face face-props)))
          ,(concat "dired-rainbow face matching " (symbol-name symbol) " files.")
          :group 'dired-rainbow)
-       (font-lock-add-keywords 'dired-mode '((,regexp 1 ',face-name)) ,how)
-       (font-lock-add-keywords 'wdired-mode '((,regexp 1 ',face-name)) ,how)
+       (font-lock-add-keywords 'dired-mode '((,regexp 1 ',face-name prepend)) ,how)
+       (font-lock-add-keywords 'wdired-mode '((,regexp 1 ',face-name prepend)) ,how)
        ,(if (listp matcher) `(push
                               '(,matcher ,face-name ,(concat "\\." (regexp-opt matcher)))
                               dired-rainbow-ext-to-face)))))
@@ -171,8 +171,8 @@ to control the order."
          '((t ,(dired-rainbow--get-face face-props)))
          ,(concat "dired-rainbow face matching " (symbol-name symbol) " files.")
          :group 'dired-rainbow)
-       (font-lock-add-keywords 'dired-mode '((,regexp 1 ',face-name)) ,how)
-       (font-lock-add-keywords 'wdired-mode '((,regexp 1 ',face-name)) ,how))))
+       (font-lock-add-keywords 'dired-mode '((,regexp 1 ',face-name prepend)) ,how)
+       (font-lock-add-keywords 'wdired-mode '((,regexp 1 ',face-name prepend)) ,how))))
 
 (provide 'dired-rainbow)
 
