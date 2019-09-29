@@ -438,6 +438,8 @@ convenient prefix key map, for example `C-,`
 
 * `dired-subtree-insert`
 * `dired-subtree-remove`
+* `dired-subtree-toggle`
+* `dired-subtree-cycle`
 * `dired-subtree-revert`
 * `dired-subtree-narrow`
 * `dired-subtree-up`
