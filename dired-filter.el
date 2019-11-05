@@ -1131,7 +1131,8 @@ Examples:
 (dired-filter-define directory
     "Toggle current view to show only directories."
   (:description "directory")
-  (or (looking-at dired-re-dir)
+  (or (and (looking-at-p dired-re-dir)
+           (not (looking-at-p dired-re-dot)))
       (and (looking-at dired-re-sym)
            (file-directory-p (dired-utils-get-filename)))))
 
