@@ -6,8 +6,9 @@
 ;; Maintainer: Matúš Goljer <matus.goljer@gmail.com>
 ;; Version: 0.0.1
 ;; Created: 17th June 2014
-;; Package-Requires: ((dash "2.7.0"))
+;; Package-Requires: ((dash "2.7.0") (dired-hacks-utils "0.0.1") (emacs "24.3"))
 ;; Keywords: files
+;; URL: https://github.com/Fuco1/dired-hacks
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -81,7 +82,7 @@
 ;; very fast way.
 
 ;; These bookmarks are not persistent.  If you want persistent
-;; bookmarks use the bookmarks provided by emacs, see (info "(emacs)
+;; bookmarks use the bookmarks provided by Emacs, see (info "(emacs)
 ;; Bookmarks").
 
 ;;; Code:
@@ -153,7 +154,7 @@ copy ring."
          (data (ring-ref dired-ranger-copy-ring index))
          (files (cdr data)))
     (dired-create-files #'dired-copy-file "Copy" files
-			#'dired-ranger--name-constructor ?C)
+                        #'dired-ranger--name-constructor ?C)
     (unless arg (ring-remove dired-ranger-copy-ring 0))))
 
 ;;;###autoload
@@ -167,7 +168,7 @@ instead of copying them."
          (data (ring-ref dired-ranger-copy-ring index))
          (files (cdr data)))
     (dired-create-files #'rename-file "Rename" files
-			#'dired-ranger--name-constructor ?M)
+                        #'dired-ranger--name-constructor ?M)
     (unless arg (ring-remove dired-ranger-copy-ring 0))))
 
 
