@@ -4,11 +4,11 @@
 
 ;; Author: Matus Goljer <matus.goljer@gmail.com>
 ;; Maintainer: Matus Goljer <matus.goljer@gmail.com>
-;; Keywords: files
-;; Package-Version: 20170922.817
 ;; Version: 0.0.3
 ;; Created: 16th February 2014
-;; Package-requires: ((dash "2.5.0") (dired-hacks-utils "0.0.1"))
+;; Keywords: files
+;; Package-requires: ((emacs "24") (dash "2.5.0") (dired-hacks-utils "0.0.1"))
+;; URL: https://github.com/Fuco1/dired-hacks
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by

@@ -4,10 +4,11 @@
 
 ;; Author: Matus Goljer <matus.goljer@gmail.com>
 ;; Maintainer: Matus Goljer <matus.goljer@gmail.com>
-;; Keywords: files
 ;; Version: 0.0.1
 ;; Created: 14th February 2014
-;; Package-requires: ((dash "2.5.0") (dired-hacks-utils "0.0.1"))
+;; Keywords: files
+;; Package-requires: ((emacs "24") (dash "2.5.0") (dired-hacks-utils "0.0.1"))
+;; URL: https://github.com/Fuco1/dired-hacks
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -119,7 +120,7 @@ directory representing this archive."
                  (not (tramp-tramp-file-p (ad-get-arg 0))))
              (dired-avfs--archive-p (ad-get-arg 0))
              (if (> (nth 7 (file-attributes (ad-get-arg 0))) (* dired-avfs-file-size-threshold 1048576))
-                 (y-or-n-p (format "Size of this file exceeds `dired-avfs-file-size-threshold' (%d MB), extracting the information might take very long time.  Do you want to continue?"
+                 (y-or-n-p (format "Size of this file exceeds `dired-avfs-file-size-threshold' (%d MB), extracting the information might take very long time.  Do you want to continue? "
                                    dired-avfs-file-size-threshold))
                t))
     (ad-set-arg 0 (dired-avfs--archive-filename (ad-get-arg 0)))))
