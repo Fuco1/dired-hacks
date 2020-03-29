@@ -496,7 +496,7 @@ Return a string suitable for insertion in `dired' buffer."
       (save-excursion
         (insert listing)
         (setq end (+ (point) 2)))
-      (newline)
+      (insert "\n")
       (setq beg (point))
       (let ((inhibit-read-only t))
         (remove-text-properties (1- beg) beg '(dired-filename)))
