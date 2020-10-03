@@ -181,7 +181,7 @@ Each car in ALIST is a string representing file extension
     (forward-line)
     (let ((inhibit-read-only t)
           (limit (line-end-position)))
-      (while (re-search-forward "\\(?:directory\\|available\\) \\(\\<[0-9]+\\>\\)" nil t)
+      (while (re-search-forward "\\(?:directory\\|available\\) \\(\\<[0-9]+$\\>\\)" nil t)
         (replace-match
          (save-match-data
            (propertize (dired-utils--string-trim
