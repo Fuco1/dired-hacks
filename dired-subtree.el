@@ -179,7 +179,7 @@ depth---that creates the prefix."
 ;; Maybe we should abstract the overlay-foo into some subtree
 ;; functions instead!!!
 
-(defun dired-subtree--remove-overlay (ov)
+(defun dsired-subtree--remove-overlay (ov)
   "Remove dired-subtree overlay OV."
   (setq dired-subtree-overlays
         (--remove (equal it ov) dired-subtree-overlays))
@@ -561,11 +561,12 @@ Return a string suitable for insertion in `dired' buffer."
 (defun dired-subtree-toggle ()
   "Insert subtree at point or remove it if it was not present."
   (interactive)
-  (if (dired-subtree--is-expanded-p)
-      (progn
-        (dired-next-line 1)
-        (dired-subtree-remove))
-      (save-excursion (dired-subtree-insert))))
+  (when (dired-subtree--is-expanded-p)
+    (dired-next-line 1)
+    (dired-subtree-remove)
+    (when (bobp)
+      (dired-next-line 1))
+    (save-excursion (dired-subtree-insert))))
 
 (defun dired-subtree--insert-recursive (depth max-depth)
   "Insert full subtree at point."
