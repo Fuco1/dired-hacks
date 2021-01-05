@@ -564,8 +564,13 @@ Return a string suitable for insertion in `dired' buffer."
   (if (dired-subtree--is-expanded-p)
       (progn
         (dired-next-line 1)
-        (dired-subtree-remove))
-      (save-excursion (dired-subtree-insert))))
+        (dired-subtree-remove)
+        ;; #175 fixes the case of the first line in dired when the
+        ;; cursor jumps to the header in dired rather then to the
+        ;; first file in buffer
+        (when (bobp)
+          (dired-next-line 1)))
+    (save-excursion (dired-subtree-insert))))
 
 (defun dired-subtree--insert-recursive (depth max-depth)
   "Insert full subtree at point."
