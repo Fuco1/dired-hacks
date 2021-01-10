@@ -102,9 +102,10 @@
   (insert-directory file dired-listing-switches nil nil)
   (forward-line -1)
   (dired-align-file (line-beginning-position) (1+ (line-end-position)))
-  (when (file-remote-p (dired-utils-get-filename))
-    (while (search-forward (dired-current-directory) (line-end-position) t)
-      (replace-match ""))))
+  (-when-let (replaced-file (dired-utils-get-filename))
+    (when (file-remote-p replaced-file)
+      (while (search-forward (dired-current-directory) (line-end-position) t)
+        (replace-match "")))))
 
 (defun dired-collapse--create-ov (&optional to-eol)
   "Create the shadow overlay which marks the collapsed path.
