@@ -462,23 +462,20 @@ children."
   "Read in the directory.
 
 Return a string suitable for insertion in `dired' buffer."
-  (with-temp-buffer
-    (insert-directory dir-name dired-listing-switches nil t)
-    (delete-char -1)
-    (goto-char (point-min))
-    (delete-region
-     (progn (beginning-of-line) (point))
-     (progn (forward-line
-             (if (save-excursion
-                   (forward-line 1)
-                   (end-of-line)
-                   (looking-back "\\."))
-                 3 1)) (point)))
-    (insert "  ")
-    (while (= (forward-line) 0)
-      (insert "  "))
-    (delete-char -2)
-    (buffer-string)))
+  (let ((switches (or dired-actual-switches dired-listing-switches)))
+    (with-temp-buffer
+      (insert-directory dir-name switches nil t)
+      (delete-char -1)
+      (goto-char (point-min))
+      (delete-region (point) (progn (forward-line 1) (point)))
+      (save-match-data
+        (while (re-search-forward "^ *d.* \\.\\.?/?\n" nil t)
+          (delete-region (match-beginning 0) (match-end 0))))
+      (goto-char (point-min))
+      (unless (looking-at-p "  ")
+        (let ((indent-tabs-mode nil))
+          (indent-rigidly (point-min) (point-max) 2)))
+      (buffer-string))))
 
 ;;;###autoload
 (defun dired-subtree-insert ()
