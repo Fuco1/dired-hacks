@@ -141,7 +141,7 @@ filename (for example when the final directory is empty)."
             (let ((path (dired-utils-get-filename))
                   files)
               (while (and (file-directory-p path)
-                          (file-readable-p path)
+                          (file-accessible-directory-p path)
                           (setq files (f-entries path))
                           (= 1 (length files)))
                 (setq path (car files)))
