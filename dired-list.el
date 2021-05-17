@@ -247,9 +247,9 @@ state of the buffer's process."
   "Locate(1) all files matching NEEDLE and display results as a `dired' buffer."
   (interactive "sLocate: ")
   (dired-list "/"
-              (concat "locate " needle)
-              (concat "locate " (shell-quote-argument needle) " -0 | xargs -I '{}' -0 ls -ld '{}' &")
-              `(lambda (ignore-auto noconfirm) (dired-list-locate ,needle))))
+	      (concat locate-command " "  needle)
+	      (concat locate-command  " " (shell-quote-argument needle) " -0 | xargs -I '{}' -0 ls -ld '{}' &")
+	      `(lambda (ignore-auto noconfirm) (dired-list-locate ,needle))))
 
 
 ;; taken from grep.el/rgrep
