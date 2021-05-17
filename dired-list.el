@@ -260,10 +260,11 @@ Display results as a `dired' buffer."
 (defun dired-list-locate (needle)
   "Locate(1) all files matching NEEDLE and display results as a `dired' buffer."
   (interactive "sLocate: ")
-  (dired-list "/"
-              (concat "locate " needle)
-              (concat "locate " (shell-quote-argument needle) " -0 | xargs -I '{}' -0 ls -ld '{}' &")
-              `(lambda (ignore-auto noconfirm) (dired-list-locate ,needle))))
+  (let ((locate (or (bound-and-true-p locate-command) "locate")))
+    (dired-list "/"
+                (concat locate " "  needle)
+                (concat locate " " (shell-quote-argument needle) " -0 | xargs -I '{}' -0 ls -ld '{}' &")
+                `(lambda (ignore-auto noconfirm) (dired-list-locate ,needle)))))
 
 (defun dired-list-git-annex-find (dir query)
   "Return files from git annex at DIR matching QUERY.
@@ -335,8 +336,8 @@ and files matching `grep-find-ignored-files' are ignored.
 If called with raw prefix argument \\[universal-argument], no
 files will be ignored."
   (interactive (let ((base-cmd (concat "find . "
-                                  (if current-prefix-arg "" (dired-list--get-ignored-stuff dir))
-                                  " -ls &")))
+                                       (if current-prefix-arg "" (dired-list--get-ignored-stuff dir))
+                                       " -ls &")))
                  (list (read-directory-name "Directory: " nil nil t)
                        (read-from-minibuffer
                         "Find command: "
