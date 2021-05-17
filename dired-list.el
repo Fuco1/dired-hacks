@@ -337,9 +337,9 @@ If called with raw prefix argument \\[universal-argument], no
 files will be ignored."
   (interactive "DDirectory: \nsPattern: ")
   (dired-list dir
-              (concat "find " dir ": " pattern)
-              (concat "find . " (if current-prefix-arg "" (dired-list--get-ignored-stuff)) " -name " (shell-quote-argument pattern) " -ls &")
-              `(lambda (ignore-auto noconfirm) (dired-list-find-name ,dir ,pattern))))
+	      (concat "find " dir ": " pattern)
+	      (concat "find . " (if current-prefix-arg "" (dired-list--get-ignored-stuff)) " -name " (shell-quote-argument pattern) " -ls &")
+	      `(lambda (ignore-auto noconfirm) (dired-list-find-name ,dir ,pattern))))
 
 (defun dired-list-grep (dir regexp)
   "Recursively find files in DIR containing regexp REGEXP and start Dired on output."
