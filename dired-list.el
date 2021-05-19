@@ -246,10 +246,11 @@ state of the buffer's process."
 (defun dired-list-locate (needle)
   "Locate(1) all files matching NEEDLE and display results as a `dired' buffer."
   (interactive "sLocate: ")
-  (dired-list "/"
-              (concat "locate " needle)
-              (concat "locate " (shell-quote-argument needle) " -0 | xargs -I '{}' -0 ls -ld '{}' &")
-              `(lambda (ignore-auto noconfirm) (dired-list-locate ,needle))))
+  (let ((locate (or (bound-and-true-p locate-command) "locate")))
+    (dired-list "/"
+	      (concat locate " "  needle)
+	      (concat locate  " " (shell-quote-argument needle) " -0 | xargs -I '{}' -0 ls -ld '{}' &")
+	      `(lambda (ignore-auto noconfirm) (dired-list-locate ,needle)))))
 
 
 ;; taken from grep.el/rgrep
@@ -337,9 +338,9 @@ If called with raw prefix argument \\[universal-argument], no
 files will be ignored."
   (interactive "DDirectory: \nsPattern: ")
   (dired-list dir
-              (concat "find " dir ": " pattern)
-              (concat "find . " (if current-prefix-arg "" (dired-list--get-ignored-stuff)) " -name " (shell-quote-argument pattern) " -ls &")
-              `(lambda (ignore-auto noconfirm) (dired-list-find-name ,dir ,pattern))))
+	      (concat "find " dir ": " pattern)
+	      (concat "find . " (if current-prefix-arg "" (dired-list--get-ignored-stuff)) " -name " (shell-quote-argument pattern) " -ls &")
+	      `(lambda (ignore-auto noconfirm) (dired-list-find-name ,dir ,pattern))))
 
 (defun dired-list-grep (dir regexp)
   "Recursively find files in DIR containing regexp REGEXP and start Dired on output."
