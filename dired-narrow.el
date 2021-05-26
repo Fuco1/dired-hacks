@@ -276,6 +276,17 @@ read from minibuffer."
   (interactive)
   (dired-narrow--internal 'dired-narrow--regexp-filter))
 
+(defun dired-narrow--completion-styles-filter (filter)
+  "Return whether `completion-styles' FILTER matches the current dired file."
+  (completion-all-completions filter (list (dired-utils-get-filename 'no-dir))
+                              nil nil))
+
+;;;###autoload
+(defun dired-narrow-completion-styles ()
+  "Narrow a dired buffer to the files matching a `completion-styles' query."
+  (interactive)
+  (dired-narrow--internal #'dired-narrow--completion-styles-filter))
+
 (defun dired-narrow--string-filter (filter)
   (let ((words (split-string filter " ")))
     (--all? (save-excursion (search-forward it (line-end-position) t)) words)))

@@ -550,6 +550,7 @@ These narrowing functions are provided:
 * `dired-narrow`
 * `dired-narrow-regexp`
 * `dired-narrow-fuzzy`
+* `dired-narrow-completion-styles`
 
 You can also create your own narrowing functions quite easily.  To
 define new narrowing function, use `dired-narrow--internal` and
