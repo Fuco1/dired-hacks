@@ -156,6 +156,29 @@ string as well."
       (set-process-query-on-exit-flag process nil))
     process))
 
+(defcustom dired-open-remote-file-regex-list nil
+  "List of regular expressions for files which should be copied
+to local machine before trying to open."
+  :type '(repeat regexp)
+  :group 'dired-open)
+
+(defun dired-open--pull-remote-file (file)
+  "Decide if we want to pull remote (tramp) FILE to local machine.
+
+In some cases such as opening html files in a browser it makes no
+sense to use the remote path, so pull the file to local machine
+and open that file instead.
+
+This functions provides a generic interface for that."
+  (if (and (file-remote-p file)
+           (--any (string-match-p it file) dired-open-remote-file-regex-list))
+      (progn
+        (mkdir (concat temporary-file-directory "dired-open") t)
+        (let ((tmp-file (make-temp-file "dired-open/tmp")))
+          (copy-file file tmp-file t)
+          tmp-file))
+    file))
+
 
 ;;; file opening procedures
 (defun dired-open-xdg ()
@@ -164,7 +187,9 @@ string as well."
   (if (executable-find "xdg-open")
       (let ((file (ignore-errors (dired-get-file-for-visit))))
         (start-process "dired-open" nil
-                       "xdg-open" (file-truename file)))
+                       "xdg-open"
+                       (dired-open--pull-remote-file
+                        (file-truename file))))
     nil))
 
 (defun dired-open-by-extension ()
@@ -179,7 +204,9 @@ The mappings from extensions to applications is specified by
                (not (file-directory-p file)))
       (--each-while dired-open-extensions (not process)
         (when (string-match-p (concat "\\." (regexp-quote (car it)) "\\'") file)
-          (setq process (dired-open--start-process file (cdr it)))))
+          (setq process (dired-open--start-process
+                         (dired-open--pull-remote-file file)
+                         (cdr it)))))
       process)))
 
 (defun dired-open-guess-shell-alist ()
@@ -192,7 +219,9 @@ The mappings from extensions to applications is specified by
                (not (file-directory-p file)))
       (--each-while dired-guess-shell-alist-user (not process)
         (when (string-match-p (car it) file)
-          (setq process (dired-open--start-process file (eval (cadr it)))))))
+          (setq process (dired-open--start-process
+                         (dired-open--pull-remote-file file)
+                         (eval (cadr it)))))))
     process))
 
 (defun dired-open-call-function-by-extension ()
