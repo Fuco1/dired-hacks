@@ -258,7 +258,11 @@ read from minibuffer."
         (funcall dired-narrow-exit-action))
       (cond
        ((equal disable-narrow "dired-narrow-enter-directory")
-        (dired-narrow--internal filter-function))))))
+        (if (file-directory-p dired-narrow--current-file)
+            (progn
+              (dired-narrow-find-file)
+              (dired-narrow--internal filter-function))
+          (dired-narrow-find-file)))))))
 
 
 ;; Interactive
