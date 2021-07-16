@@ -6,8 +6,9 @@
 ;; Maintainer: Matúš Goljer <matus.goljer@gmail.com>
 ;; Version: 0.0.1
 ;; Created: 14th February 2014
-;; Package-requires: ((dash "2.10.0"))
 ;; Keywords: files
+;; Package-requires: ((emacs "24.3") (dash "2.10.0"))
+;; URL: https://github.com/Fuco1/dired-hacks
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -45,7 +46,7 @@
 
 ;;   C-h f dired-list RET
 
-;; in emacs.
+;; in Emacs.
 
 ;; In addition to the generic interface this package implements common
 ;; listings (patches and extensions welcome!), these are:

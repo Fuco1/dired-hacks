@@ -6,8 +6,9 @@
 ;; Maintainer: Matúš Goljer <matus.goljer@gmail.com>
 ;; Version: 0.0.1
 ;; Created: 17th June 2014
-;; Package-requires: ((dash "2.7.0") (dired-hacks-utils "0.0.1"))
 ;; Keywords: files
+;; Package-requires: ((emacs "24.3") (dash "2.7.0") (dired-hacks-utils "0.0.1"))
+;; URL: https://github.com/Fuco1/dired-hacks
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -78,7 +79,7 @@
 ;; very fast way.
 
 ;; These bookmarks are not persistent.  If you want persistent
-;; bookmarks use the bookmarks provided by emacs, see (info "(emacs)
+;; bookmarks use the bookmarks provided by Emacs, see (info "(emacs)
 ;; Bookmarks").
 
 ;;; Code:
@@ -288,7 +289,7 @@ See also `dired-ranger-bookmark'."
                ((eq dired-ranger-bookmark-reopen 'never) nil)
                ((eq dired-ranger-bookmark-reopen 'always) t)
                ((eq dired-ranger-bookmark-reopen 'ask)
-                (y-or-n-p (format "The dired buffer referenced by this bookmark does not exist.  Should we try to reopen `%s'?" dir))))
+                (y-or-n-p (format "The dired buffer referenced by this bookmark does not exist.  Should we try to reopen `%s'? " dir))))
             (find-file dir)
             (setf (cdr (assoc char dired-ranger-bookmarks)) (cons dir (current-buffer)))))
       (message "Bookmark `%c' does not exist." char))))
