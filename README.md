@@ -22,7 +22,7 @@
 
 # dired-hacks [![Build Status](https://travis-ci.org/Fuco1/dired-hacks.svg?branch=master)](https://travis-ci.org/Fuco1/dired-hacks) [![Paypal logo](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=A5PMGVKCQBT88) [![Patreon](https://c5.patreon.com/external/logo/logomarkOrange.svg)](https://www.patreon.com/user?u=3282358&ty=h)
 
-Collection of useful dired additions.  I don't want this become
+Collection of useful dired additions.  I don't want this to become
 another `dired+`, so I'm splitting all the functionality into separate
 mutually independent packages.  All shared functionality and helpers
 will be extracted into a single package `dired-hacks-utils`, so that
