@@ -7,7 +7,7 @@
 ;; Keywords: files
 ;; Version: 0.0.1
 ;; Created: 14th February 2014
-;; Package-requires: ((dash "2.5.0") (dired-hacks-utils "0.0.1"))
+;; Package-Requires: ((dash "2.5.0") (dired-hacks-utils "0.0.1"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
