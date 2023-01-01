@@ -152,7 +152,7 @@ copy ring."
   (let* ((index (if (numberp arg) arg 0))
          (data (ring-ref dired-ranger-copy-ring index))
          (files (cdr data)))
-    (dired-create-files #'copy-file "Copy" files
+    (dired-create-files #'dired-copy-file "Copy" files
 			#'dired-ranger--name-constructor ?C)
     (unless arg (ring-remove dired-ranger-copy-ring 0))))
 
