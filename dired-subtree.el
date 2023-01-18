@@ -540,6 +540,7 @@ Return a string suitable for insertion in `dired' buffer."
       (goto-char beg)
       (dired-move-to-filename)
       (read-only-mode 1)
+      (when (bound-and-true-p dired-filter-mode) (dired-filter-mode 1))
       (run-hooks 'dired-subtree-after-insert-hook))))
 
 ;;;###autoload
