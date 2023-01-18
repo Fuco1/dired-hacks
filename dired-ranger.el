@@ -6,7 +6,7 @@
 ;; Maintainer: Matúš Goljer <matus.goljer@gmail.com>
 ;; Version: 0.0.1
 ;; Created: 17th June 2014
-;; Package-Requires: ((dash "2.7.0") (dired-hacks-utils "0.0.1"))
+;; Package-Requires: ((dash "2.7.0"))
 ;; Keywords: files
 
 ;; This program is free software; you can redistribute it and/or
@@ -61,6 +61,9 @@
 ;; cleared, so you can repeat the copy operation in another dired
 ;; buffer.
 
+;; The copy or move operation is asynchronous if `dired-async-mode'
+;; is activated.
+
 ;; Bookmarks
 ;; ---------
 
@@ -83,9 +86,9 @@
 
 ;;; Code:
 
-(require 'dired-hacks-utils)
 (require 'dash)
 (require 'ring)
+(require 'dired-aux)
 
 (defgroup dired-ranger ()
   "Implementation of useful ranger features for dired."
@@ -132,22 +135,9 @@ buffers for a single paste."
                          (length marked)
                          (if (> (length marked) 1) "s" "")))))))
 
-(defun dired-ranger--revert-target (char target-directory files)
-  "Revert the target buffer and mark the new files.
-
-CHAR is the temporary value for `dired-marker-char'.
-
-TARGET-DIRECTORY is the current dired directory.
-
-FILES is the list of files (from the `dired-ranger-copy-ring') we
-operated on."
-  (let ((current-file (dired-utils-get-filename)))
-    (revert-buffer)
-    (let ((dired-marker-char char))
-      (--each (-map 'file-name-nondirectory files)
-        (dired-utils-goto-line (concat target-directory it))
-        (dired-mark 1)))
-    (dired-utils-goto-line current-file)))
+(defun dired-ranger--name-constructor (oldname)
+  "Return the new file name corresponding to OLDNAME."
+  (concat (dired-current-directory) (file-name-nondirectory oldname)))
 
 ;;;###autoload
 (defun dired-ranger-paste (arg)
@@ -161,22 +151,10 @@ copy ring."
   (interactive "P")
   (let* ((index (if (numberp arg) arg 0))
          (data (ring-ref dired-ranger-copy-ring index))
-         (files (cdr data))
-         (target-directory (dired-current-directory))
-         (copied-files 0))
-    (--each files (when (file-exists-p it)
-                    (if (file-directory-p it)
-                        (copy-directory it target-directory)
-                      (condition-case err
-                          (copy-file it target-directory 0)
-                        (file-already-exists nil)))
-                    (cl-incf copied-files)))
-    (dired-ranger--revert-target ?P target-directory files)
-    (unless arg (ring-remove dired-ranger-copy-ring 0))
-    (message (format "Pasted %d/%d item%s from copy ring."
-                     copied-files
-                     (length files)
-                     (if (> (length files) 1) "s" "")))))
+         (files (cdr data)))
+    (dired-create-files #'dired-copy-file "Copy" files
+			#'dired-ranger--name-constructor ?C)
+    (unless arg (ring-remove dired-ranger-copy-ring 0))))
 
 ;;;###autoload
 (defun dired-ranger-move (arg)
@@ -187,24 +165,10 @@ instead of copying them."
   (interactive "P")
   (let* ((index (if (numberp arg) arg 0))
          (data (ring-ref dired-ranger-copy-ring index))
-         (buffers (car data))
-         (files (cdr data))
-         (target-directory (dired-current-directory))
-         (copied-files 0))
-    (--each files (when (file-exists-p it)
-                    (condition-case err
-                        (rename-file it target-directory 0)
-                      (file-already-exists nil))
-                    (cl-incf copied-files)))
-    (dired-ranger--revert-target ?M target-directory files)
-    (--each buffers
-      (when (buffer-live-p it)
-        (with-current-buffer it (revert-buffer))))
-    (unless arg (ring-remove dired-ranger-copy-ring 0))
-    (message (format "Moved %d/%d item%s from copy ring."
-                     copied-files
-                     (length files)
-                     (if (> (length files) 1) "s" "")))))
+         (files (cdr data)))
+    (dired-create-files #'rename-file "Rename" files
+			#'dired-ranger--name-constructor ?M)
+    (unless arg (ring-remove dired-ranger-copy-ring 0))))
 
 
 ;; bookmarks
