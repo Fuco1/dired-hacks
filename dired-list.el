@@ -258,6 +258,17 @@ state of the buffer's process."
               (concat "locate " (shell-quote-argument needle) " -0 | xargs -I '{}' -0 ls -ld '{}' &")
               `(lambda (ignore-auto noconfirm) (dired-list-locate ,needle))))
 
+(defun dired-list-git-annex-find (dir query)
+  "Return files from git annex at DIR matching QUERY and display results as a `dired' buffer."
+  (interactive "DDirectory: \nsQuery: ")
+  (dired-list dir
+              (concat "git annex find " dir)
+              (concat "git annex find " query
+                      (format " --print0 | xargs -I '{}' -0 ls -d%s %s '{}' &"
+                              (if dired-list-use-N-flag "N" "")
+                              dired-listing-switches))
+              `(lambda (ignore-auto noconfirm) (dired-list-git-annex-find ,dir ,query))))
+
 
 ;; taken from grep.el/rgrep
 (defun dired-list--get-ignored-stuff ()
