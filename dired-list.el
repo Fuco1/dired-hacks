@@ -66,6 +66,13 @@
 (require 'grep)
 (require 'find-dired)
 
+(defcustom dired-list-use-N-flag t
+  "GNU coreutils ls version 8.25 no longer uses --literal (-N) flag as default.
+
+If this setting is non-nil, the --literal flag will be used"
+  :type 'boolean
+  :group 'dired-list)
+
 (defun dired-list-align-size-column ()
   "Align the filesize column."
   (beginning-of-line)
