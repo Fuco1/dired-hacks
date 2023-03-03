@@ -246,7 +246,9 @@ state of the buffer's process."
 
 ;;;###autoload
 (defun dired-list-hg-locate (dir)
-  "List all files in DIR managed by mercurial and display results as a `dired' buffer."
+  "List all files in DIR managed by mercurial.
+
+Display results as a `dired' buffer."
   (interactive "DDirectory: ")
   (dired-list dir
               (concat "hg locate " dir)
@@ -263,7 +265,9 @@ state of the buffer's process."
               `(lambda (ignore-auto noconfirm) (dired-list-locate ,needle))))
 
 (defun dired-list-git-annex-find (dir query)
-  "Return files from git annex at DIR matching QUERY and display results as a `dired' buffer."
+  "Return files from git annex at DIR matching QUERY.
+
+Display results as a `dired' buffer."
   (interactive "DDirectory: \nsQuery: ")
   (dired-list dir
               (concat "git annex find " dir)
@@ -275,7 +279,7 @@ state of the buffer's process."
 
 
 ;; taken from grep.el/rgrep
-(defun dired-list--get-ignored-stuff ()
+(defun dired-list--get-ignored-stuff (dir)
   "Return an argument to find which ignores uninteresting directories and files.
 
 Directories are taken form `grep-find-ignored-directories', files
@@ -330,7 +334,7 @@ and files matching `grep-find-ignored-files' are ignored.
 If called with raw prefix argument \\[universal-argument], no
 files will be ignored."
   (interactive (let ((base-cmd (concat "find . "
-                                  (if current-prefix-arg "" (dired-list--get-ignored-stuff))
+                                  (if current-prefix-arg "" (dired-list--get-ignored-stuff dir))
                                   " -ls &")))
                  (list (read-directory-name "Directory: " nil nil t)
                        (read-from-minibuffer
@@ -359,15 +363,18 @@ files will be ignored."
   (interactive "DDirectory: \nsPattern: ")
   (dired-list dir
               (concat "find " dir ": " pattern)
-              (concat "find . " (if current-prefix-arg "" (dired-list--get-ignored-stuff)) " -name " (shell-quote-argument pattern) " -ls &")
+              (concat "find . " (if current-prefix-arg "" (dired-list--get-ignored-stuff dir)) " -name " (shell-quote-argument pattern) " -ls &")
               `(lambda (ignore-auto noconfirm) (dired-list-find-name ,dir ,pattern))))
 
 (defun dired-list-grep (dir regexp)
-  "Recursively find files in DIR containing regexp REGEXP and start Dired on output."
+  "Recursively find files in DIR containing regexp REGEXP.
+
+Start Dired on output.  The rows are added as grep streams output
+to the sentinel."
   (interactive "DDirectory: \nsRegexp: \n")
   (dired-list dir
               (concat "find grep " dir ": " regexp)
-              (concat "find . " (dired-list--get-ignored-stuff)
+              (concat "find . " (dired-list--get-ignored-stuff dir)
                       " \\( -type f -exec " grep-program " " find-grep-options
                       " -e " (shell-quote-argument regexp) " {} \\; \\) -ls &")
               `(lambda (ignore-auto noconfirm) (dired-list-find-grep ,dir ,regexp))))
