@@ -24,11 +24,11 @@
 
 ;;; Commentary:
 
-;; Produce a file listing with a shell incantation and make a dired
+;; Produce a file listing with a shell incantation and make a Dired
 ;; out of it!
 
 ;; This package provides one principal function, `dired-list' which
-;; can be used to produce dired buffers from shell programs outputing
+;; can be used to produce Dired buffers from shell programs outputing
 ;; text roughly in the format of `la -ls'.
 
 ;; For most standard output formats the default filter and sentinel
@@ -89,7 +89,9 @@ If this setting is non-nil, the --literal flag will be used"
           (insert (make-string (- 12 width) ? )))))))
 
 (defun dired-list-default-filter (proc string)
-  "Filter the output of the process to make it suitable for `dired-mode'.
+  "Filter the output of process PROC to make it suitable for `dired-mode'.
+
+STRING is the currently processed chunk of process output.
 
 This filter assumes that the input is in the format of `ls -l'."
   (let ((buf (process-buffer proc))
@@ -131,7 +133,9 @@ This filter assumes that the input is in the format of `ls -l'."
       (delete-process proc))))
 
 (defun dired-list-default-sentinel (proc state)
-  "Update the status/modeline after the process finishes."
+  "Update the status/modeline after the process PROC finishes.
+
+STATE is the final state."
   (let ((buf (process-buffer proc))
         (inhibit-read-only t))
     (if (buffer-name buf)
@@ -167,14 +171,14 @@ DIR is the default directory of the resulting `dired' buffer.
 BUFFER-NAME is name of the created buffer.  If such buffer
 exists, it is erased first.
 
-CMD is a sh(1) invocation to produce output for dired to process.
+CMD is a sh(1) invocation to produce output for Dired to process.
 It should be in the format similar to `ls -l'.
 
 Optional argument REVERT-FUNCTION is used to revert (bound to
 \\[revert-buffer]) the buffer.
 
 Optional argument FILTER is a function used to post-process the
-process's output after it was inserted to dired buffer.
+process's output after it was inserted to Dired buffer.
 
 Optional argument SENTINEL is a function called on each change of
 state of the buffer's process."
@@ -343,8 +347,7 @@ files will be ignored."
 
 ;;;###autoload
 (defun dired-list-find-name (dir pattern)
-  "Search DIR recursively for files matching the globbing pattern PATTERN,
-and run dired on those files.
+  "Search DIR recursively for files matching the globbing pattern PATTERN.
 
 PATTERN is a shell wildcard (not an Emacs regexp) and need not be quoted.
 
