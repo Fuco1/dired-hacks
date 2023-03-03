@@ -66,11 +66,45 @@
 (require 'grep)
 (require 'find-dired)
 
-(defcustom dired-list-use-N-flag t
-  "GNU coreutils ls version 8.25 no longer uses --literal (-N) flag as default.
+(defgroup dired-list ()
+  "Create dired listings from shell incantations."
+  :group 'dired-hacks
+  :prefix "dired-list-")
 
-If this setting is non-nil, the --literal flag will be used"
-  :type 'boolean
+(defcustom dired-list-mpc-display-command
+  " | tr '\\n' '\\000' | xargs -I '{}' -0 ls -lh '{}' & "
+  "Display command to use as suffix in `dired-list-mpc'."
+  :type 'string
+  :group 'dired-list)
+
+(defcustom dired-list-git-ls-files-display-command
+  " -z | xargs -I '{}' -0 ls -l '{}' & "
+  "Display command to use as suffix in `dired-list-git-ls-files'."
+  :type 'string
+  :group 'dired-list)
+
+(defcustom dired-list-hg-locate-display-command
+  " -0 | xargs -I '{}' -0 ls -l '{}' & "
+  "Display command to use as suffix in `dired-list-hg-locate'."
+  :type 'string
+  :group 'dired-list)
+
+(defcustom dired-list-locate-display-command
+  " -0 | xargs -I '{}' -0 ls -ld '{}' & "
+  "Display command to use as suffix in `dired-list-locate'."
+  :type 'string
+  :group 'dired-list)
+
+(defcustom dired-list-git-annex-display-command
+  " --print0 | xargs -I '{}' -0 ls -adlN '{}' & "
+  "Display command to use as suffix in `dired-list-git-annex-find'."
+  :type 'string
+  :group 'dired-list)
+
+(defcustom dired-list-find-display-command
+  " -ls & "
+  "Display command to use as suffix in `dired-list-find-file'."
+  :type 'string
   :group 'dired-list)
 
 (defun dired-list-align-size-column ()
@@ -227,7 +261,7 @@ state of the buffer's process."
                 (concat "mpc " query)
                 (concat "mpc search "
                         query
-                        " | tr '\\n' '\\000' | xargs -I '{}' -0 ls -l '{}' &")
+                        dired-list-mpc-display-command)
                 `(lambda (ignore-auto noconfirm)
                    (dired-list-mpc ,query)))))
 
@@ -237,7 +271,7 @@ state of the buffer's process."
   (interactive "DDirectory: ")
   (dired-list dir
               (concat "git ls-files " dir)
-              (concat "git ls-files -z | xargs -I '{}' -0 ls -l '{}' &")
+              (concat "git ls-files " dired-list-git-ls-files-display-command)
               `(lambda (ignore-auto noconfirm) (dired-list-git-ls-files ,dir))))
 
 ;;;###autoload
@@ -246,7 +280,7 @@ state of the buffer's process."
   (interactive "DDirectory: ")
   (dired-list dir
               (concat "hg locate " dir)
-              (concat "hg locate -0 | xargs -I '{}' -0 ls -l '{}' &")
+              (concat "hg locate " dired-list-hg-locate-display-command)
               `(lambda (ignore-auto noconfirm) (dired-list-hg-locate ,dir))))
 
 ;;;###autoload
@@ -255,18 +289,16 @@ state of the buffer's process."
   (interactive "sLocate: ")
   (dired-list "/"
               (concat "locate " needle)
-              (concat "locate " (shell-quote-argument needle) " -0 | xargs -I '{}' -0 ls -ld '{}' &")
+              (concat "locate " (shell-quote-argument needle) dired-list-locate-display-command)
               `(lambda (ignore-auto noconfirm) (dired-list-locate ,needle))))
 
+;;;###autoload
 (defun dired-list-git-annex-find (dir query)
   "Return files from git annex at DIR matching QUERY and display results as a `dired' buffer."
   (interactive "DDirectory: \nsQuery: ")
   (dired-list dir
               (concat "git annex find " dir)
-              (concat "git annex find " query
-                      (format " --print0 | xargs -I '{}' -0 ls -d%s %s '{}' &"
-                              (if dired-list-use-N-flag "N" "")
-                              dired-listing-switches))
+              (concat "git annex find " query dired-list-git-annex-display-command)
               `(lambda (ignore-auto noconfirm) (dired-list-git-annex-find ,dir ,query))))
 
 
@@ -327,13 +359,14 @@ If called with raw prefix argument \\[universal-argument], no
 files will be ignored."
   (interactive (let ((base-cmd (concat "find . "
                                   (if current-prefix-arg "" (dired-list--get-ignored-stuff))
-                                  " -ls &")))
+                                  " "
+				  dired-list-find-display-command)))
                  (list (read-directory-name "Directory: " nil nil t)
                        (read-from-minibuffer
                         "Find command: "
-                        (cons base-cmd (string-match-p "-ls &" base-cmd))))))
+                        (cons base-cmd (string-match-p dired-list-find-display-command base-cmd))))))
   (let ((short-cmd (save-match-data
-                     (if (string-match ".* -prune -o \\(.*?\\) -ls &" cmd)
+                     (if (string-match (concat ".* -prune -o \\(.*?\\) " dired-list-find-display-command) cmd)
                          (match-string 1 cmd)
                        cmd))))
     (dired-list dir
@@ -356,7 +389,7 @@ files will be ignored."
   (interactive "DDirectory: \nsPattern: ")
   (dired-list dir
               (concat "find " dir ": " pattern)
-              (concat "find . " (if current-prefix-arg "" (dired-list--get-ignored-stuff)) " -name " (shell-quote-argument pattern) " -ls &")
+              (concat "find . " (if current-prefix-arg "" (dired-list--get-ignored-stuff)) " -name " (shell-quote-argument pattern) dired-list-find-display-command)
               `(lambda (ignore-auto noconfirm) (dired-list-find-name ,dir ,pattern))))
 
 (defun dired-list-grep (dir regexp)
@@ -366,7 +399,8 @@ files will be ignored."
               (concat "find grep " dir ": " regexp)
               (concat "find . " (dired-list--get-ignored-stuff)
                       " \\( -type f -exec " grep-program " " find-grep-options
-                      " -e " (shell-quote-argument regexp) " {} \\; \\) -ls &")
+                      " -e " (shell-quote-argument regexp) " {} \\; \\) "
+		      dired-list-find-display-command)
               `(lambda (ignore-auto noconfirm) (dired-list-find-grep ,dir ,regexp))))
 
 (provide 'dired-list)
