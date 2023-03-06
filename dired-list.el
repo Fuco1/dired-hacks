@@ -46,7 +46,7 @@
 
 ;;   C-h f dired-list RET
 
-;; in emacs.
+;; in Emacs.
 
 ;; In addition to the generic interface this package implements common
 ;; listings (patches and extensions welcome!), these are:
@@ -68,9 +68,9 @@
 (require 'find-dired)
 
 (defcustom dired-list-use-N-flag t
-  "GNU coreutils ls version 8.25 no longer uses --literal (-N) flag as default.
+  "Non-nil means the --literal flag will be used.
 
-If this setting is non-nil, the --literal flag will be used"
+GNU coreutils ls version 8.25 no longer uses --literal (-N) flag as default."
   :type 'boolean
   :group 'dired-list)
 
@@ -281,7 +281,7 @@ Display results as a `dired' buffer."
 
 ;; taken from grep.el/rgrep
 (defun dired-list--get-ignored-stuff (dir)
-  "Return an argument to find which ignores uninteresting directories and files.
+  "Return find subcommand to ignore uninteresting dirs and files in DIR.
 
 Directories are taken form `grep-find-ignored-directories', files
 are taken from `grep-find-ignored-files'."
@@ -327,7 +327,7 @@ are taken from `grep-find-ignored-files'."
 
 ;;;###autoload
 (defun dired-list-find-file (dir cmd)
-  "Run find(1) on DIR.
+  "Run find(1) on DIR with find command CMD.
 
 By default, directories matching `grep-find-ignored-directories'
 and files matching `grep-find-ignored-files' are ignored.
