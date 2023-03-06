@@ -7,7 +7,7 @@
 ;; Version: 0.0.1
 ;; Created: 14th February 2014
 ;; URL: https://github.com/Fuco1/dired-hacks
-;; Package-Requires: ((dash "2.10.0") (emacs "24.3"))
+;; Package-Requires: ((dash "2.10.0") (emacs "24.3") (dired-hacks-utils "0.0.1"))
 ;; Keywords: files
 
 ;; This program is free software; you can redistribute it and/or
