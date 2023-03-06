@@ -292,15 +292,15 @@ are taken from `grep-find-ignored-files'."
                 ;; we should use shell-quote-argument here
                 " -path "
                 (mapconcat
-                 #'(lambda (ignore)
-                     (cond ((stringp ignore)
-                            (shell-quote-argument
-                             (concat "*/" ignore)))
-                           ((consp ignore)
-                            (and (funcall (car ignore) dir)
-                                 (shell-quote-argument
-                                  (concat "*/"
-                                          (cdr ignore)))))))
+                 (lambda (ignore)
+                   (cond ((stringp ignore)
+                          (shell-quote-argument
+                           (concat "*/" ignore)))
+                         ((consp ignore)
+                          (and (funcall (car ignore) dir)
+                               (shell-quote-argument
+                                (concat "*/"
+                                        (cdr ignore)))))))
                  grep-find-ignored-directories
                  " -o -path ")
                 " "
@@ -312,13 +312,13 @@ are taken from `grep-find-ignored-files'."
                 ;; we should use shell-quote-argument here
                 " -name "
                 (mapconcat
-                 #'(lambda (ignore)
-                     (cond ((stringp ignore)
-                            (shell-quote-argument ignore))
-                           ((consp ignore)
-                            (and (funcall (car ignore) dir)
-                                 (shell-quote-argument
-                                  (cdr ignore))))))
+                 (lambda (ignore)
+                   (cond ((stringp ignore)
+                          (shell-quote-argument ignore))
+                         ((consp ignore)
+                          (and (funcall (car ignore) dir)
+                               (shell-quote-argument
+                                (cdr ignore))))))
                  grep-find-ignored-files
                  " -o -name ")
                 " "
