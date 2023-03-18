@@ -241,7 +241,14 @@ read from minibuffer."
         (progn
           (dired-narrow-mode 1)
           (add-to-invisibility-spec :dired-narrow)
-          (setq disable-narrow (read-from-minibuffer "Filter: " nil dired-narrow-map))
+          (setq disable-narrow (read-from-minibuffer
+                                (pcase dired-narrow-filter-function
+                                  ('dired-narrow--regexp-filter
+                                   "Regex Filter:\s")
+                                  ('dired-narrow--fuzzy-filter
+                                   "Fuzzy Filter:\s")
+                                  (t "Filter:\s"))
+                                nil dired-narrow-map))
           (let ((inhibit-read-only t))
             (dired-narrow--remove-text-with-property :dired-narrow))
           ;; If the file no longer exists, we can't do anything, so
