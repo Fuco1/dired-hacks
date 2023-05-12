@@ -19,22 +19,22 @@
 
 (defcustom di-thumb-relief 2
   ""
-  :type 'integer
+  :type 'natnum
   )
 
 (defcustom di-thumb-margin 3
   ""
-  :type 'integer
+  :type 'natnum
   )
 
 (defcustom di-thumb-width 200
   ""
-  :type 'integer
+  :type 'natnum
   )
 
 (defcustom di-thumb-height 115
   ""
-  :type 'integer
+  :type 'natnum
   )
 
 (defcustom di-thumb-track t

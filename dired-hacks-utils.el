@@ -47,11 +47,11 @@
   :group 'dired
   :prefix "dired-hacks-")
 
-(defcustom dired-hacks-file-size-formatter 'file-size-human-readable
+(defcustom dired-hacks-file-size-formatter #'file-size-human-readable
   "The function used to format file sizes.
 
 See `dired-utils-format-file-sizes'."
-  :type 'symbol
+  :type 'function
   :group 'dired-hacks)
 
 (defcustom dired-hacks-datetime-regexp
@@ -65,7 +65,7 @@ followed by at least one space character.  You should only use
 shy groups (prefixed with ?:) because the first group is used by
 the font-lock to determine what portion of the name should be
 colored."
-  :type 'string
+  :type 'regexp
   :group 'dired-hacks)
 
 (defalias 'dired-utils--string-trim
