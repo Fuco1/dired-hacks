@@ -99,7 +99,7 @@
 ;; multi-stage copy/paste operations
 (defcustom dired-ranger-copy-ring-size 10
   "Specifies how many filesets for copy/paste operations should be stored."
-  :type 'integer
+  :type 'natnum
   :group 'dired-ranger)
 
 (defvar dired-ranger-copy-ring (make-ring dired-ranger-copy-ring-size))

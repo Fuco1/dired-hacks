@@ -67,6 +67,7 @@
 (require 'grep)
 (require 'find-dired)
 
+; TODO: this will become obsolete in 30.1, because -N always comes with --dired flag
 (defcustom dired-list-use-N-flag t
   "Non-nil means the --literal flag will be used.
 

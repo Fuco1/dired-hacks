@@ -106,15 +106,14 @@ exit minibuffer and call `dired-narrow-exit-action'."
   :group 'dired-narrow)
 
 (defcustom dired-narrow-enable-blinking t
-  "If set to true highlight the chosen file shortly.
-This feature works only when `dired-narrow-exit-when-one-left' is true."
+  "If non-nil, highlight the chosen file shortly.
+Only works when `dired-narrow-exit-when-one-left' is non-nil."
   :type 'boolean
   :group 'dired-narrow)
 
 (defcustom dired-narrow-blink-time 0.2
-  "How long should be highlighted a chosen file.
-Units are seconds."
-  :type 'float
+  "How many seconds should a chosen file be highlighted."
+  :type 'number
   :group 'dired-narrow)
 
 (defface dired-narrow-blink

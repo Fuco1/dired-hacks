@@ -80,17 +80,16 @@
 (defcustom dired-open-functions '(dired-open-by-extension dired-open-subdir)
   "List of functions to try to open a file.
 
-Each function should accept no argument and should retrieve the
+Each function should accept no arguments and should retrieve the
 filename and/or other context by itself.  Each function should
 return non-nil value if it succeeded in opening the file."
   :type 'hook
   :group 'dired-open)
 
-(defcustom dired-open-find-file-function 'dired-find-file
+(defcustom dired-open-find-file-function #'dired-find-file
   "A function that will be used if none of the `dired-open-functions' succeeded."
   :type 'function
   :group 'dired-open)
-
 
 (defcustom dired-open-extensions nil
   "Alist of extensions mapping to a programs to run them in.
@@ -111,8 +110,8 @@ The filename is passed as the only argument to the function."
   :group 'dired-open)
 
 (defcustom dired-open-use-nohup t
-  "If non-nil, use nohup(1) to keep external processes opened
-even if emacs process is terminated.
+  "If non-nil, use nohup to keep external processes alive.
+See man page `nohup(1)'.
 
 This only affects the built-in handlers."
   :type 'boolean
@@ -120,7 +119,7 @@ This only affects the built-in handlers."
 
 (defcustom dired-open-query-before-exit t
   "If non-nil, ask the user if they want to kill any external
-processes started by `dired-open-file' when they exit emacs.
+processes started by `dired-open-file' when they exit Emacs.
 
 This only affects the built-in handlers."
   :type 'boolean

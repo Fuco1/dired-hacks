@@ -127,13 +127,13 @@ depth---that creates the prefix."
 
 (defcustom dired-subtree-cycle-depth 3
   "Default depth expanded by `dired-subtree-cycle'."
-  :type 'integer
+  :type 'natnum
   :group 'dired-subtree)
 
 (defcustom dired-subtree-ignored-regexp
   (concat "^" (regexp-opt vc-directory-exclusion-list) "$")
   "Matching directories will not be expanded in `dired-subtree-cycle'."
-  :type 'string
+  :type 'regexp
   :group 'dired-subtree)
 
 (defgroup dired-subtree-faces ()
