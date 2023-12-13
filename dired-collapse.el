@@ -143,6 +143,7 @@ filename (for example when the final directory is empty)."
                     files)
                 (while (and (file-directory-p path)
                             (file-accessible-directory-p path)
+                            (f-readable? path)
                             (setq files (f-entries path))
                             (= 1 (length files)))
                   (setq path (car files)))
