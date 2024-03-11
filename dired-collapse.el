@@ -6,7 +6,7 @@
 ;; Maintainer: Matúš Goljer <matus.goljer@gmail.com>
 ;; Version: 1.1.0
 ;; Created: 15th July 2017
-;; Package-Requires: ((dash "2.10.0") (f "0.19.0") (s "1.13.1") (dired-hacks-utils "0.0.1"))
+;; Package-Requires: ((f "0.19.0") (s "1.13.1") (dired-hacks-utils "0.0.1"))
 ;; Keywords: files
 
 ;; This program is free software; you can redistribute it and/or
@@ -63,7 +63,6 @@
 
 ;;; Code:
 
-(require 'dash)
 (require 'dired)
 (require 'f)
 (require 'dired-hacks-utils)
@@ -110,7 +109,7 @@
   (insert-directory file dired-listing-switches nil nil)
   (forward-line -1)
   (dired-align-file (line-beginning-position) (1+ (line-end-position)))
-  (-when-let (replaced-file (dired-utils-get-filename))
+  (when-let (replaced-file (dired-utils-get-filename))
     (when (file-remote-p replaced-file)
       (while (search-forward (dired-current-directory) (line-end-position) t)
         (replace-match "")))))
@@ -135,12 +134,13 @@ filename (for example when the final directory is empty)."
 (defun dired-collapse ()
   "Collapse unique nested paths in dired listing."
   (when (or (not (file-remote-p default-directory)) dired-collapse-remote)
-    (-let* (;; dired-hide-details-mode hides details by assigning a special invisibility text property
-            ;; to them, while dired-collapse requires all the details. So we disable invisibility here
-            ;; temporarily.
-            (buffer-invisibility-spec nil)
-            (inhibit-read-only t)
-            (rgx (and (bound-and-true-p dired-omit-mode) (dired-omit-regexp))))
+    (let (;; dired-hide-details-mode hides details by assigning a
+          ;; special invisibility text property to them, while
+          ;; dired-collapse requires all the details. So we disable
+          ;; invisibility here temporarily.
+          (buffer-invisibility-spec nil)
+          (inhibit-read-only t)
+          (rgx (and (bound-and-true-p dired-omit-mode) (dired-omit-regexp))))
       (save-excursion
         (goto-char (point-min))
         (while (not (eobp))
