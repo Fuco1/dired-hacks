@@ -6,7 +6,7 @@
 ;; Maintainer: Matúš Goljer <matus.goljer@gmail.com>
 ;; Version: 1.1.0
 ;; Created: 15th July 2017
-;; Package-Requires: ((s "1.13.1") (dired-hacks-utils "0.0.1"))
+;; Package-Requires: ((s "1.13.1"))
 ;; Keywords: files
 
 ;; This program is free software; you can redistribute it and/or
@@ -64,7 +64,6 @@
 ;;; Code:
 
 (require 'dired)
-(require 'dired-hacks-utils)
 (require 's)                 ; for s-chop-prefix
 
 (defgroup dired-collapse ()
@@ -101,7 +100,7 @@
   (insert-directory file dired-listing-switches nil nil)
   (forward-line -1)
   (dired-align-file (line-beginning-position) (1+ (line-end-position)))
-  (when-let (replaced-file (dired-utils-get-filename))
+  (when-let (replaced-file (dired-get-filename nil t))
     (when (file-remote-p replaced-file)
       (while (search-forward (dired-current-directory) (line-end-position) t)
         (replace-match "")))))
@@ -135,11 +134,11 @@ filename (for example when the final directory is empty)."
       (save-excursion
         (goto-char (point-min))
         (while (not (eobp))
-          (when-let ((filename-no-dir (dired-utils-get-filename 'no-dir)))
+          (when-let ((filename-no-dir (dired-get-filename 'no-dir t)))
             (when (and (looking-at-p dired-re-dir)
                        (not (member filename-no-dir (list "." "..")))
                        (not (eolp)))
-              (let ((path (dired-utils-get-filename))
+              (let ((path (dired-get-filename nil t))
                     files)
                 (while (and (file-directory-p path)
                             (file-accessible-directory-p path)
@@ -149,7 +148,7 @@ filename (for example when the final directory is empty)."
                             (= 1 (length files)))
                   (setq path (car files)))
                 (if (and (not files)
-                         (equal path (dired-utils-get-filename)))
+                         (equal path (dired-get-filename nil t)))
                     (dired-collapse--create-ov 'to-eol)
                   (setq path (s-chop-prefix (dired-current-directory) path))
                   (when (string-match-p "/" path)
