@@ -6,7 +6,7 @@
 ;; Maintainer: Matúš Goljer <matus.goljer@gmail.com>
 ;; Version: 1.1.0
 ;; Created: 15th July 2017
-;; Package-Requires: ((dash "2.10.0") (f "0.19.0") (dired-hacks-utils "0.0.1"))
+;; Package-Requires: ((dash "2.10.0") (f "0.19.0") (s "1.13.1") (dired-hacks-utils "0.0.1"))
 ;; Keywords: files
 
 ;; This program is free software; you can redistribute it and/or
@@ -67,6 +67,7 @@
 (require 'dired)
 (require 'f)
 (require 'dired-hacks-utils)
+(require 's)                 ; for s-chop-prefix
 
 (defgroup dired-collapse ()
   "Collapse unique nested paths in dired listing."
