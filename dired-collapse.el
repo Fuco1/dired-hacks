@@ -6,7 +6,7 @@
 ;; Maintainer: Matúš Goljer <matus.goljer@gmail.com>
 ;; Version: 1.1.0
 ;; Created: 15th July 2017
-;; Package-Requires: ((f "0.19.0") (s "1.13.1") (dired-hacks-utils "0.0.1"))
+;; Package-Requires: ((s "1.13.1") (dired-hacks-utils "0.0.1"))
 ;; Keywords: files
 
 ;; This program is free software; you can redistribute it and/or
@@ -64,7 +64,6 @@
 ;;; Code:
 
 (require 'dired)
-(require 'f)
 (require 'dired-hacks-utils)
 (require 's)                 ; for s-chop-prefix
 
@@ -144,7 +143,9 @@ filename (for example when the final directory is empty)."
                     files)
                 (while (and (file-directory-p path)
                             (file-accessible-directory-p path)
-                            (setq files (f-entries path))
+                            (setq files (directory-files path
+                                                         'full
+                                                         directory-files-no-dot-files-regexp))
                             (= 1 (length files)))
                   (setq path (car files)))
                 (if (and (not files)
