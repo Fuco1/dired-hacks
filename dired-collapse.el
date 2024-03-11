@@ -79,6 +79,26 @@
   :group 'dired-collapse)
 
 ;;;###autoload
+(define-minor-mode global-dired-collapse-mode
+  "Toggle collapsing of unique nested paths in all Dired buffers."
+  :global t
+  :group 'dired-collapse
+  :lighter ""
+  (cond
+   (global-dired-collapse-mode
+     (add-hook 'dired-mode-hook 'dired-collapse-mode)
+     (dolist (elem dired-buffers)
+       (when (buffer-live-p (cdr elem))
+         (with-current-buffer (cdr elem)
+           (dired-collapse-mode 1)))))
+   (t ; ie. not global-dired-collapse-mode
+     (remove-hook 'dired-mode-hook 'dired-collapse-mode)
+     (dolist (elem dired-buffers)
+       (when (buffer-live-p (cdr elem))
+         (with-current-buffer (cdr elem)
+           (dired-collapse-mode -1)))))))
+
+;;;###autoload
 (define-minor-mode dired-collapse-mode
   "Toggle collapsing of unique nested paths in Dired."
   :group 'dired-collapse
