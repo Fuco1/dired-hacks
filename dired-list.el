@@ -336,10 +336,11 @@ and files matching `grep-find-ignored-files' are ignored.
 
 If called with raw prefix argument \\[universal-argument], no
 files will be ignored."
-  (interactive (let ((base-cmd (concat "find . "
-                                       (if current-prefix-arg "" (dired-list--get-ignored-stuff dir))
-                                       " -ls &")))
-                 (list (read-directory-name "Directory: " nil nil t)
+  (interactive (let* ((dir (read-directory-name "Directory: " nil nil t))
+                      (base-cmd (concat "find . "
+                                        (if current-prefix-arg "" (dired-list--get-ignored-stuff dir))
+                                        " -ls &")))
+                 (list dir
                        (read-from-minibuffer
                         "Find command: "
                         (cons base-cmd (string-match-p "-ls &" base-cmd))))))
