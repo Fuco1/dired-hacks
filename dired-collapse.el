@@ -139,7 +139,7 @@ filename (for example when the final directory is empty)."
             ;; temporarily.
             (buffer-invisibility-spec nil)
             (inhibit-read-only t)
-            (rgx (and dired-omit-mode (dired-omit-regexp))))
+            (rgx (and (bound-and-true-p dired-omit-mode) (dired-omit-regexp))))
       (save-excursion
         (goto-char (point-min))
         (while (not (eobp))
@@ -153,7 +153,7 @@ filename (for example when the final directory is empty)."
                             (file-accessible-directory-p path)
                             (f-readable? path)
                             (setq files (f-entries path))
-                            (or (not dired-omit-mode)
+                            (or (not (bound-and-true-p dired-omit-mode))
                                 (setq files (cl-remove-if
                                               (lambda(f)
                                                 (string-match rgx (file-name-nondirectory f)))
