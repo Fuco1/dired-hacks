@@ -162,9 +162,8 @@ string as well."
   (interactive)
   (if (executable-find "xdg-open")
       (let ((file (ignore-errors (dired-get-file-for-visit))))
-        (start-process "dired-open" nil
-                       "xdg-open" (file-truename file)))
-    nil))
+        (call-process-shell-command (concat "xdg-open '" (file-truename file) "'"))
+    nil)))
 
 (defun dired-open-by-extension ()
   "Open a file according to its extension.
