@@ -170,6 +170,47 @@ instead of copying them."
 			#'dired-ranger--name-constructor ?M)
     (unless arg (ring-remove dired-ranger-copy-ring 0))))
 
+;;;###autoload
+(defun dired-ranger-symlink (arg)
+  "Symlink the items from copy ring to current directory.
+
+This behaves like `dired-ranger-paste' but symlinks the files
+instead of copying them."
+  (interactive "P")
+  (let* ((index (if (numberp arg) arg 0))
+         (data (ring-ref dired-ranger-copy-ring index))
+         (files (cdr data)))
+    (dired-create-files #'make-symbolic-link "Symlink" files
+			#'dired-ranger--name-constructor ?S)
+    (unless arg (ring-remove dired-ranger-copy-ring 0))))
+
+;;;###autoload
+(defun dired-ranger-symlink-relative (arg)
+  "Create a relative symlink for the items from copy ring to current directory.
+
+This behaves like `dired-ranger-paste' but symlinks the files
+instead of copying them."
+  (interactive "P")
+  (let* ((index (if (numberp arg) arg 0))
+         (data (ring-ref dired-ranger-copy-ring index))
+         (files (cdr data)))
+    (dired-create-files #'dired-make-relative-symlink "Symlink Relative" files
+			#'dired-ranger--name-constructor ?R)
+    (unless arg (ring-remove dired-ranger-copy-ring 0))))
+
+;;;###autoload
+(defun dired-ranger-hardlink (arg)
+  "Create a hardlink for the items from copy ring to current directory.
+
+This behaves like `dired-ranger-paste' but hardlinks the files
+instead of copying them."
+  (interactive "P")
+  (let* ((index (if (numberp arg) arg 0))
+         (data (ring-ref dired-ranger-copy-ring index))
+         (files (cdr data)))
+    (dired-create-files #'dired-hardlink "Hardlink" files
+			#'dired-ranger--name-constructor ?H)
+    (unless arg (ring-remove dired-ranger-copy-ring 0))))
 
 ;; bookmarks
 (defcustom dired-ranger-bookmark-reopen 'ask
