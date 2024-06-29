@@ -96,8 +96,10 @@
 
 Function takes no argument and is called with point over the file
 we should act on."
-  :type '(choice (const :tag "Open file under point" dired-narrow-find-file)
-                 (function :tag "Use custom function."))
+  :type '(choice
+          (const :tag "Do nothing" ignore)
+          (const :tag "Open file under point" dired-narrow-find-file)
+          (function :tag "Use custom function"))
   :group 'dired-narrow)
 
 (defcustom dired-narrow-exit-when-one-left nil
@@ -260,13 +262,15 @@ read from minibuffer."
         (unless disable-narrow (dired-narrow-mode -1))
         (remove-from-invisibility-spec :dired-narrow)
         (dired-narrow--restore))
-      (when (and disable-narrow
-                 dired-narrow--current-file
-                 dired-narrow-exit-action)
-        (funcall dired-narrow-exit-action))
       (cond
        ((equal disable-narrow "dired-narrow-enter-directory")
-        (dired-narrow--internal filter-function))))))
+        (dired-narrow-find-file)
+        (dired-narrow--internal filter-function))
+       (t
+        (when (and disable-narrow
+                   dired-narrow--current-file
+                   dired-narrow-exit-action)
+          (funcall dired-narrow-exit-action)))))))
 
 
 ;; Interactive
