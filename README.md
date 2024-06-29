@@ -364,7 +364,7 @@ Here are some example uses:
 Putting it all together, the following is a basic setup (essentially a
 pseudo-port of [LS_COLORS](https://github.com/trapd00r/LS_COLORS)
 obtained by inspecting a terminal and approximating colors with
-[Tailwind CSS](https://tailwindcss.com/docs/colors/)). 
+[Tailwind CSS](https://tailwindcss.com/docs/colors/)).
 
 ```scheme
 (use-package dired-rainbow
@@ -390,7 +390,7 @@ obtained by inspecting a terminal and approximating colors with
     (dired-rainbow-define partition "#e3342f" ("dmg" "iso" "bin" "nrg" "qcow" "toast" "vcd" "vmdk" "bak"))
     (dired-rainbow-define vc "#0074d9" ("git" "gitignore" "gitattributes" "gitmodules"))
     (dired-rainbow-define-chmod executable-unix "#38c172" "-.*x.*")
-    )) 
+    ))
 ```
 
 *Note*: the [256 color cheat
