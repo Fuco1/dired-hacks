@@ -6,8 +6,9 @@
 ;; Maintainer: Matúš Goljer <matus.goljer@gmail.com>
 ;; Version: 0.0.1
 ;; Created: 14th February 2014
-;; Package-Requires: ((dash "2.7.0") (dired-hacks-utils "0.0.1"))
+;; Package-Requires: ((dash "2.7.0") (dired-hacks-utils "0.0.1") (emacs "24"))
 ;; Keywords: files
+;; URL: https://github.com/Fuco1/dired-hacks
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -147,7 +148,8 @@ when `dired-narrow-exit-when-one-left' and `dired-narrow-enable-blinking' are tr
 
 (defun dired-narrow--update (filter)
   "Make the files not matching the FILTER invisible.
- Return the count of visible files that are left after update."
+
+Return the count of visible files that are left after update."
 
   (let ((inhibit-read-only t)
         (visible-files-cnt 0))

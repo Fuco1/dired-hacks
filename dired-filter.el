@@ -7,7 +7,8 @@
 ;; Keywords: files
 ;; Version: 0.0.2
 ;; Created: 14th February 2014
-;; Package-Requires: ((dash "2.10.0") (dired-hacks-utils "0.0.1") (f "0.17.0") (cl-lib "0.3"))
+;; Package-Requires: ((dash "2.10.0") (dired-hacks-utils "0.0.1") (f "0.17.0") (cl-lib "0.3") (emacs "24"))
+;; URL: https://github.com/Fuco1/dired-hacks
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -394,7 +395,7 @@ See `dired-filter-stack' for the format of FILTER-STACK."
   :group 'dired-filter-group)
 
 (defconst dired-filter-group-imenu-generic-expression '("Group" "^ *\\[ \\(.*\\) \\]" 1)
-  "An alist of menus for accessing locations in documents with imenu
+  "An alist of menus for accessing locations in documents with imenu.
 
 It is a list of lists of the form
 \(MENU-TITLE REGEXP INDEX [FUNCTION] [ARGUMENTS...])
@@ -510,7 +511,7 @@ Setter for `dired-filter-mark-prefix' user variable."
    ((stringp stack)
     `(and ,@(mapcar 'dired-filter--make-filter-1
                     (or (cdr (assoc stack dired-filter-saved-filters))
-                        (error "saved filter %s does not exist" stack)))))
+                        (error "Saved filter %s does not exist" stack)))))
    ((stringp (car stack))
     `(and ,@(mapcar 'dired-filter--make-filter-1 (cdr stack))))
    ((eq (car stack) 'or)
@@ -855,14 +856,13 @@ filter"
 (defun dired-filter--mark (filter)
   "Helper used by `dired-filter-mark-by-' family.
 
-This ORs the current selection with the one specified by selected filter.
+This ORs the current selection with the one specified by selected FILTER.
 
 If prefix argument \\[universal-argument] is used, unmark the matched files instead
 \(including any previously marked files).
 
 If prefix argument \\[universal-argument] \\[universal-argument] is used, mark the files that would normally
-not be marked, that is, reverse the logical meaning of the
-filter."
+not be marked, that is, reverse the logical meaning of the filter."
   (let* ((remove (cl-cadddr (assoc (car filter) dired-filter-alist)))
          (filter (if (equal current-prefix-arg '(16))
                      `(not ,(dired-filter--make-filter (list filter)))
@@ -1237,7 +1237,7 @@ push all its constituents back on the stack."
   (let ((top (car dired-filter-stack)))
     (if (not (or (eq (car top) 'or)
                  (eq (car top) 'not)))
-        (error "You can only decompose `or' or `not' filters.")
+        (error "You can only decompose `or' or `not' filters")
       (pop dired-filter-stack)
       (--each (nreverse (cdr top))
         (dired-filter--push it))

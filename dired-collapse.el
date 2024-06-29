@@ -6,8 +6,9 @@
 ;; Maintainer: Matúš Goljer <matus.goljer@gmail.com>
 ;; Version: 1.1.0
 ;; Created: 15th July 2017
-;; Package-Requires: ((f "0.19.0") (s "1.13.1") (dired-hacks-utils "0.0.1"))
+;; Package-Requires: ((f "0.19.0") (s "1.13.1") (dired-hacks-utils "0.0.1") (emacs "24"))
 ;; Keywords: files
+;; URL: https://github.com/Fuco1/dired-hacks
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
