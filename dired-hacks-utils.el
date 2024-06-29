@@ -42,6 +42,7 @@
 
 (require 'dash)
 (require 'dired)
+(require 'dired-aux) ;; for dired-dwim-target-directory
 
 (defgroup dired-hacks ()
   "Collection of useful dired additions."
