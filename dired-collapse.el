@@ -54,9 +54,9 @@
 ;; have updated permissions, file sizes and modification dates so
 ;; they truly correspond to the properties of the file being shown.
 
-;; The path to the deepest file is dimmed with the `shadow' face so
-;; that it does not distract but at the same time is still available
-;; for inspection.
+;; The path to the deepest file is dimmed with the
+;; `dired-collapse-shadow' face so that it does not distract but at
+;; the same time is still available for inspection.
 
 ;; The mode is integrated with `dired-rainbow' so the nested files
 ;; are properly colored according to user's rules.
@@ -81,6 +81,11 @@
 (defcustom dired-collapse-fontify t
   "If non-nil, fontify with a shaded overlay."
   :type 'boolean
+  :group 'dired-collapse)
+
+(defface dired-collapse-shadow
+  '((t :inherit shadow))
+  "Face for the shadow overlay."
   :group 'dired-collapse)
 
 ;;;###autoload
@@ -117,6 +122,9 @@
 (defun dired-collapse--create-ov (&optional to-eol)
   "Create the shadow overlay which marks the collapsed path.
 
+To customize the face properties, theme the
+`dired-collapse-shadow' face.
+
 If TO-EOL is non-nil, extend the overlay over the whole
 filename (for example when the final directory is empty)."
   (save-excursion
@@ -128,7 +136,7 @@ filename (for example when the final directory is empty)."
                       (point)
                     (1+ (search-backward "/")))))
            (ov (make-overlay beg end)))
-      (overlay-put ov 'face 'shadow)
+      (overlay-put ov 'face 'dired-collapse-shadow)
       ov)))
 
 (defun dired-collapse ()
