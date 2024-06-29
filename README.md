@@ -616,7 +616,8 @@ collapsed directory they are immediately brought to the deepest
 directory with some actual content.
 
 To enable or disable this functionality use `dired-collapse-mode` to
-toggle it for the current dired buffer.
+toggle it for the current dired buffer.  To enable the mode globally
+in all dired buffers, use `global-dired-collapse-mode`.
 
 If the deepest directory contains only a single file this file is
 displayed instead of the last directory.  This way we can get

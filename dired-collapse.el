@@ -42,7 +42,8 @@
 ;; directory with some actual content.
 
 ;; To enable or disable this functionality use `dired-collapse-mode'
-;; to toggle it for the current dired buffer.
+;; to toggle it for the current dired buffer.  To enable the mode
+;; globally in all dired buffers, use `global-dired-collapse-mode'.
 
 ;; If the deepest directory contains only a single file this file is
 ;; displayed instead of the last directory.  This way we can get
@@ -106,6 +107,15 @@
     (remove-hook 'dired-subtree-after-insert-hook 'dired-collapse 'local)
     (remove-hook 'dired-omit-mode-hook 'dired-collapse 'local)
     (revert-buffer)))
+
+(defun turn-on-dired-collapse-mode ()
+  (when (derived-mode-p 'dired-mode)
+    (dired-collapse-mode)))
+
+(define-globalized-minor-mode global-dired-collapse-mode
+  dired-collapse-mode
+  turn-on-dired-collapse-mode
+  :group 'dired-collapse)
 
 (defun dired-collapse--replace-file (file)
   "Replace file on the current line with FILE."
