@@ -628,9 +628,9 @@ The files or directories re-inserted in this manner will also
 have updated permissions, file sizes and modification dates so
 they truly correspond to the properties of the file being shown.
 
-The path to the deepest file is dimmed with the `shadow` face so
-that it does not distract but at the same time is still available
-for inspection.
+The path to the deepest file is dimmed with the
+`dired-collapse-shadow` face so that it does not distract but at the
+same time is still available for inspection.
 
 The mode is integrated with `dired-rainbow` so the nested files
 are properly colored according to user's rules.
