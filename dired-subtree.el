@@ -536,6 +536,7 @@ Return a string suitable for insertion in `dired' buffer."
         (overlay-put ov 'dired-subtree-name dir-name)
         (overlay-put ov 'dired-subtree-parent parent)
         (overlay-put ov 'dired-subtree-depth depth)
+        (overlay-put ov 'dired-subtree-modtime (file-attribute-modification-time (file-attributes dir-name)))
         (overlay-put ov 'evaporate t)
         (push ov dired-subtree-overlays))
       (goto-char beg)
@@ -779,6 +780,24 @@ Optional argument means return a file name relative to `default-directory'."
                          0))) ;; dired-subtree: return zero if current
                               ;; dir is not in `dired-subdir-alist'.
            cur-dir))))
+
+;; The check for a directory change only works with the passed dirname and the
+;; buffer-wise modtime.  Make an internal function accept both as arguments...
+(defun dired-directory-changed-p--compat (dirname modtime)
+  (not (let ((attributes (file-attributes dirname)))
+         (or (eq modtime 0)
+             (not (eq (file-attribute-type attributes) t))
+             (equal (file-attribute-modification-time attributes) modtime)))))
+
+;; ...so that the original function can consider all subtrees as well.
+(defun dired-directory-changed-p (dirname)
+  (or (dired-directory-changed-p--compat dirname (visited-file-modtime))
+      (seq-some
+       (lambda (ov)
+         (dired-directory-changed-p--compat
+          (overlay-get ov 'dired-subtree-name)
+          (overlay-get ov 'dired-subtree-modtime)))
+       dired-subtree-overlays)))
 
 (provide 'dired-subtree)
 
