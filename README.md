@@ -488,8 +488,10 @@ prefix argument, add the marked files to the current clipboard.
 Past clipboards are stored in `dired-ranger-copy-ring` so you can
 repeat the past pastes.
 
-Call `dired-ranger-paste` or `dired-ranger-move` to copy or move
-the files in the current clipboard to the current dired buffer.
+Call `dired-ranger-paste`, `dired-ranger-move`, `dired-ranger-hardlink`,
+`dired-ranger-symlink`, or `dired-ranger-symlink-relative` to
+paste, move, hardlink, symlink, or create a reliative symlink from
+the files in the current clipboard to the current dired buffer respectively.
 With raw prefix argument (usually C-u), the clipboard is not
 cleared, so you can repeat the copy operation in another dired
 buffer.
