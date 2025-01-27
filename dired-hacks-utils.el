@@ -1,4 +1,4 @@
-;;; dired-hacks-utils.el --- Utilities and helpers for dired-hacks collection
+;;; dired-hacks-utils.el --- Utilities and helpers for dired-hacks collection -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2014-2015 Matúš Goljer
 

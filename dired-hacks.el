@@ -1,4 +1,4 @@
-;;; dired-hacks.el --- Collection of useful dired additions
+;;; dired-hacks.el --- Collection of useful dired additions -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2014-2015 Matúš Goljer
 
