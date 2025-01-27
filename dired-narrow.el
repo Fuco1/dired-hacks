@@ -1,4 +1,4 @@
-;;; dired-narrow.el --- Live-narrowing of search results for dired
+;;; dired-narrow.el --- Live-narrowing of search results for dired -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2014-2015 Matúš Goljer
 
@@ -227,7 +227,7 @@ Return the count of visible files that are left after update."
                    visible-files-cnt
                    (= visible-files-cnt 1))
           (when dired-narrow-enable-blinking
-              (dired-narrow--blink-current-file))
+            (dired-narrow--blink-current-file))
           (exit-minibuffer))))))
 
 (defun dired-narrow--internal (filter-function)

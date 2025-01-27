@@ -1,4 +1,4 @@
-;;; dired-rainbow.el --- Extended file highlighting according to its type
+;;; dired-rainbow.el --- Extended file highlighting according to its type -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2014-2017 Matus Goljer
 

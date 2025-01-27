@@ -1,4 +1,4 @@
-;;; dired-ranger.el --- Implementation of useful ranger features for dired
+;;; dired-ranger.el --- Implementation of useful ranger features for dired -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2014-2015 Matúš Goljer
 
