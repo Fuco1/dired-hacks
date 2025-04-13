@@ -475,11 +475,16 @@ Return a string suitable for insertion in `dired' buffer."
                    (end-of-line)
                    (looking-back "\\."))
                  3 1)) (point)))
-    (insert "  ")
-    (while (= (forward-line) 0)
-      (insert "  "))
-    (delete-char -2)
-    (buffer-string)))
+    ;; we want to indent the listing by " ", but have to take care that the
+    ;; "--dired" option to ls hasn't done that already
+    (let* ((beg (point))
+           (end (min (+ beg 2) (point-max))))
+      (when (not (string-equal "  " (buffer-substring-no-properties beg end)))
+        (insert "  ")
+        (while (= (forward-line) 0)
+          (insert "  "))
+        (delete-char -2))
+    (buffer-string))))
 
 ;;;###autoload
 (defun dired-subtree-insert ()
