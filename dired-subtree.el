@@ -475,10 +475,13 @@ Return a string suitable for insertion in `dired' buffer."
                    (end-of-line)
                    (looking-back "\\."))
                  3 1)) (point)))
-    (insert "  ")
-    (while (= (forward-line) 0)
-      (insert "  "))
-    (delete-char -2)
+    ;; we want to indent the listing by " ", but have to take care that the
+    ;; "--dired" option to ls hasn't done that already
+    (when (not (string-equal "  " (buffer-substring-no-properties (point) (+ (point) 2))))
+      (insert "  ")
+      (while (= (forward-line) 0)
+        (insert "  "))
+      (delete-char -2))
     (buffer-string)))
 
 ;;;###autoload
