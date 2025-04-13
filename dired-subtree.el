@@ -459,7 +459,7 @@ children."
       (when file-name
         (dired-utils-goto-line file-name)))))
 
-  (defun dired-subtree--readin (dir-name)
+(defun dired-subtree--readin (dir-name)
   "Read in the directory.
 
 Return a string suitable for insertion in `dired' buffer."
