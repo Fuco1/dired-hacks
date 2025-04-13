@@ -459,7 +459,7 @@ children."
       (when file-name
         (dired-utils-goto-line file-name)))))
 
-(defun dired-subtree--readin (dir-name)
+  (defun dired-subtree--readin (dir-name)
   "Read in the directory.
 
 Return a string suitable for insertion in `dired' buffer."
@@ -477,12 +477,14 @@ Return a string suitable for insertion in `dired' buffer."
                  3 1)) (point)))
     ;; we want to indent the listing by " ", but have to take care that the
     ;; "--dired" option to ls hasn't done that already
-    (when (not (string-equal "  " (buffer-substring-no-properties (point) (+ (point) 2))))
-      (insert "  ")
-      (while (= (forward-line) 0)
-        (insert "  "))
-      (delete-char -2))
-    (buffer-string)))
+    (let* ((beg (point))
+           (end (min (+ beg 2) (point-max))))
+      (when (not (string-equal "  " (buffer-substring-no-properties beg end)))
+        (insert "  ")
+        (while (= (forward-line) 0)
+          (insert "  "))
+        (delete-char -2))
+    (buffer-string))))
 
 ;;;###autoload
 (defun dired-subtree-insert ()
