@@ -250,7 +250,7 @@ read from minibuffer."
                                    "Regex Filter:\s")
                                   ('dired-narrow--fuzzy-filter
                                    "Fuzzy Filter:\s")
-                                  (t "Filter:\s"))
+                                  (_ "Filter:\s"))
                                 nil dired-narrow-map))
           (let ((inhibit-read-only t))
             (dired-narrow--remove-text-with-property :dired-narrow))
