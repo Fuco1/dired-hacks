@@ -1,4 +1,4 @@
-;;; dired-list.el --- Create dired listings from sources
+;;; dired-list.el --- Create dired listings from sources -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2014-2015 Matúš Goljer
 

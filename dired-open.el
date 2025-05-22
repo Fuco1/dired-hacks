@@ -1,4 +1,4 @@
-;;; dired-open.el --- Open files from dired using using custom actions
+;;; dired-open.el --- Open files from dired using using custom actions -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2014-2015 Matúš Goljer
 
@@ -164,7 +164,7 @@ string as well."
   (if (executable-find "xdg-open")
       (let ((file (ignore-errors (dired-get-file-for-visit))))
         (call-process-shell-command (concat "xdg-open '" (file-truename file) "'"))
-    nil)))
+        nil)))
 
 (defun dired-open-by-extension ()
   "Open a file according to its extension.
